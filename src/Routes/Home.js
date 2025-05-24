@@ -3,9 +3,9 @@ import './css/elements.css'
 import './css/menu.css'
 import './css/styles.css'
 import './css/variables.css'
-import './img/breakfast-not-optimized.svg'
-import './img/main-bg.svg'
-import './img/pastel.png'
+
+import breakfastImg from './img/breakfast-not-optimized.svg';
+import pastelImg from './img/pastel.png';
 
 function Home() {
   return (
@@ -54,7 +54,7 @@ function Home() {
             </p>
           </div>
           <div className="intro-img">
-            <img src="breakfast-not-optimized" alt="desenho de três pessoas" />
+            <img src={breakfastImg} alt="desenho de três pessoas" />
           </div>
         </div>
       </section>
@@ -85,7 +85,7 @@ function Home() {
           <div className="grid">
             {[...Array(6)].map((_, i) => (
               <div className="gallery-img" key={i}>
-                <img src="./img/pastel.png" alt="random image" />
+                <img src={pastelImg} alt="pastel" />
               </div>
             ))}
           </div>
@@ -138,7 +138,7 @@ function Home() {
             <p>...</p>
           </div>
           <div className="intro-img">
-            <img src="assets/img/breakfast-not-optimized.svg" alt="desenho de três pessoas" />
+            <img src={breakfastImg} alt="desenho de três pessoas" />
           </div>
 
           <div className="contact-form">
@@ -169,14 +169,9 @@ function Home() {
       </section>
 
       <footer id="footer" className="footer white-bg">
-        <p>
-          <a href="https://www.instagram.com/padua_nathan/">
-            Feito com <span className="heart">❤</span> Nathan Pádua
-          </a>
-        </p>
+        
       </footer>
-
-      <a className="back-to-top" href="#">➔</a>
+      <button className="back-to-top" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>➔</button>
     </div>
   );
 }
