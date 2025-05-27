@@ -1,6 +1,10 @@
+import React from 'react';
 import './login-cadastro.css'
+import { useNavigate } from 'react-router-dom'
 
 function Cadastro() {
+  const navigate = useNavigate();
+
     return (
         <div className="flex items-center justify-center min-h-screen main">
             <div className="bg-[#172c3c] rounded-md p-8 shadow-xl max-w-md w-full mx-4">
@@ -25,15 +29,17 @@ function Cadastro() {
                 placeholder="Digite sua senha"
                 className="w-full p-3 mb-6 rounded border border-gray-500 focus:outline-none focus:border-blue-500"
                 />
-
+                <label className="block text-gray-300 mb-2" htmlFor="password">
+                Confirmar Senha
+                </label>
+                <input
+                id="password"
+                type="password"
+                placeholder="Digite sua senha"
+                className="w-full p-3 mb-6 rounded border border-gray-500 focus:outline-none focus:border-blue-500"
+                />
                 <button
-                type="submit"
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded transition-colors"
-                >
-                Entrar
-                </button>
-                <button
-                onClick={() => navigate('/cadastro')}
+                onClick={() => navigate('/')}
                 className="w-full mt-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded transition-colors"
                 >
                 Cadastro
