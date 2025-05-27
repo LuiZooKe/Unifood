@@ -1,9 +1,6 @@
 import './login-cadastro.css'
-import { useNavigate } from 'react-router-dom'
 
-function Login() {
-  const navigate = useNavigate();
-
+function Cadastro() {
     return (
         <div className="flex items-center justify-center min-h-screen main">
             <div className="bg-[#172c3c] rounded-md p-8 shadow-xl max-w-md w-full mx-4">
@@ -46,4 +43,4 @@ function Login() {
     );
 }
 
-export default Login;
+export default Cadastro;
