@@ -1,13 +1,23 @@
-import './css/classes.css'
-import './css/elements.css'
-import './css/menu.css'
-import './css/styles.css'
-import './css/variables.css'
+import React from 'react';
+import './css/classes.css';
+import './css/elements.css';
+import './css/menu.css';
+import './css/styles.css';
+import './css/variables.css';
 
 import breakfastImg from './img/breakfast-not-optimized.svg';
 import pastelImg from './img/pastel.png';
 
+import { useNavigate } from 'react-router-dom';
+
 function Home() {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem('usuarioLogado');
+    navigate('/login');
+  };
+
   return (
     <div>
       <input
@@ -36,6 +46,13 @@ function Home() {
               <li><a href="#grid-two">Grid Two</a></li>
               <li><a href="#pricing">Pricing</a></li>
               <li><a href="#contact">Contact</a></li>
+              <button
+                onClick={handleLogout}
+                className="m-4 bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded w-full"
+              >
+                Sair
+              </button>
+
             </ul>
           </nav>
         </div>
@@ -169,7 +186,7 @@ function Home() {
       </section>
 
       <footer id="footer" className="footer white-bg">
-        
+
       </footer>
       <button className="back-to-top" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>➔</button>
     </div>

@@ -33,6 +33,21 @@ if ($conn->connect_error) {
     exit;
 }
 
+// ✅ Verifica se o e-mail já existe
+$checkStmt = $conn->prepare("SELECT id FROM users WHERE email = ?");
+$checkStmt->bind_param("s", $email);
+$checkStmt->execute();
+$checkStmt->store_result();
+
+if ($checkStmt->num_rows > 0) {
+    echo json_encode(['success' => false, 'message' => 'Email já cadastrado.']);
+    $checkStmt->close();
+    $conn->close();
+    exit;
+}
+$checkStmt->close();
+
+// ✅ Prossegue com o cadastro
 $stmt = $conn->prepare("INSERT INTO users (nome, email, senha, email_confirmado, tipo_usuario) VALUES (?, ?, ?, 'nao', ?)");
 $stmt->bind_param("sssi", $nome, $email, $senha, $tipo_usuario);
 

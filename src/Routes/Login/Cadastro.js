@@ -9,49 +9,70 @@ function Cadastro() {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [confirmarSenha, setConfirmarSenha] = useState('');
-  const [erro, setErro] = useState('');
+  const [erros, setErros] = useState([]);
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  if (senha !== confirmarSenha) {
-    setErro('As senhas devem ser iguais.');
-    return;
-  }
+    const novosErros = [];
 
-  if (!email.toLowerCase().endsWith('@unifucamp.edu.br')) {
-    setErro('Você não é aluno.');
-    return;
-  }
-
-  try {
-    const response = await fetch('http://localhost/UNIFOOD/database/register.php', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ nome, email, senha, tipo_usuario: parseInt(tipoUsuario) })
-    });
-
-    const data = await response.json();
-
-    if (data.success) {
-      setErro('');
-      navigate('/');
-    } else {
-      setErro(data.message || 'Erro ao cadastrar.');
+    if (!nome.trim()) {
+      novosErros.push('O nome é obrigatório.');
     }
-  } catch (error) {
-    console.error('Erro ao enviar:', error);
-    setErro('Erro na conexão com o servidor.');
-  }
-};
+
+    if (!email.trim()) {
+      novosErros.push('O email é obrigatório.');
+    } else if (!email.toLowerCase().endsWith('@unifucamp.edu.br')) {
+      novosErros.push('Você não é aluno. Use um email @unifucamp.edu.br.');
+    }
+
+    if (!senha) {
+      novosErros.push('A senha é obrigatória.');
+    }
+
+    if (!confirmarSenha) {
+      novosErros.push('A confirmação de senha é obrigatória.');
+    }
+
+    if (senha && confirmarSenha && senha !== confirmarSenha) {
+      novosErros.push('As senhas devem ser iguais.');
+    }
+
+    if (novosErros.length > 0) {
+      setErros(novosErros);
+      return;
+    }
+
+    // Se chegou aqui, não tem erros na validação frontend
+    setErros([]); // limpa erros anteriores
+
+    try {
+      const response = await fetch('http://localhost/UNIFOOD/database/register.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ nome, email, senha, tipo_usuario: parseInt(tipoUsuario) })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setErros([]);
+        navigate('/');
+      } else {
+        setErros([data.message || 'Erro ao cadastrar.']);
+      }
+    } catch (error) {
+      console.error('Erro ao enviar:', error);
+      setErros(['Erro na conexão com o servidor.']);
+    }
+  };
 
   return (
     <form onSubmit={handleSubmit} className="flex items-center justify-center min-h-screen main">
       <div className="bg-[#172c3c] rounded-md p-8 shadow-xl max-w-md w-full mx-4">
         <h1 className="text-white text-3xl font-semibold mb-6 text-center">Cadastro</h1>
-
 
         <label className="block text-gray-300 mb-2" htmlFor="tipoUsuario">Tipo de Usuário</label>
         <select
@@ -109,7 +130,13 @@ function Cadastro() {
           required
         />
 
-        {erro && <p className="text-red-500 mb-4">{erro}</p>}
+        {erros.length > 0 && (
+          <ul className="text-red-500 mb-4 list-disc pl-5">
+            {erros.map((erro, index) => (
+              <li key={index}>{erro}</li>
+            ))}
+          </ul>
+        )}
 
         <button
           type="submit"

@@ -1,50 +1,84 @@
-import React from 'react';
-import './login-cadastro.css'
-import { useNavigate } from 'react-router-dom'
+import React, { useState } from 'react';
+import './login-cadastro.css';
+import { useNavigate } from 'react-router-dom';
 
 function Login() {
   const navigate = useNavigate();
+  const [email, setEmail] = useState('');
+  const [senha, setSenha] = useState('');
+  const [erro, setErro] = useState('');
 
-    return (
-        <div className="flex items-center justify-center min-h-screen main">
-            <div className="bg-[#172c3c] rounded-md p-8 shadow-xl max-w-md w-full mx-4">
-                <h1 className="text-white text-3xl font-semibold mb-6 text-center">Login</h1>
+  const handleLogin = async (e) => {
+    e.preventDefault();
 
-                <label className="block text-gray-300 mb-2" htmlFor="email">
-                Email
-                </label>
-                <input
-                id="email"
-                type="email"
-                placeholder="Digite seu email"
-                className="w-full p-3 mb-4 rounded border border-gray-500 focus:outline-none focus:border-blue-500"
-                />
+    try {
+      const response = await fetch('http://localhost/UNIFOOD/database/login.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, senha }),
+      });
 
-                <label className="block text-gray-300 mb-2" htmlFor="password">
-                Senha
-                </label>
-                <input
-                id="password"
-                type="password"
-                placeholder="Digite sua senha"
-                className="w-full p-3 mb-6 rounded border border-gray-500 focus:outline-none focus:border-blue-500"
-                />
+      const data = await response.json();
 
-                <button
-                type="submit"
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded transition-colors"
-                >
-                Entrar
-                </button>
-                <button
-                onClick={() => navigate('/cadastro')}
-                className="w-full mt-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded transition-colors"
-                >
-                Cadastro
-                </button>
-            </div>
-        </div>
-    );
+      if (data.success) {
+        localStorage.setItem('usuarioLogado', 'true');
+        setErro('');
+        navigate('/');
+      }else {
+        setErro(data.message);
+      }
+    } catch (error) {
+      console.error('Erro ao logar:', error);
+      setErro('Erro de conexão com o servidor.');
+    }
+  };
+
+  return (
+    <form onSubmit={handleLogin} className="flex items-center justify-center min-h-screen main">
+      <div className="bg-[#172c3c] rounded-md p-8 shadow-xl max-w-md w-full mx-4">
+        <h1 className="text-white text-3xl font-semibold mb-6 text-center">Login</h1>
+
+        <label className="block text-gray-300 mb-2" htmlFor="email">Email</label>
+        <input
+          id="email"
+          type="email"
+          placeholder="Digite seu email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="w-full p-3 mb-4 rounded border border-gray-500 focus:outline-none focus:border-blue-500"
+          required
+        />
+
+        <label className="block text-gray-300 mb-2" htmlFor="password">Senha</label>
+        <input
+          id="password"
+          type="password"
+          placeholder="Digite sua senha"
+          value={senha}
+          onChange={(e) => setSenha(e.target.value)}
+          className="w-full p-3 mb-6 rounded border border-gray-500 focus:outline-none focus:border-blue-500"
+          required
+        />
+
+        {erro && <p className="text-red-500 mb-4">{erro}</p>}
+
+        <button
+          type="submit"
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded transition-colors"
+        >
+          Entrar
+        </button>
+
+        <button
+          type="button"
+          onClick={() => navigate('/cadastro')}
+          className="w-full mt-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded transition-colors"
+        >
+          Cadastro
+        </button>
+      </div>
+    </form>
+  );
 }
 
 export default Login;
