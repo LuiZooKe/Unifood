@@ -60,6 +60,8 @@ a {
 
 p {
     margin-bottom: 3rem;
+    text-align: justify;
+    word-spacing: 4px;
 }
 
 .responsive-table {

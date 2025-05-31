@@ -5,7 +5,7 @@
     right: 0;
     width: 100%;
     z-index: 1;
-    border-bottom: 0.1rem solid var(--light-gray-color);
+    background-color: var(--red-color);
 }
 
 .menu-content {
@@ -14,11 +14,13 @@
     align-items: center;
     padding-top: 0;
     padding-bottom: 0;
+    margin-top: -3rem;
+    margin-bottom: -3rem;
 }
 
 .menu h1 {
     font-size:2.3rem;
-    color: var(--primary-color);
+    color: var(--white-color);
 }
 
 .menu h1 a {
@@ -35,7 +37,7 @@
     display: block;
     padding: 2rem;
     font-size: 1.8rem;
-    color: var(--primary-color);
+    color: var(--white-color);
     position: relative;
 }
 
@@ -53,5 +55,9 @@
 .menu ul li a:hover::after {
     width: 50%;
     left: 25%;
+}
+
+.logo {
+    width: 30%;
 }
 

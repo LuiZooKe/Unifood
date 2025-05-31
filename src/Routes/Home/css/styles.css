@@ -119,6 +119,7 @@
 textarea {
   border: none;
   background-color: var(--white-color);
+  color: black;
   padding: 1.5rem 2rem;
   width: 100%;
   font-size: 3rem;
@@ -152,7 +153,7 @@ textarea:focus {
 }
 
 .form-group ::placeholder {
-  color: var(--light-gray-color);
+  color: var(  --gray-color);
 }
 
 .footer {

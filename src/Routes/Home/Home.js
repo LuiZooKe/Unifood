@@ -7,6 +7,7 @@ import './css/variables.css';
 
 import breakfastImg from './img/breakfast-not-optimized.svg';
 import pastelImg from './img/pastel.png';
+import logoUnifood from './img/logounifood.png';
 
 import { useNavigate } from 'react-router-dom';
 
@@ -36,16 +37,16 @@ function Home() {
       <aside className="menu white-bg">
         <div className="main-content menu-content">
           <h1 onClick={() => (document.getElementById('close-menu').checked = false)}>
-            <a href="#home">LOGO</a>
+            <div className="logo">
+              <a href="#home"><img src={logoUnifood} alt="unifood" /></a>
+            </div>
           </h1>
           <nav>
             <ul onClick={() => (document.getElementById('close-menu').checked = false)}>
               <li><a href="#intro">Intro</a></li>
-              <li><a href="#grid-one">Grid One</a></li>
-              <li><a href="#gallery">Gallery</a></li>
-              <li><a href="#grid-two">Grid Two</a></li>
-              <li><a href="#pricing">Pricing</a></li>
-              <li><a href="#contact">Contact</a></li>
+              <li><a href="#gallery">Cardápio</a></li>
+              <li><a href="#pricing">Preços</a></li>
+              <li><a href="#contact">Contato</a></li>
               <button
                 onClick={handleLogout}
                 className="m-4 bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded w-full"
@@ -60,37 +61,25 @@ function Home() {
 
       <div className="menu-spacing"></div>
 
-      <section id="home" className="intro main-bg section">
+      <section id="intro" className="intro main-bg section">
         <div className="main-content intro-content">
           <div className="intro-text-content">
-            <h2 className="grid-main-heading">De cara nova! Conheça a UNIFOOD!</h2>
+            <h2 className="grid-main-heading">Conheça o Unifood!</h2>
             <p>
-              as grandes filas rotineiras sejam reduzidas, pois estas são responsáveis por tomar grande parte do
-              tempo dos clientes, que por sua vez, não podem se dar ao luxo de ficarem longos períodos fora da sala de
-              aula.
+              Menos filas, mais tempo pra você. Uma nova experiência no seu dia a dia acadêmico.
+              Desenvolvido especialmente para a comunidade universitária, o Unifood integra tecnologia e praticidade para tornar a alimentação no campus mais rápida, organizada e acessível. 
+            </p>
+            <br/>
+            <p>
+              Faça recargas de onde quiser, acesse o cardápio do dia e muito mais. 
+            </p>
+            <br/>
+            <p>
+              Um sistema moderno, pensado para quem não pode perder tempo — e merece qualidade em cada detalhe.
             </p>
           </div>
           <div className="intro-img">
             <img src={breakfastImg} alt="desenho de três pessoas" />
-          </div>
-        </div>
-      </section>
-
-      <section id="intro" className="white-bg section">
-        <div className="main-content top3-content">
-          <h2 className="grid-main-heading">TOP 3 JOBS</h2>
-          <p>...</p>
-        </div>
-      </section>
-
-      <section id="grid-one" className="grid-one main-bg section">
-        <div className="main-content grid-one-content">
-          <h2 className="grid-main-heading">O Futuro</h2>
-          <p className="grid-description">Breve descrição</p>
-          <div className="grid">
-            <article><h3>TESTE 1</h3><p>...</p></article>
-            <article><h3>TESTE 2</h3><p>...</p></article>
-            <article><h3>TESTE 3</h3><p>...</p></article>
           </div>
         </div>
       </section>
@@ -105,18 +94,6 @@ function Home() {
                 <img src={pastelImg} alt="pastel" />
               </div>
             ))}
-          </div>
-        </div>
-      </section>
-
-      <section id="grid-two" className="grid-one main-bg section">
-        <div className="main-content grid-one-content">
-          <h2 className="grid-main-heading">O Futuro</h2>
-          <p className="grid-description">Breve descrição</p>
-          <div className="grid">
-            <article><h3>TESTE 1</h3><p>...</p></article>
-            <article><h3>TESTE 2</h3><p>...</p></article>
-            <article><h3>TESTE 3</h3><p>...</p></article>
           </div>
         </div>
       </section>
@@ -151,8 +128,7 @@ function Home() {
       <section id="contact" className="intro main-bg section">
         <div className="main-content intro-content">
           <div className="intro-text-content">
-            <h2 className="grid-main-heading">De cara nova! Conheça a UNIFOOD!</h2>
-            <p>...</p>
+            <h2 className="grid-main-heading">EM CASO DE DÚVIDAS, NOS CONTATE</h2>
           </div>
           <div className="intro-img">
             <img src={breakfastImg} alt="desenho de três pessoas" />
@@ -160,25 +136,20 @@ function Home() {
 
           <div className="contact-form">
             <fieldset className="form-grid">
-              <legend>Contact me</legend>
               <div className="form-group">
-                <label htmlFor="first-name">First Name</label>
-                <input type="text" name="first-name" id="first-name" placeholder="Your First Name" />
+                <label htmlFor="first-name">NOME COMPLETO</label>
+                <input type="text" name="first-name" id="first-name" placeholder="Digite seu nome completo aqui" />
               </div>
               <div className="form-group">
-                <label htmlFor="last-name">Last Name</label>
-                <input type="text" name="last-name" id="last-name" placeholder="Your Last Name" />
-              </div>
-              <div className="form-group">
-                <label htmlFor="email">E-mail</label>
-                <input type="email" name="email" id="email" placeholder="Your E-mail" />
+                <label htmlFor="email">E-MAIL</label>
+                <input type="email" name="email" id="email" placeholder="Digite seu e-mail de contato aqui" />
               </div>
               <div className="form-group full-width">
-                <label htmlFor="message">Message</label>
-                <textarea name="message" id="message" cols="30" rows="10" placeholder="Sua Sugestão/reclamação"></textarea>
+                <label htmlFor="message">MENSAGEM</label>
+                <textarea name="message" id="message" cols="30" rows="10" placeholder="Digite aqui sua dúvida, reclamação ou elogio "></textarea>
               </div>
               <div className="form-group full-width">
-                <button type="submit">Send message</button>
+                <button type="submit">ENVIAR MENSAGEM</button>
               </div>
             </fieldset>
           </div>
