@@ -31,7 +31,7 @@ if ($conn->connect_error) {
     exit;
 }
 
-$stmt = $conn->prepare("SELECT id, senha FROM users WHERE email = ?");
+$stmt = $conn->prepare("SELECT id, senha, tipo_usuario FROM users WHERE email = ?");
 $stmt->bind_param("s", $email);
 $stmt->execute();
 $result = $stmt->get_result();
@@ -48,4 +48,8 @@ if (!password_verify($senha, $user['senha'])) {
     exit;
 }
 
-echo json_encode(['success' => true, 'message' => 'Login realizado com sucesso']);
+echo json_encode([
+    'success' => true,
+    'message' => 'Login realizado com sucesso',
+    'tipo_usuario' => $user['tipo_usuario']
+]);

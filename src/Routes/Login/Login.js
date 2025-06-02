@@ -22,9 +22,16 @@ function Login() {
 
       if (data.success) {
         localStorage.setItem('usuarioLogado', 'true');
+        localStorage.setItem('tipo_usuario', data.tipo_usuario);
         setErro('');
-        navigate('/');
-      }else {
+
+        // Redireciona conforme o tipo de usuário
+        if (parseInt(data.tipo_usuario, 10) === 0) {
+          navigate('/funcionario');
+        } else {
+          navigate('/');
+        }
+      } else {
         setErro(data.message);
       }
     } catch (error) {

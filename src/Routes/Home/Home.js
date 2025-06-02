@@ -67,15 +67,15 @@ function Home() {
             <h2 className="grid-main-heading">Conheça o Unifood!</h2>
             <p>
               Menos filas, mais tempo pra você. Uma nova experiência no seu dia a dia acadêmico.
-              Desenvolvido especialmente para a comunidade universitária, o Unifood integra tecnologia e praticidade para tornar a alimentação no campus mais rápida, organizada e acessível. 
+              Desenvolvido especialmente para a comunidade universitária, o Unifood integra tecnologia e praticidade para tornar a alimentação no campus mais rápida, organizada e acessível.
             </p>
             <br/>
             <p>
-              Faça recargas de onde quiser, acesse o cardápio do dia e muito mais. 
+              Faça recargas de onde quiser, acesse o cardápio do dia e muito mais.
             </p>
             <br/>
             <p>
-              Um sistema moderno, pensado para quem não pode perder tempo — e merece qualidade em cada detalhe.
+              Um sistema moderno, pensado para quem não pode perder tempo — e merece qualidade em cada detalhe.
             </p>
           </div>
           <div className="intro-img">

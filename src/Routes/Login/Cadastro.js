@@ -30,6 +30,10 @@ function Cadastro() {
       novosErros.push('A senha é obrigatória.');
     }
 
+    if (senha.length < 8) {
+      novosErros.push('A senha deve ter pelo menos 8 caracteres.');
+    }
+
     if (!confirmarSenha) {
       novosErros.push('A confirmação de senha é obrigatória.');
     }
