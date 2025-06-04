@@ -81,7 +81,7 @@ function CadastroFuncionario() {
     <Dashboard>
       <form onSubmit={handleSubmit} className="flex items-center justify-center">
         <div className="bg-[#172c3c] rounded-md p-8 shadow-xl w-full">
-          <h1 className="text-white text-3xl font-semibold mb-6 text-center">Cadastro</h1>
+          <h1 className="text-white text-3xl font-semibold mb-6 text-center">Cadastro Funcionário</h1>
 
           <label className="block text-gray-300 mb-2" htmlFor="nome">Nome</label>
           <input

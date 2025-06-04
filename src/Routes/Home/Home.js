@@ -35,7 +35,7 @@ function Home() {
       ></label>
 
       <aside className="menu white-bg">
-        <div className="main-content menu-content">
+        <div className="h-[150px] main-content menu-content">
           <h1 onClick={() => (document.getElementById('close-menu').checked = false)}>
             <div className="logo">
               <a href="#home"><img src={logoUnifood} alt="unifood" /></a>

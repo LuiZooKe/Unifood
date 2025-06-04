@@ -1,22 +1,23 @@
 import React, { useState } from 'react';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, ChevronDown } from 'lucide-react';
 import PropTypes from 'prop-types';
-import { useNavigate } from 'react-router-dom';  // <-- Importa useNavigate
+import { useNavigate } from 'react-router-dom';
 
 function Dashboard({ children }) {
   const [menuAberto, setMenuAberto] = useState(false);
-  const navigate = useNavigate();  // <-- Hook para navegação
+  const [produtosAberto, setProdutosAberto] = useState(false);
+  const navigate = useNavigate();
 
   const handleLogout = () => {
     localStorage.removeItem('usuarioLogado');
-    localStorage.removeItem('tipo_usuario'); // limpa também o tipo se usar
+    localStorage.removeItem('tipo_usuario');
     navigate('/login');
   };
 
   return (
-    <div className="flex min-h-screen relative main">
+    <div className="w-screen min-h-screen overflow-hidden flex main">
       {!menuAberto && (
-        <div className="md:hidden fixed top-4 left-4 z-30">
+        <div className="lg:hidden fixed top-4 left-4 z-30">
           <button
             onClick={() => setMenuAberto(true)}
             className="bg-gray-800 text-white p-2 rounded"
@@ -27,13 +28,13 @@ function Dashboard({ children }) {
       )}
 
       <aside
-        className={`fixed md:static top-0 left-0 h-full w-[300px] bg-gray-800 text-white p-4 z-20 transform transition-transform duration-300 ease-in-out
-        ${menuAberto ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}
+        className={`fixed lg:static top-0 left-0 min-h-screen w-[300px] bg-gray-800 text-white p-4 z-20 transform transition-transform duration-300 ease-in-out
+        ${menuAberto ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}
       >
         {menuAberto && (
           <button
             onClick={() => setMenuAberto(false)}
-            className="md:hidden absolute pt-[9px] top-4 right-4 text-white p-2 hover:bg-gray-700 rounded z-30"
+            className="lg:hidden absolute pt-[9px] top-4 right-4 text-white p-2 hover:bg-gray-700 rounded z-30"
           >
             <X size={24} />
           </button>
@@ -44,10 +45,39 @@ function Dashboard({ children }) {
         </div>
 
         <nav className="flex flex-col space-y-3">
-          <a href="/cadastrar-funcionario" className="hover:bg-gray-700 p-2 rounded">Cadastrar Funcionário</a>
-          <a href="#" className="hover:bg-gray-700 p-2 rounded">Produtos</a>
-          <a href="#" className="hover:bg-gray-700 p-2 rounded">Relatórios</a>
-          {/* Aqui substituí o link "Sair" por um botão com logout */}
+          <a href="/cadastrar-funcionario" className="hover:bg-gray-700 p-2 rounded">
+            Cadastrar Funcionário
+          </a>
+
+          <div>
+            <button
+              onClick={() => setProdutosAberto(!produtosAberto)}
+              className="w-full flex items-center justify-between hover:bg-gray-700 p-2 rounded focus:outline-none"
+            >
+              <span>Produtos</span>
+              <ChevronDown
+                size={20}
+                className={`transform transition-transform duration-300 ${
+                  produtosAberto ? 'rotate-180' : ''
+                }`}
+              />
+            </button>
+            {produtosAberto && (
+              <div className="ml-4 mt-2 flex flex-col space-y-2">
+                <a href="/lista-produtos" className="hover:bg-gray-700 p-2 rounded">
+                  Lista de Produtos
+                </a>
+                <a href="/cadastrar-produto" className="hover:bg-gray-700 p-2 rounded">
+                  Cadastrar Produto
+                </a>
+              </div>
+            )}
+          </div>
+
+          <a href="#" className="hover:bg-gray-700 p-2 rounded">
+            Relatórios
+          </a>
+
           <button
             onClick={handleLogout}
             className="text-left hover:bg-gray-700 p-2 rounded focus:outline-none"
@@ -57,7 +87,7 @@ function Dashboard({ children }) {
         </nav>
       </aside>
 
-      <main className="flex-1 p-6">
+      <main className="flex-1 p-6 overflow-x-hidden">
         {children}
       </main>
     </div>

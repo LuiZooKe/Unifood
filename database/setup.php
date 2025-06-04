@@ -20,6 +20,18 @@ $sql = "CREATE TABLE IF NOT EXISTS users (
     email_confirmado VARCHAR(10) NOT NULL DEFAULT 'nao',
     senha VARCHAR(255) NOT NULL
 )";
+
+$sql = "CREATE TABLE IF NOT EXISTS produtos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    descricao TEXT NOT NULL,
+    preco DECIMAL(10,2) NOT NULL,
+    quantidade INT NOT NULL,
+    imagem VARCHAR(255)
+)";
+
+
+
 $conn->query($sql);
   echo "Banco e tabela criados com sucesso.";
 $conn->close();
