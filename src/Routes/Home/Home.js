@@ -1,11 +1,11 @@
 import React from 'react';
-import './css/classes.css';
 import './css/elements.css';
-import './css/menu.css';
-import './css/styles.css';
-import './css/variables.css';
+// import './css/classes.css';
+// import './css/menu.css';
+// import './css/styles.css';
+// import './css/variables.css';
 
-import breakfastImg from './img/breakfast-not-optimized.svg';
+import pratodecomida from './img/prato de comida.png';
 import pastelImg from './img/pastel.png';
 import logoUnifood from './img/logounifood.png';
 
@@ -64,22 +64,20 @@ function Home() {
       <section id="intro" className="intro main-bg section">
         <div className="main-content intro-content">
           <div className="intro-text-content">
-            <h2 className="grid-main-heading">Conheça o Unifood!</h2>
+            <h2 className="grid-main-heading">Conheça a Unifood!</h2>
             <p>
               Menos filas, mais tempo pra você. Uma nova experiência no seu dia a dia acadêmico.
-              Desenvolvido especialmente para a comunidade universitária, o Unifood integra tecnologia e praticidade para tornar a alimentação no campus mais rápida, organizada e acessível.
+              {/* Desenvolvido especialmente para a comunidade universitária, o Unifood integra tecnologia e praticidade para tornar a alimentação no campus mais rápida, organizada e acessível. */}
             </p>
-            <br/>
             <p>
               Faça recargas de onde quiser, acesse o cardápio do dia e muito mais.
             </p>
-            <br/>
             <p>
               Um sistema moderno, pensado para quem não pode perder tempo — e merece qualidade em cada detalhe.
             </p>
           </div>
           <div className="intro-img">
-            <img src={breakfastImg} alt="desenho de três pessoas" />
+            <img src={pratodecomida} alt="desenho de três pessoas" />
           </div>
         </div>
       </section>
@@ -100,27 +98,72 @@ function Home() {
 
       <section id="pricing" className="white-bg section">
         <div className="main-content top3-content">
-          <h2 className="grid-main-heading">pricing</h2>
-          <p>...</p>
-          <div className="responsive-table">
-            <table>
-              <caption className="grid-main-heading">Pricing Table</caption>
-              <thead>
-                <tr>
-                  <th>Title 1</th><th>Title 2</th><th>Title 3</th><th>Title 4</th><th>Title 5</th>
-                </tr>
-              </thead>
-              <tbody>
-                {[1, 2, 3].map((i) => (
-                  <tr key={i}>
-                    <td>Content 1</td><td>Content 2</td><td>Content 3</td><td>Content 2</td><td>Content 3</td>
+          <h2 className="grid-main-heading">TABELA DE PREÇOS</h2>
+          <div className="tables-wrapper">
+            <div className="responsive-table">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Produto</th><th>Preço</th>
                   </tr>
-                ))}
-              </tbody>
-              <tfoot>
-                <tr><td></td><td></td><td></td><td></td><td>Testando</td></tr>
-              </tfoot>
-            </table>
+                </thead>
+                <tbody>
+                    <tr>
+                      <td>Jantinha</td><td>R$15,00</td>
+                    </tr>
+                    <tr>
+                      <td>Jantinha</td><td>R$15,00</td>
+                    </tr>
+                    <tr>
+                      <td>Jantinha</td><td>R$15,00</td>
+                    </tr>
+                    <tr>
+                      <td>Jantinha</td><td>R$15,00</td>
+                    </tr>
+                    <tr>
+                      <td>Jantinha</td><td>R$15,00</td>
+                    </tr>
+                    <tr>
+                      <td>Jantinha</td><td>R$15,00</td>
+                    </tr>
+                </tbody>
+                <tfoot>
+                  <tr><td>COMIDAS</td><td></td></tr>
+                </tfoot>
+              </table>
+            </div>
+            <div className="responsive-table">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Produto</th><th>Preço</th>
+                  </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                      <td>Refrigerante 2L</td><td>R$13,00</td>
+                    </tr>
+                    <tr>
+                      <td>Refrigerante 2L</td><td>R$13,00</td>
+                    </tr>
+                    <tr>
+                      <td>Refrigerante 2L</td><td>R$13,00</td>
+                    </tr>
+                    <tr>
+                      <td>Refrigerante 2L</td><td>R$13,00</td>
+                    </tr>
+                    <tr>
+                      <td>Refrigerante 2L</td><td>R$13,00</td>
+                    </tr>
+                    <tr>
+                      <td>Refrigerante 2L</td><td>R$13,00</td>
+                    </tr>
+                </tbody>
+                <tfoot>
+                  <tr><td>CONSUMÍVEIS</td><td></td></tr>
+                </tfoot>
+              </table>
+            </div>
           </div>
         </div>
       </section>
@@ -131,7 +174,7 @@ function Home() {
             <h2 className="grid-main-heading">EM CASO DE DÚVIDAS, NOS CONTATE</h2>
           </div>
           <div className="intro-img">
-            <img src={breakfastImg} alt="desenho de três pessoas" />
+            <img src={pratodecomida} alt="prato de comida" />
           </div>
 
           <div className="contact-form">
@@ -155,10 +198,6 @@ function Home() {
           </div>
         </div>
       </section>
-
-      <footer id="footer" className="footer white-bg">
-
-      </footer>
       <button className="back-to-top" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>➔</button>
     </div>
   );

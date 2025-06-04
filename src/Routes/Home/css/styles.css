@@ -201,11 +201,6 @@ textarea:focus {
     grid-template-columns: 1fr;
   }
 
-
-  h2 {
-    font-size: 1rem;
-  }
-
   .gallery-img {
     width: 100%;
     max-width: 100%;
