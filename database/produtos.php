@@ -42,6 +42,21 @@ if ($action === 'deletar' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
+    // Pega o nome da imagem antiga para excluir o arquivo
+    $stmt = $conn->prepare("SELECT imagem FROM produtos WHERE id = ?");
+    $stmt->bind_param("i", $id);
+    $stmt->execute();
+    $stmt->bind_result($imagemAntiga);
+    $stmt->fetch();
+    $stmt->close();
+
+    if ($imagemAntiga) {
+        $caminhoImagem = __DIR__ . '/imgProdutos/' . $imagemAntiga;
+        if (file_exists($caminhoImagem)) {
+            unlink($caminhoImagem);
+        }
+    }
+
     $stmt = $conn->prepare("DELETE FROM produtos WHERE id = ?");
     $stmt->bind_param("i", $id);
     $stmt->execute();
@@ -51,21 +66,54 @@ if ($action === 'deletar' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 if ($action === 'atualizar' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-    $data = json_decode(file_get_contents('php://input'), true);
-
-    $id = $data['id'] ?? null;
-    $nome = $data['nome'] ?? '';
-    $descricao = $data['descricao'] ?? '';
-    $preco = $data['preco'] ?? 0;
-    $quantidade = $data['quantidade'] ?? 0;
+    $id = $_POST['id'] ?? null;
+    $nome = $_POST['nome'] ?? '';
+    $descricao = $_POST['descricao'] ?? '';
+    $preco = $_POST['preco'] ?? 0;
+    $quantidade = $_POST['quantidade'] ?? 0;
 
     if (!$id || !$nome || !$descricao || !$preco) {
         echo json_encode(['success' => false, 'message' => 'Dados incompletos']);
         exit;
     }
 
-    $stmt = $conn->prepare("UPDATE produtos SET nome = ?, descricao = ?, preco = ?, quantidade = ? WHERE id = ?");
-    $stmt->bind_param("ssdii", $nome, $descricao, $preco, $quantidade, $id);
+    // Pega o nome da imagem antiga
+    $stmt = $conn->prepare("SELECT imagem FROM produtos WHERE id = ?");
+    $stmt->bind_param("i", $id);
+    $stmt->execute();
+    $stmt->bind_result($imagemAntiga);
+    $stmt->fetch();
+    $stmt->close();
+
+    $novaImagemNome = $imagemAntiga;
+
+    if (isset($_FILES['imagem']) && $_FILES['imagem']['error'] === UPLOAD_ERR_OK) {
+        $tmpName = $_FILES['imagem']['tmp_name'];
+        $nomeOriginal = basename($_FILES['imagem']['name']);
+        $ext = strtolower(pathinfo($nomeOriginal, PATHINFO_EXTENSION));
+
+        $novoNomeArquivo = "img_{$id}_" . time() . "." . $ext;
+
+        $pastaDestino = __DIR__ . '/imgProdutos/';
+        $destinoCompleto = $pastaDestino . $novoNomeArquivo;
+
+        if (move_uploaded_file($tmpName, $destinoCompleto)) {
+            // Excluir imagem antiga
+            if ($imagemAntiga && $imagemAntiga !== $novoNomeArquivo) {
+                $caminhoImagemAntiga = $pastaDestino . $imagemAntiga;
+                if (file_exists($caminhoImagemAntiga)) {
+                    unlink($caminhoImagemAntiga);
+                }
+            }
+            $novaImagemNome = $novoNomeArquivo;
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Falha ao mover arquivo de imagem']);
+            exit;
+        }
+    }
+
+    $stmt = $conn->prepare("UPDATE produtos SET nome = ?, descricao = ?, preco = ?, quantidade = ?, imagem = ? WHERE id = ?");
+    $stmt->bind_param("ssdisi", $nome, $descricao, $preco, $quantidade, $novaImagemNome, $id);
     $stmt->execute();
 
     echo json_encode(['success' => true, 'message' => 'Produto atualizado com sucesso']);

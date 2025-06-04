@@ -7,6 +7,7 @@ function ListaProdutos() {
   const [modalDescricao, setModalDescricao] = useState(null);
   const [modalEditar, setModalEditar] = useState(false);
   const [editedProduto, setEditedProduto] = useState(null);
+  const [imagemFile, setImagemFile] = useState(null); // arquivo de imagem selecionado
 
   const fetchProdutos = async () => {
     try {
@@ -39,15 +40,28 @@ function ListaProdutos() {
   };
 
   const salvarEdicao = async () => {
+    if (!editedProduto) return;
+
+    const formData = new FormData();
+    formData.append('id', editedProduto.id);
+    formData.append('nome', editedProduto.nome);
+    formData.append('descricao', editedProduto.descricao);
+    formData.append('preco', editedProduto.preco);
+    formData.append('quantidade', editedProduto.quantidade);
+
+    if (imagemFile) {
+      formData.append('imagem', imagemFile);
+    }
+
     try {
       const res = await fetch('http://localhost/UNIFOOD/database/produtos.php?action=atualizar', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(editedProduto),
+        body: formData,
       });
       const data = await res.json();
       if (data.success) {
         setModalEditar(false);
+        setImagemFile(null);
         fetchProdutos();
       } else {
         alert(data.message);
@@ -72,9 +86,20 @@ function ListaProdutos() {
           {produtos.map((produto) => (
             <div
               key={produto.id}
-              className="bg-[#1f2f3f] p-4 rounded shadow flex justify-between items-center flex-wrap md:flex-nowrap"
+              className="bg-[#1f2f3f] p-4 rounded shadow flex justify-between items-center flex-wrap md:flex-nowrap gap-4"
             >
-              <div>
+              {/* Imagem ou espaço em branco */}
+              {produto.imagem ? (
+                <img
+                  src={`http://localhost/UNIFOOD/database/${produto.imagem}`}
+                  alt={produto.nome}
+                  className="w-24 h-24 object-cover rounded-md border border-gray-600"
+                />
+              ) : (
+                <div className="w-24 h-24 rounded-md border border-gray-600 bg-white" />
+              )}
+
+              <div className="flex-1">
                 <p className="text-3xl font-semibold">{produto.nome}</p>
                 <p className="text-2xl text-gray-400">
                   R$ {parseFloat(produto.preco).toFixed(2)}
@@ -92,6 +117,7 @@ function ListaProdutos() {
                   onClick={() => {
                     setEditedProduto(produto);
                     setModalEditar(true);
+                    setImagemFile(null); // reseta o input de arquivo ao abrir modal
                   }}
                   className="bg-yellow-500 px-3 py-1 rounded"
                 >
@@ -152,6 +178,7 @@ function ListaProdutos() {
               <label>Preço</label>
               <input
                 type="number"
+                step="0.01"
                 value={editedProduto.preco}
                 onChange={(e) =>
                   setEditedProduto({ ...editedProduto, preco: e.target.value })
@@ -169,9 +196,29 @@ function ListaProdutos() {
                 className="w-full border px-3 py-2 mb-3"
               />
 
+              <label>Imagem</label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => setImagemFile(e.target.files[0])}
+                className="w-full mb-3"
+              />
+
+              {/* Preview da imagem atual, se houver, e se o usuário não tiver escolhido uma nova */}
+              {editedProduto.imagem && !imagemFile && (
+                <img
+                  src={`http://localhost/UNIFOOD/database/${editedProduto.imagem}`}
+                  alt="Imagem atual"
+                  className="mb-3 max-h-40 object-contain"
+                />
+              )}
+
               <div className="flex justify-end gap-2">
                 <button
-                  onClick={() => setModalEditar(false)}
+                  onClick={() => {
+                    setModalEditar(false);
+                    setImagemFile(null);
+                  }}
                   className="bg-gray-400 px-4 py-2 rounded"
                 >
                   Cancelar

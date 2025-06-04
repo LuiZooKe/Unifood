@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import './Funcionario.css'; // Pode renomear se quiser
+import './Funcionario.css';
 import Dashboard from './Dashboard';
 
 function CadastroProduto() {
@@ -7,6 +7,7 @@ function CadastroProduto() {
   const [descricao, setDescricao] = useState('');
   const [preco, setPreco] = useState('');
   const [quantidade, setQuantidade] = useState('');
+  const [imagem, setImagem] = useState(null);
   const [erros, setErros] = useState([]);
   const [sucesso, setSucesso] = useState('');
 
@@ -14,11 +15,11 @@ function CadastroProduto() {
     e.preventDefault();
 
     const novosErros = [];
-
     if (!nome.trim()) novosErros.push('O nome do produto é obrigatório.');
     if (!descricao.trim()) novosErros.push('A descrição é obrigatória.');
     if (!preco || isNaN(preco) || Number(preco) <= 0) novosErros.push('Informe um preço válido.');
     if (!quantidade || isNaN(quantidade) || Number(quantidade) < 0) novosErros.push('Informe uma quantidade válida.');
+    if (!imagem) novosErros.push('A imagem do produto é obrigatória.');
 
     if (novosErros.length > 0) {
       setErros(novosErros);
@@ -26,20 +27,17 @@ function CadastroProduto() {
       return;
     }
 
-    setErros([]);
+    const formData = new FormData();
+    formData.append('nome', nome);
+    formData.append('descricao', descricao);
+    formData.append('preco', preco);
+    formData.append('quantidade', quantidade);
+    formData.append('imagem', imagem);
 
     try {
       const response = await fetch('http://localhost/UNIFOOD/database/register_produto.php', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          nome,
-          descricao,
-          preco,
-          quantidade
-        })
+        body: formData,
       });
 
       const data = await response.json();
@@ -50,6 +48,8 @@ function CadastroProduto() {
         setDescricao('');
         setPreco('');
         setQuantidade('');
+        setImagem(null);
+        setErros([]);
       } else {
         setErros([data.message || 'Erro ao cadastrar produto.']);
       }
@@ -73,7 +73,6 @@ function CadastroProduto() {
             value={nome}
             onChange={(e) => setNome(e.target.value)}
             className="w-full p-3 mb-4 rounded border border-gray-500"
-            required
           />
 
           <label className="block text-gray-300 mb-2" htmlFor="descricao">Descrição</label>
@@ -83,7 +82,6 @@ function CadastroProduto() {
             value={descricao}
             onChange={(e) => setDescricao(e.target.value)}
             className="w-full p-3 mb-4 rounded border border-gray-500"
-            required
           />
 
           <label className="block text-gray-300 mb-2" htmlFor="preco">Preço (R$)</label>
@@ -95,7 +93,6 @@ function CadastroProduto() {
             value={preco}
             onChange={(e) => setPreco(e.target.value)}
             className="w-full p-3 mb-4 rounded border border-gray-500"
-            required
           />
 
           <label className="block text-gray-300 mb-2" htmlFor="quantidade">Quantidade</label>
@@ -105,8 +102,16 @@ function CadastroProduto() {
             placeholder="Quantidade em estoque"
             value={quantidade}
             onChange={(e) => setQuantidade(e.target.value)}
+            className="w-full p-3 mb-4 rounded border border-gray-500"
+          />
+
+          <label className="block text-gray-300 mb-2" htmlFor="imagem">Imagem do Produto</label>
+          <input
+            id="imagem"
+            type="file"
+            accept="image/*"
+            onChange={(e) => setImagem(e.target.files[0])}
             className="w-full p-3 mb-6 rounded border border-gray-500"
-            required
           />
 
           {erros.length > 0 && (
