@@ -8,6 +8,7 @@ import './css/elements.css';
 import pratodecomida from './img/prato de comida.png';
 import pastelImg from './img/pastel.png';
 import logoUnifood from './img/logounifood.png';
+import icone from './img/ícone.png'
 
 import { useNavigate } from 'react-router-dom';
 
@@ -64,7 +65,16 @@ function Home() {
       <section id="intro" className="intro main-bg section">
         <div className="main-content intro-content">
           <div className="intro-text-content">
-            <h2 className="grid-main-heading">Conheça a Unifood!</h2>
+            <h2 className="grid-main-heading">
+              Conheça a Unifood!
+              <img
+                src={icone}
+                alt="ícone"
+                className="inline-block ml-2 w-[80px] align-middle"
+              />
+            </h2>
+
+
             <p>
               Menos filas, mais tempo pra você. Uma nova experiência no seu dia a dia acadêmico.
               {/* Desenvolvido especialmente para a comunidade universitária, o Unifood integra tecnologia e praticidade para tornar a alimentação no campus mais rápida, organizada e acessível. */}
@@ -77,7 +87,7 @@ function Home() {
             </p>
           </div>
           <div className="intro-img">
-            <img src={pratodecomida} alt="desenho de três pessoas" />
+            <img src={pratodecomida} alt="prato de comida" />
           </div>
         </div>
       </section>
@@ -108,24 +118,24 @@ function Home() {
                   </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                      <td>Jantinha</td><td>R$15,00</td>
-                    </tr>
-                    <tr>
-                      <td>Jantinha</td><td>R$15,00</td>
-                    </tr>
-                    <tr>
-                      <td>Jantinha</td><td>R$15,00</td>
-                    </tr>
-                    <tr>
-                      <td>Jantinha</td><td>R$15,00</td>
-                    </tr>
-                    <tr>
-                      <td>Jantinha</td><td>R$15,00</td>
-                    </tr>
-                    <tr>
-                      <td>Jantinha</td><td>R$15,00</td>
-                    </tr>
+                  <tr>
+                    <td>Jantinha</td><td>R$15,00</td>
+                  </tr>
+                  <tr>
+                    <td>Jantinha</td><td>R$15,00</td>
+                  </tr>
+                  <tr>
+                    <td>Jantinha</td><td>R$15,00</td>
+                  </tr>
+                  <tr>
+                    <td>Jantinha</td><td>R$15,00</td>
+                  </tr>
+                  <tr>
+                    <td>Jantinha</td><td>R$15,00</td>
+                  </tr>
+                  <tr>
+                    <td>Jantinha</td><td>R$15,00</td>
+                  </tr>
                 </tbody>
                 <tfoot>
                   <tr><td>COMIDAS</td><td></td></tr>
@@ -140,24 +150,24 @@ function Home() {
                   </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                      <td>Refrigerante 2L</td><td>R$13,00</td>
-                    </tr>
-                    <tr>
-                      <td>Refrigerante 2L</td><td>R$13,00</td>
-                    </tr>
-                    <tr>
-                      <td>Refrigerante 2L</td><td>R$13,00</td>
-                    </tr>
-                    <tr>
-                      <td>Refrigerante 2L</td><td>R$13,00</td>
-                    </tr>
-                    <tr>
-                      <td>Refrigerante 2L</td><td>R$13,00</td>
-                    </tr>
-                    <tr>
-                      <td>Refrigerante 2L</td><td>R$13,00</td>
-                    </tr>
+                  <tr>
+                    <td>Refrigerante 2L</td><td>R$13,00</td>
+                  </tr>
+                  <tr>
+                    <td>Refrigerante 2L</td><td>R$13,00</td>
+                  </tr>
+                  <tr>
+                    <td>Refrigerante 2L</td><td>R$13,00</td>
+                  </tr>
+                  <tr>
+                    <td>Refrigerante 2L</td><td>R$13,00</td>
+                  </tr>
+                  <tr>
+                    <td>Refrigerante 2L</td><td>R$13,00</td>
+                  </tr>
+                  <tr>
+                    <td>Refrigerante 2L</td><td>R$13,00</td>
+                  </tr>
                 </tbody>
                 <tfoot>
                   <tr><td>CONSUMÍVEIS</td><td></td></tr>

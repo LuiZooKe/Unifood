@@ -22,8 +22,8 @@ h3,
 h4,
 h5,
 h6 {
-    font-family: 'Montserrat', sans-serif;
-    font-weight: 900;
+    font-family: 'Montserrat', sans-serif !important;
+    font-weight: 900 !important;
 }
 
 h1 {
@@ -32,7 +32,7 @@ h1 {
 }
 
 h2 {
-    font-size: 6rem;
+    font-size: 5rem !important;
     margin-bottom: 5rem;
     text-transform: uppercase;
     line-height: 1.2;
@@ -125,10 +125,6 @@ tfoot td, table th {
 
 .section {
     min-height: 100vh;
-}
-
-.menu-spacing {
-    height: 8rem;
 }
 
 /* MENU --------------------------------- */
