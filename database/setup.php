@@ -12,7 +12,7 @@ if ($conn->connect_error) {
 $conn->query("CREATE DATABASE IF NOT EXISTS $dbName");
 $conn->select_db($dbName);
 
-$sql = "CREATE TABLE IF NOT EXISTS users (
+$sql1 = "CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     tipo_usuario INT NOT NULL,
     nome VARCHAR(100) NOT NULL,
@@ -21,7 +21,7 @@ $sql = "CREATE TABLE IF NOT EXISTS users (
     senha VARCHAR(255) NOT NULL
 )";
 
-$sql = "CREATE TABLE IF NOT EXISTS produtos (
+$sql2 = "CREATE TABLE IF NOT EXISTS produtos (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
     descricao TEXT NOT NULL,
@@ -32,7 +32,8 @@ $sql = "CREATE TABLE IF NOT EXISTS produtos (
 
 
 
-$conn->query($sql);
+$conn->query($sql1);
+$conn->query($sql2);
   echo "Banco e tabela criados com sucesso.";
 $conn->close();
 ?>

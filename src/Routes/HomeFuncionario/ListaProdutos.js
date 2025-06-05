@@ -1,3 +1,4 @@
+// ListaProdutos.jsx
 import React, { useEffect, useState } from 'react';
 import Dashboard from './Dashboard';
 
@@ -7,7 +8,6 @@ function ListaProdutos() {
   const [modalDescricao, setModalDescricao] = useState(null);
   const [modalEditar, setModalEditar] = useState(false);
   const [editedProduto, setEditedProduto] = useState(null);
-  const [imagemFile, setImagemFile] = useState(null); // arquivo de imagem selecionado
 
   const fetchProdutos = async () => {
     try {
@@ -40,17 +40,14 @@ function ListaProdutos() {
   };
 
   const salvarEdicao = async () => {
-    if (!editedProduto) return;
-
     const formData = new FormData();
     formData.append('id', editedProduto.id);
     formData.append('nome', editedProduto.nome);
     formData.append('descricao', editedProduto.descricao);
     formData.append('preco', editedProduto.preco);
     formData.append('quantidade', editedProduto.quantidade);
-
-    if (imagemFile) {
-      formData.append('imagem', imagemFile);
+    if (editedProduto.novaImagem) {
+      formData.append('imagem', editedProduto.novaImagem);
     }
 
     try {
@@ -61,7 +58,6 @@ function ListaProdutos() {
       const data = await res.json();
       if (data.success) {
         setModalEditar(false);
-        setImagemFile(null);
         fetchProdutos();
       } else {
         alert(data.message);
@@ -88,10 +84,9 @@ function ListaProdutos() {
               key={produto.id}
               className="bg-[#1f2f3f] p-4 rounded shadow flex justify-between items-center flex-wrap md:flex-nowrap gap-4"
             >
-              {/* Imagem ou espaço em branco */}
               {produto.imagem ? (
                 <img
-                  src={`http://localhost/UNIFOOD/database/${produto.imagem}`}
+                  src={`http://localhost/UNIFOOD/database/imgProdutos/${produto.imagem}`}
                   alt={produto.nome}
                   className="w-24 h-24 object-cover rounded-md border border-gray-600"
                 />
@@ -117,7 +112,6 @@ function ListaProdutos() {
                   onClick={() => {
                     setEditedProduto(produto);
                     setModalEditar(true);
-                    setImagemFile(null); // reseta o input de arquivo ao abrir modal
                   }}
                   className="bg-yellow-500 px-3 py-1 rounded"
                 >
@@ -134,7 +128,6 @@ function ListaProdutos() {
           ))}
         </div>
 
-        {/* Modal Descrição */}
         {modalDescricao && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 overflow-auto">
             <div className="bg-white text-black p-6 rounded shadow w-full max-w-md mx-4">
@@ -150,75 +143,49 @@ function ListaProdutos() {
           </div>
         )}
 
-        {/* Modal Editar */}
         {modalEditar && editedProduto && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 overflow-auto">
             <div className="bg-white text-black p-6 rounded shadow w-full max-w-md mx-4">
               <h2 className="text-xl font-bold mb-4">Editar Produto</h2>
-
               <label>Nome</label>
               <input
                 type="text"
                 value={editedProduto.nome}
-                onChange={(e) =>
-                  setEditedProduto({ ...editedProduto, nome: e.target.value })
-                }
+                onChange={(e) => setEditedProduto({ ...editedProduto, nome: e.target.value })}
                 className="w-full border px-3 py-2 mb-3"
               />
-
               <label>Descrição</label>
               <textarea
                 value={editedProduto.descricao}
-                onChange={(e) =>
-                  setEditedProduto({ ...editedProduto, descricao: e.target.value })
-                }
+                onChange={(e) => setEditedProduto({ ...editedProduto, descricao: e.target.value })}
                 className="w-full border px-3 py-2 mb-3"
               />
-
               <label>Preço</label>
               <input
                 type="number"
-                step="0.01"
                 value={editedProduto.preco}
-                onChange={(e) =>
-                  setEditedProduto({ ...editedProduto, preco: e.target.value })
-                }
+                onChange={(e) => setEditedProduto({ ...editedProduto, preco: e.target.value })}
                 className="w-full border px-3 py-2 mb-3"
               />
-
               <label>Quantidade</label>
               <input
                 type="number"
                 value={editedProduto.quantidade}
-                onChange={(e) =>
-                  setEditedProduto({ ...editedProduto, quantidade: e.target.value })
-                }
+                onChange={(e) => setEditedProduto({ ...editedProduto, quantidade: e.target.value })}
                 className="w-full border px-3 py-2 mb-3"
               />
-
-              <label>Imagem</label>
+              <label>Nova Imagem (opcional)</label>
               <input
                 type="file"
                 accept="image/*"
-                onChange={(e) => setImagemFile(e.target.files[0])}
-                className="w-full mb-3"
+                onChange={(e) =>
+                  setEditedProduto({ ...editedProduto, novaImagem: e.target.files[0] })
+                }
+                className="w-full border px-3 py-2 mb-3"
               />
-
-              {/* Preview da imagem atual, se houver, e se o usuário não tiver escolhido uma nova */}
-              {editedProduto.imagem && !imagemFile && (
-                <img
-                  src={`http://localhost/UNIFOOD/database/${editedProduto.imagem}`}
-                  alt="Imagem atual"
-                  className="mb-3 max-h-40 object-contain"
-                />
-              )}
-
               <div className="flex justify-end gap-2">
                 <button
-                  onClick={() => {
-                    setModalEditar(false);
-                    setImagemFile(null);
-                  }}
+                  onClick={() => setModalEditar(false)}
                   className="bg-gray-400 px-4 py-2 rounded"
                 >
                   Cancelar

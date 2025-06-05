@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import './Funcionario.css';
 import Dashboard from './Dashboard';
 
@@ -11,6 +11,9 @@ function CadastroProduto() {
   const [erros, setErros] = useState([]);
   const [sucesso, setSucesso] = useState('');
 
+  // Ref para o input file
+  const inputFileRef = useRef(null);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -19,7 +22,7 @@ function CadastroProduto() {
     if (!descricao.trim()) novosErros.push('A descrição é obrigatória.');
     if (!preco || isNaN(preco) || Number(preco) <= 0) novosErros.push('Informe um preço válido.');
     if (!quantidade || isNaN(quantidade) || Number(quantidade) < 0) novosErros.push('Informe uma quantidade válida.');
-    if (!imagem) novosErros.push('A imagem do produto é obrigatória.');
+    // A imagem NÃO é obrigatória conforme seu pedido, então não valida aqui
 
     if (novosErros.length > 0) {
       setErros(novosErros);
@@ -32,7 +35,7 @@ function CadastroProduto() {
     formData.append('descricao', descricao);
     formData.append('preco', preco);
     formData.append('quantidade', quantidade);
-    formData.append('imagem', imagem);
+    if (imagem) formData.append('imagem', imagem); // adiciona só se tiver imagem
 
     try {
       const response = await fetch('http://localhost/UNIFOOD/database/register_produto.php', {
@@ -50,12 +53,19 @@ function CadastroProduto() {
         setQuantidade('');
         setImagem(null);
         setErros([]);
+
+        // Limpa o campo input file visualmente
+        if (inputFileRef.current) {
+          inputFileRef.current.value = '';
+        }
       } else {
         setErros([data.message || 'Erro ao cadastrar produto.']);
+        setSucesso('');
       }
     } catch (error) {
       console.error('Erro ao enviar:', error);
       setErros(['Erro na conexão com o servidor.']);
+      setSucesso('');
     }
   };
 
@@ -110,6 +120,7 @@ function CadastroProduto() {
             id="imagem"
             type="file"
             accept="image/*"
+            ref={inputFileRef}
             onChange={(e) => setImagem(e.target.files[0])}
             className="w-full p-3 mb-6 rounded border border-gray-500 text-gray-300"
           />

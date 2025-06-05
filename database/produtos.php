@@ -34,36 +34,45 @@ if ($action === 'listar') {
 }
 
 if ($action === 'deletar' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-    $data = json_decode(file_get_contents('php://input'), true);
+    $data = json_decode(file_get_contents("php://input"), true);
     $id = $data['id'] ?? null;
 
     if (!$id) {
-        echo json_encode(['success' => false, 'message' => 'ID não informado']);
+        echo json_encode(['success' => false, 'message' => 'ID inválido.']);
         exit;
     }
 
-    // Pega o nome da imagem antiga para excluir o arquivo
+    // Buscar a imagem atual do produto
     $stmt = $conn->prepare("SELECT imagem FROM produtos WHERE id = ?");
     $stmt->bind_param("i", $id);
     $stmt->execute();
-    $stmt->bind_result($imagemAntiga);
+    $stmt->bind_result($imagem);
     $stmt->fetch();
     $stmt->close();
 
-    if ($imagemAntiga) {
-        $caminhoImagem = __DIR__ . '/imgProdutos/' . $imagemAntiga;
+    // Deletar o arquivo da imagem, se existir
+    if ($imagem) {
+        $caminhoImagem = __DIR__ . '/imgProdutos/' . $imagem;
         if (file_exists($caminhoImagem)) {
             unlink($caminhoImagem);
         }
     }
 
+    // Deletar o produto do banco
     $stmt = $conn->prepare("DELETE FROM produtos WHERE id = ?");
     $stmt->bind_param("i", $id);
-    $stmt->execute();
 
-    echo json_encode(['success' => true, 'message' => 'Produto deletado com sucesso']);
+    if ($stmt->execute()) {
+        echo json_encode(['success' => true, 'message' => 'Produto deletado com sucesso.']);
+    } else {
+        echo json_encode(['success' => false, 'message' => 'Erro ao deletar produto.']);
+    }
+
+    $stmt->close();
+    $conn->close();
     exit;
 }
+
 
 if ($action === 'atualizar' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $id = $_POST['id'] ?? null;
@@ -77,45 +86,31 @@ if ($action === 'atualizar' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
-    // Pega o nome da imagem antiga
-    $stmt = $conn->prepare("SELECT imagem FROM produtos WHERE id = ?");
-    $stmt->bind_param("i", $id);
-    $stmt->execute();
-    $stmt->bind_result($imagemAntiga);
-    $stmt->fetch();
-    $stmt->close();
+    $imagem_nome = null;
 
-    $novaImagemNome = $imagemAntiga;
-
-    if (isset($_FILES['imagem']) && $_FILES['imagem']['error'] === UPLOAD_ERR_OK) {
-        $tmpName = $_FILES['imagem']['tmp_name'];
-        $nomeOriginal = basename($_FILES['imagem']['name']);
-        $ext = strtolower(pathinfo($nomeOriginal, PATHINFO_EXTENSION));
-
-        $novoNomeArquivo = "img_{$id}_" . time() . "." . $ext;
-
-        $pastaDestino = __DIR__ . '/imgProdutos/';
-        $destinoCompleto = $pastaDestino . $novoNomeArquivo;
-
-        if (move_uploaded_file($tmpName, $destinoCompleto)) {
-            // Excluir imagem antiga
-            if ($imagemAntiga && $imagemAntiga !== $novoNomeArquivo) {
-                $caminhoImagemAntiga = $pastaDestino . $imagemAntiga;
-                if (file_exists($caminhoImagemAntiga)) {
-                    unlink($caminhoImagemAntiga);
-                }
+    // Se uma nova imagem foi enviada
+    if (!empty($_FILES['imagem']['name'])) {
+        // Buscar imagem anterior
+        $res = $conn->query("SELECT imagem FROM produtos WHERE id = $id");
+        if ($res && $row = $res->fetch_assoc()) {
+            $imagem_antiga = $row['imagem'];
+            if ($imagem_antiga && file_exists("imgProdutos/$imagem_antiga")) {
+                unlink("imgProdutos/$imagem_antiga");
             }
-            $novaImagemNome = $novoNomeArquivo;
-        } else {
-            echo json_encode(['success' => false, 'message' => 'Falha ao mover arquivo de imagem']);
-            exit;
         }
+
+        $extensao = pathinfo($_FILES['imagem']['name'], PATHINFO_EXTENSION);
+        $imagem_nome = uniqid() . "." . $extensao;
+        move_uploaded_file($_FILES['imagem']['tmp_name'], "imgProdutos/" . $imagem_nome);
+
+        $stmt = $conn->prepare("UPDATE produtos SET nome = ?, descricao = ?, preco = ?, quantidade = ?, imagem = ? WHERE id = ?");
+        $stmt->bind_param("ssdiss", $nome, $descricao, $preco, $quantidade, $imagem_nome, $id);
+    } else {
+        $stmt = $conn->prepare("UPDATE produtos SET nome = ?, descricao = ?, preco = ?, quantidade = ? WHERE id = ?");
+        $stmt->bind_param("ssdii", $nome, $descricao, $preco, $quantidade, $id);
     }
 
-    $stmt = $conn->prepare("UPDATE produtos SET nome = ?, descricao = ?, preco = ?, quantidade = ?, imagem = ? WHERE id = ?");
-    $stmt->bind_param("ssdisi", $nome, $descricao, $preco, $quantidade, $novaImagemNome, $id);
     $stmt->execute();
-
     echo json_encode(['success' => true, 'message' => 'Produto atualizado com sucesso']);
     exit;
 }
