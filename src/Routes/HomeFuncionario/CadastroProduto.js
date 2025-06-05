@@ -62,7 +62,7 @@ function CadastroProduto() {
   return (
     <Dashboard>
       <form onSubmit={handleSubmit} className="flex items-center justify-center">
-        <div className="bg-[#172c3c] rounded-md p-8 shadow-xl w-full">
+        <div className="bg-[#520000] rounded-md p-8 shadow-xl w-full">
           <h1 className="text-white text-3xl font-semibold mb-6 text-center">Cadastro de Produto</h1>
 
           <label className="block text-gray-300 mb-2" htmlFor="nome">Nome</label>
@@ -111,7 +111,7 @@ function CadastroProduto() {
             type="file"
             accept="image/*"
             onChange={(e) => setImagem(e.target.files[0])}
-            className="w-full p-3 mb-6 rounded border border-gray-500"
+            className="w-full p-3 mb-6 rounded border border-gray-500 text-gray-300"
           />
 
           {erros.length > 0 && (

@@ -28,7 +28,7 @@ function Dashboard({ children }) {
       )}
 
       <aside
-        className={`fixed lg:static top-0 left-0 min-h-screen w-[300px] bg-gray-800 text-white p-4 z-20 transform transition-transform duration-300 ease-in-out
+        className={`fixed lg:static top-0 left-0 min-h-screen w-[300px] bg-[#520000] text-white p-4 z-20 transform transition-transform duration-300 ease-in-out
         ${menuAberto ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}
       >
         {menuAberto && (
