@@ -91,10 +91,8 @@ function Cadastro() {
           <br/>
           <h3 className="text-4xl font-bold mb-[-20px] leading-snug">todas as vantagens da UNIFOOD!</h3>
           <div className="flex justify-center items-center gap-6 mt-6">
-            <a href="#home">
               <img src={logoUnifood} alt="unifood" className="h-80" />
-            </a>
-            <a href="#home">
+            <a href="https://www.unifucamp.edu.br/">
               <img src={logoUniFUCAMP} alt="unifucamp" className="h-22" />
             </a>
           </div>

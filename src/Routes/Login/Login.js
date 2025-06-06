@@ -54,10 +54,8 @@ function Login() {
           </h2>
           <h3 className="text-4xl font-bold mb-4 leading-snug">Faça login e resolva isso rapidinho.</h3>
           <div className="flex justify-center items-center gap-6 mt-6">
-            <a href="#home">
               <img src={logoUnifood} alt="unifood" className="h-80" />
-            </a>
-            <a href="#home">
+            <a href="https://www.unifucamp.edu.br/">
               <img src={logoUniFUCAMP} alt="unifucamp" className="h-22" />
             </a>
           </div>
