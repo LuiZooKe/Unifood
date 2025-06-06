@@ -20,7 +20,7 @@ function RedefinirSenha() {
 
     const verificarToken = async () => {
       try {
-        const response = await fetch(`http://localhost:8000/Unifood/database/verificar-token.php?token=${token}`);
+        const response = await fetch(`http://localhost/Unifood/database/verificar-token.php?token=${token}`);
         const data = await response.json();
 
         if (data.success) {
@@ -56,7 +56,7 @@ function RedefinirSenha() {
     }
 
     try {
-      const response = await fetch('http://localhost:8000/Unifood/database/redefinir-senha.php', {
+      const response = await fetch('http://localhost/Unifood/database/redefinir-senha.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ senha, token }),

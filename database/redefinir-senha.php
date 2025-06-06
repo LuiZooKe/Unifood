@@ -23,8 +23,8 @@ if (!isset($data['senha'], $data['token'])) {
 $senha = $data['senha'];
 $token = $data['token'];
 
-if (strlen($senha) < 6) {
-    echo json_encode(['success' => false, 'message' => 'A senha deve ter pelo menos 6 caracteres.']);
+if (strlen($senha) < 8) {
+    echo json_encode(['success' => false, 'message' => 'A senha deve ter pelo menos 8 caracteres.']);
     exit;
 }
 
