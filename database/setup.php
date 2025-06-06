@@ -18,7 +18,9 @@ $sql1 = "CREATE TABLE IF NOT EXISTS users (
     nome VARCHAR(100) NOT NULL,
     email VARCHAR(100) NOT NULL UNIQUE,
     email_confirmado VARCHAR(10) NOT NULL DEFAULT 'nao',
-    senha VARCHAR(255) NOT NULL
+    senha VARCHAR(255) NOT NULL,
+    reset_token VARCHAR(64) NULL,
+    reset_token_expira DATETIME NULL
 )";
 
 $sql2 = "CREATE TABLE IF NOT EXISTS produtos (

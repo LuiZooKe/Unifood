@@ -3,11 +3,13 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css';
 import Home from './Routes/Home/Home';
 import Login from './Routes/Login/Login';
+import EsqueciSenha from './Routes/Login/EsqueciSenha';
 import Cadastro from './Routes/Login/Cadastro';
 import Funcionario from './Routes/HomeFuncionario/HomeFuncionario';
 import CadastroFuncionario from './Routes/HomeFuncionario/CadastroFuncionario';
 import CadastroProduto from './Routes/HomeFuncionario/CadastroProduto';
 import ListaProdutos from './Routes/HomeFuncionario/ListaProdutos';
+import RedefinirSenha from './Routes/Login/RedefinirSenha';
 
 import PrivateRoute from './components/PrivateRoute';
 import AdminRoute from './components/AdminRoute';
@@ -22,6 +24,8 @@ function App() {
           </PrivateRoute>
         } />
         <Route path="/login" element={<Login />} />
+        <Route path="/esqueci-senha" element={<EsqueciSenha />} />
+        <Route path="/redefinir-senha" element={<RedefinirSenha />} />
         <Route path="/cadastro" element={<Cadastro />} />
         <Route path="/funcionario" element={
           <AdminRoute>

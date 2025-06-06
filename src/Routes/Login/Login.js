@@ -42,7 +42,7 @@ function Login() {
 
   return (
     <form onSubmit={handleLogin} className="flex items-center justify-center min-h-screen main">
-      <div className="bg-[#172c3c] rounded-md p-8 shadow-xl max-w-md w-full mx-4">
+      <div className="bg-[#520000] rounded-md p-8 shadow-xl max-w-md w-full mx-4">
         <h1 className="text-white text-3xl font-semibold mb-6 text-center">Login</h1>
 
         <label className="block text-gray-300 mb-2" htmlFor="email">Email</label>
@@ -63,9 +63,20 @@ function Login() {
           placeholder="Digite sua senha"
           value={senha}
           onChange={(e) => setSenha(e.target.value)}
-          className="w-full p-3 mb-6 rounded border border-gray-500 focus:outline-none focus:border-blue-500"
+          className="w-full p-3 mb-2 rounded border border-gray-500 focus:outline-none focus:border-blue-500"
           required
         />
+
+        {/* Link para "Esqueci minha senha" */}
+        <div className="mb-6 text-right">
+          <button
+            type="button"
+            onClick={() => navigate('/esqueci-senha')}
+            className="text-blue-400 hover:underline text-lg font-medium px-2 py-1"
+          >
+            Esqueci minha senha
+          </button>
+        </div>
 
         {erro && <p className="text-red-500 mb-4">{erro}</p>}
 
