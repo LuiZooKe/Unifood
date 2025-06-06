@@ -22,21 +22,21 @@ function ListaFuncionarios() {
     }
   };
 
-  const deletarFuncionario = async (id) => {
-    if (!window.confirm('Deseja realmente deletar este funcionário?')) return;
-    try {
-      const res = await fetch('http://localhost/UNIFOOD/database/funcionarios.php?action=deletar', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id }),
-      });
-      const data = await res.json();
-      if (data.success) fetchFuncionarios();
-      else alert(data.message);
-    } catch {
-      alert('Erro ao deletar funcionário.');
-    }
-  };
+  // const deletarFuncionario = async (id) => {
+  //   if (!window.confirm('Deseja realmente deletar este funcionário?')) return;
+  //   try {
+  //     const res = await fetch('http://localhost/UNIFOOD/database/funcionarios.php?action=deletar', {
+  //       method: 'POST',
+  //       headers: { 'Content-Type': 'application/json' },
+  //       body: JSON.stringify({ id }),
+  //     });
+  //     const data = await res.json();
+  //     if (data.success) fetchFuncionarios();
+  //     else alert(data.message);
+  //   } catch {
+  //     alert('Erro ao deletar funcionário.');
+  //   }
+  // };
 
   const salvarEdicao = async () => {
     try {
