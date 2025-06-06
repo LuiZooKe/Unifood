@@ -8,6 +8,7 @@ import Cadastro from './Routes/Login/Cadastro';
 import Funcionario from './Routes/HomeFuncionario/HomeFuncionario';
 import CadastroFuncionario from './Routes/HomeFuncionario/CadastroFuncionario';
 import CadastroProduto from './Routes/HomeFuncionario/CadastroProduto';
+import ListaFuncionario from './Routes/HomeFuncionario/ListaFuncionario';
 import ListaProdutos from './Routes/HomeFuncionario/ListaProdutos';
 import RedefinirSenha from './Routes/Login/RedefinirSenha';
 
@@ -45,6 +46,11 @@ function App() {
         <Route path="lista-produtos" element={
           <AdminRoute>
             <ListaProdutos />
+          </AdminRoute>
+        } />
+        <Route path="/lista-funcionarios" element={
+          <AdminRoute>
+            <ListaFuncionario />
           </AdminRoute>
         } />
       </Routes>

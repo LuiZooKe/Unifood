@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 function Dashboard({ children }) {
   const [menuAberto, setMenuAberto] = useState(false);
   const [produtosAberto, setProdutosAberto] = useState(false);
+  const [funcionariosAberto, setFuncionariosAberto] = useState(false);
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -45,10 +46,33 @@ function Dashboard({ children }) {
         </div>
 
         <nav className="flex flex-col space-y-3">
-          <a href="/cadastrar-funcionario" className="hover:bg-gray-700 p-2 rounded">
-            Cadastrar Funcionário
-          </a>
+          {/* Menu Funcionários */}
+          <div>
+            <button
+              onClick={() => setFuncionariosAberto(!funcionariosAberto)}
+              className="w-full flex items-center justify-between hover:bg-gray-700 p-2 rounded focus:outline-none"
+            >
+              <span>Funcionários</span>
+              <ChevronDown
+                size={20}
+                className={`transform transition-transform duration-300 ${
+                  funcionariosAberto ? 'rotate-180' : ''
+                }`}
+              />
+            </button>
+            {funcionariosAberto && (
+              <div className="ml-4 mt-2 flex flex-col space-y-2">
+                <a href="/lista-funcionarios" className="hover:bg-gray-700 p-2 rounded">
+                  Lista de Funcionários
+                </a>
+                <a href="/cadastrar-funcionario" className="hover:bg-gray-700 p-2 rounded">
+                  Cadastrar Funcionário
+                </a>
+              </div>
+            )}
+          </div>
 
+          {/* Menu Produtos */}
           <div>
             <button
               onClick={() => setProdutosAberto(!produtosAberto)}

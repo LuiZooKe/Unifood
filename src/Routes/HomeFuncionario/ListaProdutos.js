@@ -74,7 +74,7 @@ function ListaProdutos() {
   return (
     <Dashboard>
       <div className="p-6 text-white overflow-x-hidden w-full">
-        <h1 className="text-3xl font-bold mb-4 text-center">Lista de Produtos</h1>
+        <h1 className="text-3xl font-bold mb-[30px] text-center">Lista de Produtos</h1>
 
         {erro && <p className="text-red-400 mb-4">{erro}</p>}
 
@@ -131,7 +131,7 @@ function ListaProdutos() {
         {modalDescricao && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 overflow-auto">
             <div className="bg-white text-black p-6 rounded shadow w-full max-w-md mx-4">
-              <h2 className="text-xl font-bold mb-4">{modalDescricao.nome}</h2>
+              <h3 className="text-3xl font-bold mb-4">{modalDescricao.nome}</h3>
               <p className="mb-4">{modalDescricao.descricao}</p>
               <button
                 onClick={() => setModalDescricao(null)}
@@ -146,7 +146,7 @@ function ListaProdutos() {
         {modalEditar && editedProduto && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 overflow-auto">
             <div className="bg-white text-black p-6 rounded shadow w-full max-w-md mx-4">
-              <h2 className="text-xl font-bold mb-4">Editar Produto</h2>
+              <h3 className="text-3xl font-bold mb-4">Editar Produto</h3>
               <label>Nome</label>
               <input
                 type="text"
