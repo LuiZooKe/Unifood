@@ -49,7 +49,7 @@ function EsqueciSenha() {
           placeholder="Digite seu email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full p-3 mb-4 rounded border border-gray-500 focus:outline-none focus:border-blue-500"
+          className="w-full p-3 mb-4 rounded border border-gray-500 focus:outline-none focus:border-red-500"
           required
         />
 
@@ -58,7 +58,7 @@ function EsqueciSenha() {
 
         <button
           type="submit"
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded transition-colors"
+          className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-3 rounded transition-colors"
         >
           Enviar link de redefinição
         </button>
@@ -72,6 +72,8 @@ function EsqueciSenha() {
         </button>
       </div>
     </form>
+
+    
   );
 }
 

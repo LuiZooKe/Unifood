@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import './login-cadastro.css';
 import { useNavigate } from 'react-router-dom';
+import fundoLogin from './img/fundo-logcad.jpg';
+import logoUnifood from './img/logounifood.png';
+import logoUniFUCAMP from './img/logoUNIFUCAMP.png'
 
 function Cadastro() {
   const navigate = useNavigate();
@@ -74,82 +77,108 @@ function Cadastro() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex items-center justify-center min-h-screen main">
-      <div className="bg-[#172c3c] rounded-md p-8 shadow-xl max-w-md w-full mx-4">
-        <h1 className="text-white text-3xl font-semibold mb-6 text-center">Cadastro</h1>
+    <div className="flex min-h-screen">
+      {/* Lado esquerdo com imagem de fundo */}
+      <div
+        className="w-1/2 hidden lg:flex items-center justify-center bg-cover bg-center rounded-r-3xl"
+        style={{ backgroundImage: `url(${fundoLogin})` }}
+      >
+        <div className="bg-black bg-opacity-60 px-10 pt-14 pb-14 rounded-lg text-white flex flex-col items-center text-center">
+          <h2 className="text-5xl font-bold mb-4 leading-snug">
+            Novo por aqui?<br />
+          </h2>
+          <h3 className="text-4xl font-bold mb-[-30px] leading-snug">Crie sua conta e aproveite</h3>
+          <br/>
+          <h3 className="text-4xl font-bold mb-[-20px] leading-snug">todas as vantagens da UNIFOOD!</h3>
+          <div className="flex justify-center items-center gap-6 mt-6">
+            <a href="#home">
+              <img src={logoUnifood} alt="unifood" className="h-80" />
+            </a>
+            <a href="#home">
+              <img src={logoUniFUCAMP} alt="unifucamp" className="h-22" />
+            </a>
+          </div>
 
-        <label className="block text-gray-300 mb-2" htmlFor="tipoUsuario">Tipo de Usuário</label>
-        <select
-          id="tipoUsuario"
-          value={tipoUsuario}
-          onChange={(e) => setTipoUsuario(e.target.value)}
-          className="w-full p-3 mb-4 rounded border border-gray-500 focus:outline-none focus:border-blue-500"
-          required
-        >
-          <option value="1">Aluno/Professor</option>
-          <option value="2">Responsável</option>
-        </select>
-
-        <label className="block text-gray-300 mb-2" htmlFor="nome">Nome</label>
-        <input
-          id="nome"
-          type="text"
-          placeholder="Digite seu nome"
-          value={nome}
-          onChange={(e) => setNome(e.target.value)}
-          className="w-full p-3 mb-4 rounded border border-gray-500 focus:outline-none focus:border-blue-500"
-          required
-        />
-
-        <label className="block text-gray-300 mb-2" htmlFor="email">Email</label>
-        <input
-          id="email"
-          type="email"
-          placeholder="Digite seu email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="w-full p-3 mb-4 rounded border border-gray-500 focus:outline-none focus:border-blue-500"
-          required
-        />
-
-        <label className="block text-gray-300 mb-2" htmlFor="senha">Senha</label>
-        <input
-          id="senha"
-          type="password"
-          placeholder="Digite sua senha"
-          value={senha}
-          onChange={(e) => setSenha(e.target.value)}
-          className="w-full p-3 mb-6 rounded border border-gray-500 focus:outline-none focus:border-blue-500"
-          required
-        />
-
-        <label className="block text-gray-300 mb-2" htmlFor="confirmarSenha">Confirmar Senha</label>
-        <input
-          id="confirmarSenha"
-          type="password"
-          placeholder="Confirme sua senha"
-          value={confirmarSenha}
-          onChange={(e) => setConfirmarSenha(e.target.value)}
-          className="w-full p-3 mb-6 rounded border border-gray-500 focus:outline-none focus:border-blue-500"
-          required
-        />
-
-        {erros.length > 0 && (
-          <ul className="text-red-500 mb-4 list-disc pl-5">
-            {erros.map((erro, index) => (
-              <li key={index}>{erro}</li>
-            ))}
-          </ul>
-        )}
-
-        <button
-          type="submit"
-          className="w-full mt-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded transition-colors"
-        >
-          Cadastrar
-        </button>
+        </div>
       </div>
-    </form>
+
+      <form onSubmit={handleSubmit} 
+      className="w-full lg:w-1/2 flex items-center justify-center bg-white p-10 rounded-r-1x3">
+        <div className="max-w-md w-full">
+          <h1 className="text-gray-800 text-3xl font-bold mb-6 text-center">CADASTRO</h1>
+          <label className="block text-gray-700 mb-2" htmlFor="tipoUsuario">Tipo de Usuário</label>
+          <select
+            id="tipoUsuario"
+            value={tipoUsuario}
+            onChange={(e) => setTipoUsuario(e.target.value)}
+            className="w-full p-3 mb-4 rounded border border-gray-500 focus:outline-none focus:border-red-500"
+            required
+          >
+            <option value="1">Aluno/Professor</option>
+            <option value="2">Responsável</option>
+          </select>
+
+          <label className="block text-gray-300 mb-2" htmlFor="nome">Nome</label>
+          <input
+            id="nome"
+            type="text"
+            placeholder="Digite seu nome"
+            value={nome}
+            onChange={(e) => setNome(e.target.value)}
+            className="w-full p-3 mb-4 rounded border border-gray-500 focus:outline-none focus:border-red-500"
+            required
+          />
+
+          <label className="block text-gray-300 mb-2" htmlFor="email">Email</label>
+          <input
+            id="email"
+            type="email"
+            placeholder="Digite seu email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full p-3 mb-4 rounded border border-gray-500 focus:outline-none focus:border-red-500"
+            required
+          />
+
+          <label className="block text-gray-300 mb-2" htmlFor="senha">Senha</label>
+          <input
+            id="senha"
+            type="password"
+            placeholder="Digite sua senha"
+            value={senha}
+            onChange={(e) => setSenha(e.target.value)}
+            className="w-full p-3 mb-6 rounded border border-gray-500 focus:outline-none focus:border-red-500"
+            required
+          />
+
+          <label className="block text-gray-300 mb-2" htmlFor="confirmarSenha">Confirmar Senha</label>
+          <input
+            id="confirmarSenha"
+            type="password"
+            placeholder="Confirme sua senha"
+            value={confirmarSenha}
+            onChange={(e) => setConfirmarSenha(e.target.value)}
+            className="w-full p-3 mb-6 rounded border border-gray-500 focus:outline-none focus:border-red-500"
+            required
+          />
+
+          {erros.length > 0 && (
+            <ul className="text-red-500 mb-4 list-disc pl-5">
+              {erros.map((erro, index) => (
+                <li key={index}>{erro}</li>
+              ))}
+            </ul>
+          )}
+
+          <button
+            type="submit"
+            className="w-full mt-2 bg-red-600 hover:bg-red-700 text-white font-semibold py-3 rounded transition-colors"
+          >
+            Cadastrar
+          </button>
+        </div>
+      </form>
+    </div>
   );
 }
 

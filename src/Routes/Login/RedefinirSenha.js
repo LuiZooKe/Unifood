@@ -95,7 +95,7 @@ function RedefinirSenha() {
               placeholder="Digite a nova senha"
               value={senha}
               onChange={(e) => setSenha(e.target.value)}
-              className="w-full p-3 mb-4 rounded border border-gray-500 focus:outline-none focus:border-blue-500"
+              className="w-full p-3 mb-4 rounded border border-gray-500 focus:outline-none focus:border-red-500"
               required
             />
 
@@ -106,7 +106,7 @@ function RedefinirSenha() {
               placeholder="Confirme a nova senha"
               value={confirmarSenha}
               onChange={(e) => setConfirmarSenha(e.target.value)}
-              className="w-full p-3 mb-4 rounded border border-gray-500 focus:outline-none focus:border-blue-500"
+              className="w-full p-3 mb-4 rounded border border-gray-500 focus:outline-none focus:border-red-500"
               required
             />
 
@@ -115,7 +115,7 @@ function RedefinirSenha() {
 
             <button
               type="submit"
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded transition-colors"
+              className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-3 rounded transition-colors"
             >
               Redefinir Senha
             </button>
