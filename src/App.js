@@ -11,6 +11,7 @@ import CadastroProduto from './Routes/HomeFuncionario/CadastroProduto';
 import ListaFuncionario from './Routes/HomeFuncionario/ListaFuncionario';
 import ListaProdutos from './Routes/HomeFuncionario/ListaProdutos';
 import RedefinirSenha from './Routes/Login/RedefinirSenha';
+import SaibaMais from './Routes/Home/SaibaMais';
 
 import PrivateRoute from './components/PrivateRoute';
 import AdminRoute from './components/AdminRoute';
@@ -22,6 +23,11 @@ function App() {
         <Route path="/" element={
           <PrivateRoute>
             <Home />
+          </PrivateRoute>
+        } />
+        <Route path="/saibamais" element={
+          <PrivateRoute>
+            <SaibaMais />
           </PrivateRoute>
         } />
         <Route path="/login" element={<Login />} />

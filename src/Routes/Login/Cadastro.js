@@ -3,7 +3,7 @@ import './login-cadastro.css';
 import { useNavigate } from 'react-router-dom';
 import fundoLogin from './img/fundo-logcad.jpg';
 import logoUnifood from './img/logounifood.png';
-import logoUniFUCAMP from './img/logoUNIFUCAMP.png'
+import logoUniFUCAMP from './img/logoUNIFUCAMP.png';
 
 function Cadastro() {
   const navigate = useNavigate();

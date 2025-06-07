@@ -44,10 +44,10 @@ function Home() {
           </h1>
           <nav>
             <ul onClick={() => (document.getElementById('close-menu').checked = false)}>
-              <li><a href="#intro">Intro</a></li>
               <li><a href="#gallery">Cardápio</a></li>
               <li><a href="#pricing">Preços</a></li>
               <li><a href="#contact">Contato</a></li>
+              <li><a href="/saibamais">Saiba Mais</a></li>
               <button
                 onClick={handleLogout}
                 className="m-4 bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded w-full"
@@ -61,36 +61,6 @@ function Home() {
       </aside>
 
       <div className="menu-spacing"></div>
-
-      <section id="intro" className="intro main-bg section">
-        <div className="main-content intro-content">
-          <div className="intro-text-content">
-            <h2 className="grid-main-heading">
-              Conheça a Unifood!
-              <img
-                src={icone}
-                alt="ícone"
-                className="inline-block ml-2 w-[80px] align-middle"
-              />
-            </h2>
-
-
-            <p>
-              Menos filas, mais tempo pra você. Uma nova experiência no seu dia a dia acadêmico.
-              {/* Desenvolvido especialmente para a comunidade universitária, o Unifood integra tecnologia e praticidade para tornar a alimentação no campus mais rápida, organizada e acessível. */}
-            </p>
-            <p>
-              Faça recargas de onde quiser, acesse o cardápio do dia e muito mais.
-            </p>
-            <p>
-              Um sistema moderno, pensado para quem não pode perder tempo — e merece qualidade em cada detalhe.
-            </p>
-          </div>
-          <div className="intro-img">
-            <img src={pratodecomida} alt="prato de comida" />
-          </div>
-        </div>
-      </section>
 
       <section id="gallery" className="grid-one white-bg section">
         <div className="main-content grid-one-content">
