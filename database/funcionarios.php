@@ -25,7 +25,7 @@ $action = $_GET['action'] ?? '';
 
 if ($action === 'listar') {
     // Listar funcionários com tipo_usuario = 0
-    $result = $conn->query("SELECT id, nome, email FROM users WHERE tipo_usuario = 0");
+    $result = $conn->query("SELECT id, nome, email FROM users WHERE tipo_usuario = 3");
     $funcionarios = [];
 
     while ($row = $result->fetch_assoc()) {

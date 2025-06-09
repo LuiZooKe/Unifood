@@ -27,7 +27,7 @@ function Login() {
         localStorage.setItem('tipo_usuario', data.tipo_usuario);
         setErro('');
 
-        if (parseInt(data.tipo_usuario, 10) === 0) {
+        if (parseInt(data.tipo_usuario, 10) === 0 || parseInt(data.tipo_usuario, 10) === 3) {
           navigate('/funcionario');
         } else {
           navigate('/');

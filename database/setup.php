@@ -32,10 +32,27 @@ $sql2 = "CREATE TABLE IF NOT EXISTS produtos (
     imagem VARCHAR(255)
 )";
 
+$sql3 = "CREATE TABLE IF NOT EXISTS funcionario (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    cpf VARCHAR(14) NOT NULL UNIQUE,
+    data_nascimento DATE NOT NULL,
+    logradouro VARCHAR(100),
+    numero VARCHAR(10),
+    bairro VARCHAR(50),
+    cidade VARCHAR(50),
+    telefone VARCHAR(20),
+    data_admissao DATE NOT NULL,
+    cargo VARCHAR(50),
+    salario DECIMAL(10,2)
+)";
+
 
 
 $conn->query($sql1);
 $conn->query($sql2);
+$conn->query($sql3);
   echo "Banco e tabela criados com sucesso.";
 $conn->close();
 ?>

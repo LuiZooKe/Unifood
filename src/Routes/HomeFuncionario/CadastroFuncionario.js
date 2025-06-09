@@ -1,44 +1,59 @@
-import React, { useState } from 'react';
-import './Funcionario.css';
+import React, { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import Dashboard from './Dashboard';
 
 function CadastroFuncionario() {
-  const [tipoUsuario] = useState(0);
-  const [nome, setNome] = useState('');
-  const [email, setEmail] = useState('');
-  const [senha, setSenha] = useState('');
-  const [confirmarSenha, setConfirmarSenha] = useState('');
+  const [tipoUsuario] = useState(3);
+
+  const [formData, setFormData] = useState({
+    nome: '',
+    email: '',
+    senha: '',
+    confirmarSenha: '',
+    cpf: '',
+    data_nascimento: '',
+    logradouro: '',
+    numero: '',
+    bairro: '',
+    cidade: '',
+    telefone: '',
+    data_admissao: '',
+    cargo: '',
+    salario: ''
+  });
+
   const [erros, setErros] = useState([]);
   const [sucesso, setSucesso] = useState('');
 
+  useEffect(() => {
+    if (window.$) {
+      window.$('#cpf').mask('000.000.000-00');
+      window.$('#telefone').mask('(00) 00000-0000');
+      window.$('#salario').mask('000.000.000,00', { reverse: true });
+      window.$('#data_nascimento').mask('00/00/0000');
+      window.$('#data_admissao').mask('00/00/0000');
+    }
+  }, []);
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const formatDate = (dateStr) => {
+    const [dia, mes, ano] = dateStr.split('/');
+    return `${ano}-${mes}-${dia}`; // yyyy-mm-dd
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     const novosErros = [];
 
-    if (!nome.trim()) {
-      novosErros.push('O nome é obrigatório.');
-    }
-
-    if (!email.trim()) {
-      novosErros.push('O email é obrigatório.');
-    }
-
-    if (!senha) {
-      novosErros.push('A senha é obrigatória.');
-    }
-
-    if (senha.length < 8) {
-      novosErros.push('A senha deve ter pelo menos 8 caracteres.');
-    }
-
-    if (!confirmarSenha) {
-      novosErros.push('A confirmação de senha é obrigatória.');
-    }
-
-    if (senha && confirmarSenha && senha !== confirmarSenha) {
-      novosErros.push('As senhas devem ser iguais.');
-    }
+    if (!formData.nome.trim()) novosErros.push('O nome é obrigatório.');
+    if (!formData.email.trim()) novosErros.push('O email é obrigatório.');
+    if (!formData.senha) novosErros.push('A senha é obrigatória.');
+    if (formData.senha.length < 8) novosErros.push('A senha deve ter pelo menos 8 caracteres.');
+    if (!formData.confirmarSenha) novosErros.push('A confirmação de senha é obrigatória.');
+    if (formData.senha !== formData.confirmarSenha) novosErros.push('As senhas devem ser iguais.');
 
     if (novosErros.length > 0) {
       setErros(novosErros);
@@ -48,24 +63,43 @@ function CadastroFuncionario() {
 
     setErros([]);
 
+    const formDataFormatado = {
+      ...formData,
+      cpf: formData.cpf.replace(/\D/g, ''),
+      telefone: formData.telefone.replace(/\D/g, ''),
+      salario: formData.salario.replace(/\./g, '').replace(',', '.'),
+      data_nascimento: formatDate(formData.data_nascimento),
+      data_admissao: formatDate(formData.data_admissao),
+      tipo_usuario: tipoUsuario
+    };
+
     try {
       const response = await fetch('http://localhost/UNIFOOD/database/register.php', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ nome, email, senha, tipo_usuario: tipoUsuario })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formDataFormatado)
       });
 
       const data = await response.json();
 
       if (data.success) {
-        setErros([]);
         setSucesso('Cadastrado com sucesso!');
-        setNome('');
-        setEmail('');
-        setSenha('');
-        setConfirmarSenha('');
+        setFormData({
+          nome: '',
+          email: '',
+          senha: '',
+          confirmarSenha: '',
+          cpf: '',
+          data_nascimento: '',
+          logradouro: '',
+          numero: '',
+          bairro: '',
+          cidade: '',
+          telefone: '',
+          data_admissao: '',
+          cargo: '',
+          salario: ''
+        });
       } else {
         setErros([data.message || 'Erro ao cadastrar.']);
         setSucesso('');
@@ -79,76 +113,63 @@ function CadastroFuncionario() {
 
   return (
     <Dashboard>
-      <form onSubmit={handleSubmit} className="flex items-center justify-center">
-        <div className="bg-[#520000] rounded-md p-8 shadow-xl w-full">
-          <h1 className="text-white text-3xl font-semibold mb-6 text-center">Cadastro Funcionário</h1>
+      <form onSubmit={handleSubmit} className="mx-auto bg-[#520000] text-white rounded-xl p-8 shadow-lg grid grid-cols-1 md:grid-cols-2 gap-6">
+        <h1 className="text-3xl font-bold col-span-1 md:col-span-2 text-center mb-4">Cadastro Funcionário</h1>
 
-          <label className="block text-gray-300 mb-2" htmlFor="nome">Nome</label>
-          <input
-            id="nome"
-            type="text"
-            placeholder="Digite seu nome"
-            value={nome}
-            onChange={(e) => setNome(e.target.value)}
-            className="w-full p-3 mb-4 rounded border border-gray-500 focus:outline-none focus:border-blue-500"
-            required
-          />
+        <Input label="Nome" name="nome" value={formData.nome} onChange={handleChange} />
+        <Input label="Email" type="email" name="email" value={formData.email} onChange={handleChange} />
+        <Input label="Senha" type="password" name="senha" value={formData.senha} onChange={handleChange} />
+        <Input label="Confirmar Senha" type="password" name="confirmarSenha" value={formData.confirmarSenha} onChange={handleChange} />
+        <Input label="CPF" name="cpf" value={formData.cpf} onChange={handleChange} />
+        <Input label="Data de Nascimento" type="text" name="data_nascimento" value={formData.data_nascimento} onChange={handleChange} />
+        <Input label="Logradouro" name="logradouro" value={formData.logradouro} onChange={handleChange} />
+        <Input label="Número" name="numero" value={formData.numero} onChange={handleChange} />
+        <Input label="Bairro" name="bairro" value={formData.bairro} onChange={handleChange} />
+        <Input label="Cidade" name="cidade" value={formData.cidade} onChange={handleChange} />
+        <Input label="Telefone" name="telefone" value={formData.telefone} onChange={handleChange} />
+        <Input label="Data de Admissão" type="text" name="data_admissao" value={formData.data_admissao} onChange={handleChange} />
+        <Input label="Cargo" name="cargo" value={formData.cargo} onChange={handleChange} />
+        <Input label="Salário" name="salario" value={formData.salario} onChange={handleChange} />
 
-          <label className="block text-gray-300 mb-2" htmlFor="email">Email</label>
-          <input
-            id="email"
-            type="email"
-            placeholder="Digite seu email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full p-3 mb-4 rounded border border-gray-500 focus:outline-none focus:border-blue-500"
-            required
-          />
+        {erros.length > 0 && (
+          <ul className="col-span-1 md:col-span-2 text-red-400 list-disc pl-5">
+            {erros.map((erro, i) => <li key={i}>{erro}</li>)}
+          </ul>
+        )}
 
-          <label className="block text-gray-300 mb-2" htmlFor="senha">Senha</label>
-          <input
-            id="senha"
-            type="password"
-            placeholder="Digite sua senha"
-            value={senha}
-            onChange={(e) => setSenha(e.target.value)}
-            className="w-full p-3 mb-6 rounded border border-gray-500 focus:outline-none focus:border-blue-500"
-            required
-          />
+        {sucesso && (
+          <p className="col-span-1 md:col-span-2 text-green-400 font-bold text-center">{sucesso}</p>
+        )}
 
-          <label className="block text-gray-300 mb-2" htmlFor="confirmarSenha">Confirmar Senha</label>
-          <input
-            id="confirmarSenha"
-            type="password"
-            placeholder="Confirme sua senha"
-            value={confirmarSenha}
-            onChange={(e) => setConfirmarSenha(e.target.value)}
-            className="w-full p-3 mb-6 rounded border border-gray-500 focus:outline-none focus:border-blue-500"
-            required
-          />
-
-          {erros.length > 0 && (
-            <ul className="text-red-500 mb-4 list-disc pl-5">
-              {erros.map((erro, index) => (
-                <li key={index}>{erro}</li>
-              ))}
-            </ul>
-          )}
-
-          {sucesso && (
-            <p className="text-green-500 mb-4 text-center font-semibold">{sucesso}</p>
-          )}
-
-          <button
-            type="submit"
-            className="w-full mt-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded transition-colors"
-          >
-            Cadastrar
-          </button>
-        </div>
+        <button type="submit" className="col-span-1 md:col-span-2 bg-blue-600 hover:bg-blue-700 py-3 rounded text-white font-semibold transition">
+          Cadastrar
+        </button>
       </form>
     </Dashboard>
   );
 }
+
+const Input = ({ label, name, value, onChange, type = "text" }) => (
+  <div>
+    <label htmlFor={name} className="block text-gray-200 mb-1">{label}</label>
+    <input
+      id={name}
+      name={name}
+      type={type}
+      value={value}
+      onChange={onChange}
+      className="w-full p-2 rounded border border-gray-400 text-black"
+      required
+    />
+  </div>
+);
+
+Input.propTypes = {
+  label: PropTypes.string.isRequired,
+  name: PropTypes.string.isRequired,
+  value: PropTypes.string.isRequired,
+  onChange: PropTypes.func.isRequired,
+  type: PropTypes.string
+};
 
 export default CadastroFuncionario;

@@ -7,7 +7,7 @@ const AdminRoute = ({ children }) => {
   const tipoUsuario = parseInt(localStorage.getItem('tipo_usuario'), 10);
 
   if (!isAuthenticated) return <Navigate to="/login" />;
-  if (tipoUsuario !== 0) return <Navigate to="/" />;
+  if (tipoUsuario !== 0 && tipoUsuario !== 3) return <Navigate to="/" />;
 
   return children;
 };
