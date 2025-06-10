@@ -3,7 +3,6 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-// Permite requisições de qualquer origem (CORS)
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Headers: Content-Type");
 header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
@@ -14,7 +13,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit();
 }
 
-// Conexão com banco
 $conn = new mysqli("localhost", "root", "", "unifood_db");
 if ($conn->connect_error) {
     echo json_encode(['success' => false, 'message' => 'Erro ao conectar ao banco']);
@@ -24,8 +22,7 @@ if ($conn->connect_error) {
 $action = $_GET['action'] ?? '';
 
 if ($action === 'listar') {
-    // Listar funcionários com tipo_usuario = 0
-    $result = $conn->query("SELECT id, nome, email FROM users WHERE tipo_usuario = 3");
+    $result = $conn->query("SELECT * FROM funcionario");
     $funcionarios = [];
 
     while ($row = $result->fetch_assoc()) {
@@ -45,14 +42,29 @@ if ($action === 'deletar' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
-    // Deletar funcionário com tipo_usuario = 0 e id informado
-    $stmt = $conn->prepare("DELETE FROM users WHERE id = ? AND tipo_usuario = 0");
+    // Busca e exclui usuário vinculado ao funcionário
+    $stmtSelect = $conn->prepare("SELECT email FROM funcionario WHERE id = ?");
+    $stmtSelect->bind_param("i", $id);
+    $stmtSelect->execute();
+    $result = $stmtSelect->get_result();
+    $email = $result->fetch_assoc()['email'] ?? null;
+    $stmtSelect->close();
+
+    if ($email) {
+        $stmtDelUser = $conn->prepare("DELETE FROM users WHERE email = ?");
+        $stmtDelUser->bind_param("s", $email);
+        $stmtDelUser->execute();
+        $stmtDelUser->close();
+    }
+
+    // Exclui da tabela funcionario
+    $stmt = $conn->prepare("DELETE FROM funcionario WHERE id = ?");
     $stmt->bind_param("i", $id);
 
     if ($stmt->execute()) {
-        echo json_encode(['success' => true, 'message' => 'Funcionário deletado com sucesso.']);
+        echo json_encode(['success' => true, 'message' => 'Funcionário excluído.']);
     } else {
-        echo json_encode(['success' => false, 'message' => 'Erro ao deletar funcionário.']);
+        echo json_encode(['success' => false, 'message' => 'Erro ao excluir funcionário.']);
     }
 
     $stmt->close();
@@ -61,31 +73,40 @@ if ($action === 'deletar' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 if ($action === 'atualizar' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Recebe JSON para atualizar (não é multipart/form-data, pois não tem upload de arquivo)
     $data = json_decode(file_get_contents("php://input"), true);
     $id = $data['id'] ?? null;
-    $nome = $data['nome'] ?? '';
-    $email = $data['email'] ?? '';
 
-    if (!$id || !$nome || !$email) {
-        echo json_encode(['success' => false, 'message' => 'Dados incompletos.']);
+    if (!$id) {
+        echo json_encode(['success' => false, 'message' => 'ID inválido.']);
         exit;
     }
 
-    $stmt = $conn->prepare("UPDATE users SET nome = ?, email = ? WHERE id = ? AND tipo_usuario = 0");
-    $stmt->bind_param("ssi", $nome, $email, $id);
+    $fields = ['nome', 'email', 'cpf', 'data_nascimento', 'logradouro', 'numero', 'bairro', 'cidade', 'telefone', 'data_admissao', 'cargo', 'salario'];
+    $values = [];
+    $params = '';
 
-    if ($stmt->execute()) {
-        echo json_encode(['success' => true, 'message' => 'Funcionário atualizado com sucesso.']);
-    } else {
-        echo json_encode(['success' => false, 'message' => 'Erro ao atualizar funcionário.']);
+    foreach ($fields as $field) {
+        $values[] = $data[$field] ?? '';
+        $params .= 's';
     }
+    $values[] = $id;
+    $params .= 'i';
 
+    $stmt = $conn->prepare("UPDATE funcionario SET nome=?, email=?, cpf=?, data_nascimento=?, logradouro=?, numero=?, bairro=?, cidade=?, telefone=?, data_admissao=?, cargo=?, salario=? WHERE id=?");
+    $stmt->bind_param($params, ...$values);
+    $stmt->execute();
     $stmt->close();
+
+    // Atualizar nome e email na tabela users, se existir
+    $stmtUser = $conn->prepare("UPDATE users SET nome = ?, email = ? WHERE email = (SELECT email FROM (SELECT email FROM funcionario WHERE id = ?) AS temp)");
+    $stmtUser->bind_param("ssi", $data['nome'], $data['email'], $id);
+    $stmtUser->execute();
+    $stmtUser->close();
+
+    echo json_encode(['success' => true, 'message' => 'Funcionário atualizado.']);
     $conn->close();
     exit;
 }
 
-// Caso a ação não seja reconhecida
-echo json_encode(['success' => false, 'message' => 'Ação inválida']);
+echo json_encode(['success' => false, 'message' => 'Ação inválida.']);
 exit;
