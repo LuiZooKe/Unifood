@@ -14,6 +14,7 @@ import RedefinirSenha from './Routes/Login/RedefinirSenha';
 import SaibaMais from './Routes/Home/SaibaMais';
 
 import PrivateRoute from './components/PrivateRoute';
+import FunRoute from './components/FunRoute';
 import AdminRoute from './components/AdminRoute';
 
 function App() {
@@ -35,9 +36,9 @@ function App() {
         <Route path="/redefinir-senha" element={<RedefinirSenha />} />
         <Route path="/cadastro" element={<Cadastro />} />
         <Route path="/funcionario" element={
-          <AdminRoute>
+          <FunRoute>
             <Funcionario />
-          </AdminRoute>
+          </FunRoute>
         } />
         <Route path="/cadastrar-funcionario" element={
           <AdminRoute>
@@ -45,14 +46,14 @@ function App() {
           </AdminRoute>
         } />
         <Route path="/cadastrar-produto" element={
-          <AdminRoute>
+          <FunRoute>
             <CadastroProduto />
-          </AdminRoute>
+          </FunRoute>
         } />
         <Route path="lista-produtos" element={
-          <AdminRoute>
+          <FunRoute>
             <ListaProdutos />
-          </AdminRoute>
+          </FunRoute>
         } />
         <Route path="/lista-funcionarios" element={
           <AdminRoute>
