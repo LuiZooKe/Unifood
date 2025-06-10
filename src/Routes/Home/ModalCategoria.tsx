@@ -21,11 +21,36 @@ export const ModalCategoria = ({
   categoria,
   produtos,
 }: ModalCategoriaProps) => {
+  const numProdutos = produtos.length;
+  const numColunas = Math.min(numProdutos, 3); // máximo 4 colunas
+
+  // Largura do modal com base na quantidade de colunas
+  const larguraModal =
+    numColunas === 1
+      ? 'max-w-[30%]'
+      : numColunas === 2
+      ? 'max-w-[45%]'
+      : numColunas === 3
+      ? 'max-w-[60%]'
+      : 'max-w-[60%]'; // 4 ou mais
+
+  // Classe de grid com base no número de colunas
+  const gridColsClass =
+    numColunas === 1
+      ? 'grid-cols-1'
+      : numColunas === 2
+      ? 'grid-cols-2'
+      : numColunas === 3
+      ? 'grid-cols-3'
+      : 'grid-cols-4';
+
   return (
     <Dialog open={isOpen} onClose={onClose} className="relative z-50">
       <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" aria-hidden="true" />
       <div className="fixed inset-0 flex items-center justify-center p-4">
-        <Dialog.Panel className="bg-white w-full max-w-[60%] rounded-2xl shadow-xl p-12 relative">
+        <Dialog.Panel
+          className={`bg-white w-full ${larguraModal} rounded-2xl shadow-xl p-12 relative`}
+        >
           {/* Botão de Fechar */}
           <button
             onClick={onClose}
@@ -40,7 +65,11 @@ export const ModalCategoria = ({
           </Dialog.Title>
 
           {/* Lista de Produtos */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-h-[70vh] overflow-y-auto">
+          <div
+            className={`grid ${gridColsClass} gap-6 ${
+              numProdutos > 4 ? 'max-h-[70vh] overflow-y-auto' : ''
+            }`}
+          >
             {produtos.map((produto, index) => (
               <div
                 key={index}

@@ -40,6 +40,7 @@ const produtosPorCategoria = {
   Salgados: [
     { nome: 'Coxinha', preco: 'R$7,00', imagem: pastelImg },
     { nome: 'Pastel', preco: 'R$6,00', imagem: pastelImg },
+    { nome: 'Pastel', preco: 'R$6,00', imagem: pastelImg },
   ],
   Bebidas: [
     { nome: 'Refrigerante 2L', preco: 'R$13,00', imagem: pastelImg },
@@ -47,7 +48,6 @@ const produtosPorCategoria = {
   ],
   Sobremesas: [
     { nome: 'Pudim', preco: 'R$5,00', imagem: pastelImg },
-    { nome: 'Mousse', preco: 'R$4,00', imagem: pastelImg },
   ],
 };
 
