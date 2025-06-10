@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import Dashboard from './Dashboard';
 
 function CadastroFuncionario() {
-  const [tipoUsuario] = useState(3);
+  const [tipoUsuario] = useState(0);
 
   const [formData, setFormData] = useState({
     nome: '',
@@ -30,8 +30,6 @@ function CadastroFuncionario() {
       window.$('#cpf').mask('000.000.000-00');
       window.$('#telefone').mask('(00) 00000-0000');
       window.$('#salario').mask('000.000.000,00', { reverse: true });
-      window.$('#data_nascimento').mask('00/00/0000');
-      window.$('#data_admissao').mask('00/00/0000');
     }
   }, []);
 
@@ -39,9 +37,9 @@ function CadastroFuncionario() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const formatDate = (dateStr) => {
-    const [dia, mes, ano] = dateStr.split('/');
-    return `${ano}-${mes}-${dia}`; // yyyy-mm-dd
+  // Bloqueia a digitação manual no input date (permite só seleção via picker)
+  const bloquearInputManual = (e) => {
+    e.preventDefault();
   };
 
   const handleSubmit = async (e) => {
@@ -54,6 +52,9 @@ function CadastroFuncionario() {
     if (formData.senha.length < 8) novosErros.push('A senha deve ter pelo menos 8 caracteres.');
     if (!formData.confirmarSenha) novosErros.push('A confirmação de senha é obrigatória.');
     if (formData.senha !== formData.confirmarSenha) novosErros.push('As senhas devem ser iguais.');
+
+    if (!formData.data_nascimento) novosErros.push('Data de nascimento é obrigatória.');
+    if (!formData.data_admissao) novosErros.push('Data de admissão é obrigatória.');
 
     if (novosErros.length > 0) {
       setErros(novosErros);
@@ -68,8 +69,6 @@ function CadastroFuncionario() {
       cpf: formData.cpf.replace(/\D/g, ''),
       telefone: formData.telefone.replace(/\D/g, ''),
       salario: formData.salario.replace(/\./g, '').replace(',', '.'),
-      data_nascimento: formatDate(formData.data_nascimento),
-      data_admissao: formatDate(formData.data_admissao),
       tipo_usuario: tipoUsuario
     };
 
@@ -113,27 +112,60 @@ function CadastroFuncionario() {
 
   return (
     <Dashboard>
-      <form onSubmit={handleSubmit} className="mx-auto bg-[#520000] text-white rounded-xl p-8 shadow-lg grid grid-cols-1 md:grid-cols-2 gap-6">
-        <h1 className="text-3xl font-bold col-span-1 md:col-span-2 text-center mb-4">Cadastro Funcionário</h1>
+      <form
+        onSubmit={handleSubmit}
+        className="mx-auto bg-[#520000] text-white rounded-xl p-8 shadow-lg grid grid-cols-1 md:grid-cols-2 gap-6"
+      >
+        <h1 className="text-3xl font-bold col-span-1 md:col-span-2 text-center mb-4">
+          Cadastro Funcionário
+        </h1>
 
         <Input label="Nome" name="nome" value={formData.nome} onChange={handleChange} />
         <Input label="Email" type="email" name="email" value={formData.email} onChange={handleChange} />
         <Input label="Senha" type="password" name="senha" value={formData.senha} onChange={handleChange} />
-        <Input label="Confirmar Senha" type="password" name="confirmarSenha" value={formData.confirmarSenha} onChange={handleChange} />
+        <Input
+          label="Confirmar Senha"
+          type="password"
+          name="confirmarSenha"
+          value={formData.confirmarSenha}
+          onChange={handleChange}
+        />
         <Input label="CPF" name="cpf" value={formData.cpf} onChange={handleChange} />
-        <Input label="Data de Nascimento" type="text" name="data_nascimento" value={formData.data_nascimento} onChange={handleChange} />
+
+        <Input
+          label="Data de Nascimento"
+          type="date"
+          name="data_nascimento"
+          value={formData.data_nascimento}
+          onChange={handleChange}
+          onKeyDown={bloquearInputManual}
+          onPaste={bloquearInputManual}
+        />
+
         <Input label="Logradouro" name="logradouro" value={formData.logradouro} onChange={handleChange} />
         <Input label="Número" name="numero" value={formData.numero} onChange={handleChange} />
         <Input label="Bairro" name="bairro" value={formData.bairro} onChange={handleChange} />
         <Input label="Cidade" name="cidade" value={formData.cidade} onChange={handleChange} />
         <Input label="Telefone" name="telefone" value={formData.telefone} onChange={handleChange} />
-        <Input label="Data de Admissão" type="text" name="data_admissao" value={formData.data_admissao} onChange={handleChange} />
+
+        <Input
+          label="Data de Admissão"
+          type="date"
+          name="data_admissao"
+          value={formData.data_admissao}
+          onChange={handleChange}
+          onKeyDown={bloquearInputManual}
+          onPaste={bloquearInputManual}
+        />
+
         <Input label="Cargo" name="cargo" value={formData.cargo} onChange={handleChange} />
         <Input label="Salário" name="salario" value={formData.salario} onChange={handleChange} />
 
         {erros.length > 0 && (
           <ul className="col-span-1 md:col-span-2 text-red-400 list-disc pl-5">
-            {erros.map((erro, i) => <li key={i}>{erro}</li>)}
+            {erros.map((erro, i) => (
+              <li key={i}>{erro}</li>
+            ))}
           </ul>
         )}
 
@@ -141,7 +173,10 @@ function CadastroFuncionario() {
           <p className="col-span-1 md:col-span-2 text-green-400 font-bold text-center">{sucesso}</p>
         )}
 
-        <button type="submit" className="col-span-1 md:col-span-2 bg-blue-600 hover:bg-blue-700 py-3 rounded text-white font-semibold transition">
+        <button
+          type="submit"
+          className="col-span-1 md:col-span-2 bg-blue-600 hover:bg-blue-700 py-3 rounded text-white font-semibold transition"
+        >
           Cadastrar
         </button>
       </form>
@@ -149,15 +184,19 @@ function CadastroFuncionario() {
   );
 }
 
-const Input = ({ label, name, value, onChange, type = "text" }) => (
+const Input = ({ label, name, value, onChange, type = 'text', onKeyDown, onPaste }) => (
   <div>
-    <label htmlFor={name} className="block text-gray-200 mb-1">{label}</label>
+    <label htmlFor={name} className="block text-gray-200 mb-1">
+      {label}
+    </label>
     <input
       id={name}
       name={name}
       type={type}
       value={value}
       onChange={onChange}
+      onKeyDown={onKeyDown}
+      onPaste={onPaste}
       className="w-full p-2 rounded border border-gray-400 text-black"
       required
     />
@@ -169,7 +208,9 @@ Input.propTypes = {
   name: PropTypes.string.isRequired,
   value: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
-  type: PropTypes.string
+  type: PropTypes.string,
+  onKeyDown: PropTypes.func,
+  onPaste: PropTypes.func
 };
 
 export default CadastroFuncionario;

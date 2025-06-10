@@ -20,19 +20,29 @@ if (!isset($data['nome'], $data['email'], $data['senha'], $data['tipo_usuario'])
     exit;
 }
 
+function formatDateToSQL($date) {
+    if (!$date) return null;
+    // Espera string no formato YYYY-MM-DD
+    $dateParts = explode('-', $date);
+    if (count($dateParts) === 3) {
+        return $date;
+    }
+    return null;
+}
+
 $tipo_usuario = intval($data['tipo_usuario']);
 $nome = htmlspecialchars(trim($data['nome']));
 $email = filter_var(trim($data['email']), FILTER_SANITIZE_EMAIL);
 $senha = password_hash($data['senha'], PASSWORD_DEFAULT);
 
 $cpf = htmlspecialchars(trim($data['cpf']));
-$data_nascimento = $data['data_nascimento'];
+$data_nascimento = formatDateToSQL($data['data_nascimento']);
 $logradouro = htmlspecialchars(trim($data['logradouro']));
 $numero = htmlspecialchars(trim($data['numero']));
 $bairro = htmlspecialchars(trim($data['bairro']));
 $cidade = htmlspecialchars(trim($data['cidade']));
 $telefone = htmlspecialchars(trim($data['telefone']));
-$data_admissao = $data['data_admissao'];
+$data_admissao = formatDateToSQL($data['data_admissao']);
 $cargo = htmlspecialchars(trim($data['cargo']));
 $salario = floatval($data['salario']);
 
@@ -78,7 +88,7 @@ if ($stmt->execute()) {
     if ($stmtFuncionario->execute()) {
         echo json_encode(['success' => true, 'message' => 'Usuário e funcionário cadastrados com sucesso']);
     } else {
-        echo json_encode(['success' => false, 'message' => 'Erro ao salvar funcionário']);
+        echo json_encode(['success' => false, 'message' => 'Erro ao salvar funcionário', 'erro' => $stmtFuncionario->error]);
     }
 
     $stmtFuncionario->close();
