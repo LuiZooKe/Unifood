@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import './css/elements.css';
+import { useNavigate } from 'react-router-dom';
+import Slider from 'react-slick';
+
+import 'slick-carousel/slick/slick.css';
+import 'slick-carousel/slick/slick-theme.css';
 
 import logoUnifood from './img/logounifood.png';
 import fundocardapio from './img/fundo-cardapio.png';
 import pratodecomida from './img/prato de comida.png';
-import { useNavigate } from 'react-router-dom';
-import Slider from 'react-slick';
-import { ModalCategoria } from './ModalCategoria.tsx'; // Importando o modal
 
-import 'slick-carousel/slick/slick.css';
-import 'slick-carousel/slick/slick-theme.css';
+import { ModalCategoria } from './ModalCategoria.tsx';
+import './css/elements.css';
 
 const carouselSettings = {
   dots: true,
@@ -27,7 +28,7 @@ function Home() {
   const [modalAberto, setModalAberto] = useState(false);
   const [categoriaSelecionada, setCategoriaSelecionada] = useState('');
   const [produtosPorCategoria, setProdutosPorCategoria] = useState({});
-  const [imagensCarrossel, setImagensCarrossel] = useState([]); // NOVO
+  const [imagensCarrossel, setImagensCarrossel] = useState([]);
 
   const abrirModal = (categoria) => {
     setCategoriaSelecionada(categoria);
@@ -46,6 +47,7 @@ function Home() {
           'http://localhost/UNIFOOD/database/produtos.php?action=listar'
         );
         const data = await res.json();
+
         if (data.success) {
           const agrupado = {};
           const imagens = [];
@@ -56,7 +58,6 @@ function Home() {
             if (!agrupado[produto.categoria]) {
               agrupado[produto.categoria] = [];
             }
-
             agrupado[produto.categoria].push({
               nome: produto.nome,
               preco: `R$ ${parseFloat(produto.preco).toFixed(2)}`,
@@ -64,7 +65,7 @@ function Home() {
               descricao: produto.descricao || '',
             });
 
-            if (produto.imagem) {
+            if (produto.imagem && produto.nome) {
               imagens.push({
                 img: imagemURL,
                 alt: produto.nome,
@@ -76,10 +77,10 @@ function Home() {
           setProdutosPorCategoria(agrupado);
           setImagensCarrossel(imagens);
         } else {
-          console.error(data.message);
+          console.error('Erro ao carregar produtos:', data.message);
         }
       } catch (err) {
-        console.error('Erro ao carregar produtos:', err);
+        console.error('Erro de rede ou ao carregar produtos:', err);
       }
     };
 
@@ -89,9 +90,9 @@ function Home() {
   return (
     <div>
       <input id="close-menu" className="close-menu" type="checkbox" aria-label="Close menu" role="button" />
-      <label className="close-menu-label" htmlFor="close-menu" title="close menu"></label>
+      <label className="close-menu-label z-[9999]" htmlFor="close-menu" title="close menu"></label>
 
-      <aside className="menu white-bg">
+      <aside className="menu white-bg z-[999]">
         <div className="h-[150px] main-content menu-content">
           <h1 onClick={() => (document.getElementById('close-menu').checked = false)}>
             <div className="logo">
@@ -115,30 +116,50 @@ function Home() {
         </div>
       </aside>
 
-      <section id="gallery" className="white-bg section">
+      <section id="gallery" className="white-bg section relative z-10">
         <div
           className="absolute inset-0 bg-no-repeat bg-center bg-[length:100%] opacity-[5%] z-0"
           style={{ backgroundImage: `url(${fundocardapio})` }}
         />
-        <div className="main-content max-w-6xl mx-auto px-4 text-center">
+        <div className="main-content max-w-6xl mx-auto px-4 text-center relative z-20">
           <h2 className="grid-main-heading">NOSSO CARDÁPIO</h2>
 
-          <div className="relative w-full h-[200px] md:h-[250px] lg:h-[280px] mx-auto rounded-2xl overflow-hidden shadow-xl mb-16">
+          <div className="relative w-full
+            h-[250px] md:h-[320px] lg:h-[380px] 
+            mx-auto rounded-2xl overflow-hidden shadow-xl mb-16 z-30">
             <Slider {...carouselSettings}>
-              {imagensCarrossel.map((item, index) => (
-                <div key={index} className="w-full">
-                  <div className="relative w-full h-full">
-                    <img src={item.img} alt={item.alt} className="w-full h-full object-cover rounded-2xl" />
-                    {item.caption && (
-                      <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-60 text-white p-3 text-sm md:text-base">
-                        <p className="font-medium">{item.caption}</p>
-                      </div>
-                    )}
+              {imagensCarrossel.length > 0 ? (
+                imagensCarrossel.map((item, index) => (
+                  <div key={index} className="relative w-full h-full">
+                    <div className="relative w-full h-[250px] md:h-[320px] lg:h-[380px] overflow-hidden">
+                      <img
+                        src={item.img}
+                        alt={item.alt}
+                        className="w-full h-full object-cover object-center"
+                      />
+                      {item.caption && (
+                        <div
+                          className="absolute bottom-0 left-0 right-0
+                           bg-gradient-to-t from-black via-black/70 to-transparent 
+                           text-white text-center px-4 py-6
+                           text-xl md:text-2xl lg:text-3xl font-bold z-10"
+                        >
+                          <p className="drop-shadow-lg">
+                            QUERIDINHOS DA GALERA: {item.caption}
+                          </p>
+                        </div>
+                      )}
+                    </div>
                   </div>
+                ))
+              ) : (
+                <div className="flex items-center justify-center h-full">
+                  <p className="text-gray-600">Carregando imagens do carrossel...</p>
                 </div>
-              ))}
+              )}
             </Slider>
           </div>
+
 
           <h3 className="text-4xl font-bold text-gray-800 mb-6">CATEGORIAS</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -155,7 +176,7 @@ function Home() {
                   alt={categoria}
                   className="w-full h-56 object-cover transform group-hover:scale-105 transition duration-300"
                 />
-                <div className="absolute bottom-0 bg-black bg-opacity-50 w-full py-3 text-white text-xl font-semibold">
+                <div className="absolute bottom-0 bg-black bg-opacity-50 w-full py-3 text-white text-xl font-bold">
                   {categoria}
                 </div>
               </div>
@@ -164,7 +185,7 @@ function Home() {
         </div>
       </section>
 
-      <section id="contact" className="intro main-bg section">
+      <section id="contact" className="intro main-bg section relative z-10">
         <div className="main-content intro-content">
           <div className="intro-text-content">
             <h2 className="grid-main-heading">EM CASO DE DÚVIDAS, NOS CONTATE</h2>
@@ -196,7 +217,7 @@ function Home() {
       </section>
 
       <button
-        className="back-to-top"
+        className="back-to-top z-[990]"
         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
       >
         ➔

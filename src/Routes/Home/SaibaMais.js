@@ -109,7 +109,7 @@ function SaibaMais() {
                 <h3 className="text-xl font-bold mb-1 text-gray-800 break-words leading-tight">Humberto G. Silva</h3>
                 <p className="text-red-600 font-bold text-[18px]">UI/UX Designer</p>
               </div>
-              <p className="text-gray-600 font-bold text-[15px] leading-relaxed text-justify px-2 mt-10">Especialista em interfaces intuitivas, trazendo a beleza e funcionalidade para a Unifood.</p>
+              <p className="text-gray-600 font-bold text-[14px] text-center leading-relaxed mt-10">Responsável por planejar e desenhar a experiência e a interface do usuário, garantindo que a aplicação seja amigável e visualmente atraente para os clientes.</p>
             </div>
 
             <div className="bg-white p-6 rounded-lg shadow-md text-center flex flex-col items-center min-h-[400px]">
@@ -120,7 +120,7 @@ function SaibaMais() {
                 <h3 className="text-xl font-bold mb-1 text-gray-800 break-words leading-tight">Nathan M. Pádua</h3>
                 <p className="text-red-600 font-bold text-[18px]">Desenvolvedor Front-end</p>
               </div>
-              <p className="text-gray-600 font-bold text-[15px] leading-relaxed text-justify px-2 mt-10">Cria experiências intuitivas e visualmente atraentes para todos os usuários.</p>
+              <p className="text-gray-600 font-bold text-[14px] text-center leading-relaxed mt-10">Transforma os designs em código-fonte, construindo a parte da aplicação com a qual o usuário interage diretamente no navegador, deixando o site intuitivo e funcional.</p>
             </div>
 
             <div className="bg-white p-6 rounded-lg shadow-md text-center flex flex-col items-center min-h-[400px]">
@@ -129,9 +129,9 @@ function SaibaMais() {
               </div>
               <div className="flex flex-col justify-start w-full min-h-[90px]">
                 <h3 className="text-xl font-bold mb-1 text-gray-800 break-words leading-tight">Luiz Gustavo Dias</h3>
-                <p className="text-red-600 font-bold text-[18px]">Desenvolvedor Back-end</p> {/* AQUI: text-base -> text-lg */}
+                <p className="text-red-600 font-bold text-[18px]">Desenvolvedor Back-end</p>
               </div>
-              <p className="text-gray-600 font-bold text-[15px] leading-relaxed text-justify px-2 mt-10">Arquiteto de sistemas robustos, garantindo a performance e segurança da plataforma.</p> {/* AQUI: text-sm -> text-base */}
+              <p className="text-gray-600 font-bold text-[14px] text-center leading-relaxed mt-10">Desenvolve a lógica e a estrutura que operam os sistemas por trás das aplicações, garantindo o processamento de dados e a segurança da plataforma.</p>
             </div>
 
             {/* Card para Prof. Luiz Gustavo */}
@@ -142,14 +142,21 @@ function SaibaMais() {
               </div>
               <div className="flex flex-col justify-start w-full min-h-[90px]">
                 <h3 className="text-xl font-bold mb-1 text-gray-800 break-words leading-tight">Prof. Luiz Gustavo</h3>
-                <p className="text-red-600 font-bold text-[18px]">Gerente de Projeto</p> {/* AQUI: text-base -> text-lg */}
+                <p className="text-red-600 font-bold text-[18px]">Gerente de Projeto</p>
               </div>
-              <p className="text-gray-600 font-bold text-[15px] leading-relaxed text-justify px-2 mt-10">Líder estratégico que guia a equipe rumo ao sucesso, garantindo a entrega e qualidade.</p> {/* AQUI: text-sm -> text-base */}
+              <p className="text-gray-600 font-bold text-[14px] text-center leading-relaxed mt-10">Líder estratégico que guia a equipe rumo ao sucesso, garantindo a entrega e qualidade.</p>
             </div>
 
           </div>
         </div>
       </section>
+
+      <button
+        className="back-to-top"
+        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+      >
+        ➔
+      </button>
     </div>
   );
 }
