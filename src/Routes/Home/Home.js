@@ -1,17 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './css/elements.css';
 
-import pratodecomida from './img/prato de comida.png';
-import pastelImg from './img/pastel.png';
 import logoUnifood from './img/logounifood.png';
 import fundocardapio from './img/fundo-cardapio.png';
-
+import pratodecomida from './img/prato de comida.png';
 import { useNavigate } from 'react-router-dom';
-import Slider from "react-slick";
+import Slider from 'react-slick';
 import { ModalCategoria } from './ModalCategoria.tsx';
 
-import "slick-carousel/slick/slick.css";
-import "slick-carousel/slick/slick-theme.css";
+import 'slick-carousel/slick/slick.css';
+import 'slick-carousel/slick/slick-theme.css';
 
 const carouselSettings = {
   dots: true,
@@ -25,38 +23,23 @@ const carouselSettings = {
 };
 
 const carouselItems = [
-  { img: pastelImg, alt: "Pastel delicioso", caption: "Pastel fresquinho!" },
-  { img: pratodecomida, alt: "Prato de comida", caption: "Refeições completas!" },
-  { img: logoUnifood, alt: "Logo Unifood", caption: "Sua melhor escolha em alimentos!" },
+  {
+    img: pratodecomida,
+    alt: 'Prato de comida',
+    caption: 'Refeições completas!',
+  },
+  {
+    img: logoUnifood,
+    alt: 'Logo Unifood',
+    caption: 'Sua melhor escolha em alimentos!',
+  },
 ];
-
-const produtosPorCategoria = {
-  Jantinhas: [
-    { nome: 'Jantinha de Frango', preco: 'R$15,00', imagem: pastelImg },
-    { nome: 'Jantinha de Carne', preco: 'R$17,00', imagem: pastelImg },
-    { nome: 'Jantinha de Carne', preco: 'R$17,00', imagem: pastelImg },
-    { nome: 'Jantinha de Carne', preco: 'R$17,00', imagem: pastelImg },
-    { nome: 'Jantinha de Carne', preco: 'R$17,00', imagem: pastelImg },
-  ],
-  Salgados: [
-    { nome: 'Coxinha', preco: 'R$7,00', imagem: pastelImg },
-    { nome: 'Pastel', preco: 'R$6,00', imagem: pastelImg },
-    { nome: 'Pastel', preco: 'R$6,00', imagem: pastelImg },
-  ],
-  Bebidas: [
-    { nome: 'Refrigerante 2L', preco: 'R$13,00', imagem: pastelImg },
-    { nome: 'Água Mineral', preco: 'R$3,00', imagem: pastelImg },
-  ],
-  Sobremesas: [
-    { nome: 'Pudim', preco: 'R$5,00', imagem: pastelImg },
-  ],
-};
 
 function Home() {
   const navigate = useNavigate();
-
   const [modalAberto, setModalAberto] = useState(false);
   const [categoriaSelecionada, setCategoriaSelecionada] = useState('');
+  const [produtosPorCategoria, setProdutosPorCategoria] = useState({});
 
   const abrirModal = (categoria) => {
     setCategoriaSelecionada(categoria);
@@ -67,6 +50,37 @@ function Home() {
     localStorage.removeItem('usuarioLogado');
     navigate('/login');
   };
+
+  useEffect(() => {
+    const fetchProdutos = async () => {
+      try {
+        const res = await fetch(
+          'http://localhost/UNIFOOD/database/produtos.php?action=listar'
+        );
+        const data = await res.json();
+        if (data.success) {
+          const agrupado = {};
+          data.produtos.forEach((produto) => {
+            if (!agrupado[produto.categoria]) {
+              agrupado[produto.categoria] = [];
+            }
+            agrupado[produto.categoria].push({
+              nome: produto.nome,
+              preco: `R$ ${parseFloat(produto.preco).toFixed(2)}`,
+              imagem: `http://localhost/UNIFOOD/database/imgProdutos/${produto.imagem}`,
+            });
+          });
+          setProdutosPorCategoria(agrupado);
+        } else {
+          console.error(data.message);
+        }
+      } catch (err) {
+        console.error('Erro ao carregar produtos:', err);
+      }
+    };
+
+    fetchProdutos();
+  }, []);
 
   return (
     <div>
@@ -83,7 +97,6 @@ function Home() {
           <nav>
             <ul onClick={() => (document.getElementById('close-menu').checked = false)}>
               <li><a href="#gallery">Cardápio 🍴</a></li>
-              {/* <li><a href="#pricing">Preços</a></li> */}
               <li><a href="#contact">Contato 📞</a></li>
               <li><a href="/saibamais">Saiba Mais ℹ️</a></li>
               <li><a href="#">Carrinho 🛒</a></li>
@@ -132,7 +145,10 @@ function Home() {
                 onClick={() => abrirModal(categoria)}
               >
                 <img
-                  src={pastelImg}
+                  src={
+                    produtosPorCategoria[categoria][0]?.imagem ||
+                    pratodecomida
+                  }
                   alt={categoria}
                   className="w-full h-56 object-cover transform group-hover:scale-105 transition duration-300"
                 />
@@ -144,46 +160,6 @@ function Home() {
           </div>
         </div>
       </section>
-
-      {/* <section id="pricing" className="white-bg section">
-        <div className="main-content top3-content">
-          <h2 className="grid-main-heading">TABELA DE PREÇOS</h2>
-          <div className="tables-wrapper">
-            <div className="responsive-table">
-              <table>
-                <thead>
-                  <tr><th>Produto</th><th>Preço</th></tr>
-                </thead>
-                <tbody>
-                  <tr><td>Jantinha</td><td>R$15,00</td></tr>
-                  <tr><td>Jantinha</td><td>R$15,00</td></tr>
-                  <tr><td>Jantinha</td><td>R$15,00</td></tr>
-                  <tr><td>Jantinha</td><td>R$15,00</td></tr>
-                  <tr><td>Jantinha</td><td>R$15,00</td></tr>
-                  <tr><td>Jantinha</td><td>R$15,00</td></tr>
-                </tbody>
-                <tfoot><tr><td>COMIDAS</td><td></td></tr></tfoot>
-              </table>
-            </div>
-            <div className="responsive-table">
-              <table>
-                <thead>
-                  <tr><th>Produto</th><th>Preço</th></tr>
-                </thead>
-                <tbody>
-                  <tr><td>Refrigerante 2L</td><td>R$13,00</td></tr>
-                  <tr><td>Refrigerante 2L</td><td>R$13,00</td></tr>
-                  <tr><td>Refrigerante 2L</td><td>R$13,00</td></tr>
-                  <tr><td>Refrigerante 2L</td><td>R$13,00</td></tr>
-                  <tr><td>Refrigerante 2L</td><td>R$13,00</td></tr>
-                  <tr><td>Refrigerante 2L</td><td>R$13,00</td></tr>
-                </tbody>
-                <tfoot><tr><td>CONSUMÍVEIS</td><td></td></tr></tfoot>
-              </table>
-            </div>
-          </div>
-        </div>
-      </section> */}
 
       <section id="contact" className="intro main-bg section">
         <div className="main-content intro-content">
