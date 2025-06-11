@@ -1,0 +1,238 @@
+import React, { useState } from 'react';
+import PropTypes from 'prop-types';
+import Dashboard from './Dashboard';
+import { IMaskInput } from 'react-imask';
+
+function CadastroFornecedor() {
+  const [formData, setFormData] = useState({
+    nome: '',
+    email: '',
+    cpf: '',
+    cnpj: '',
+    logradouro: '',
+    numero: '',
+    bairro: '',
+    cidade: '',
+    telefone: '',
+    mostrarCPF: false,
+    mostrarCNPJ: false
+  });
+
+  const [erros, setErros] = useState([]);
+  const [sucesso, setSucesso] = useState('');
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const toggleCPF = () => {
+    setFormData((prev) => ({
+      ...prev,
+      mostrarCPF: !prev.mostrarCPF,
+      cpf: !prev.mostrarCPF ? prev.cpf : '',
+      mostrarCNPJ: false,
+      cnpj: ''
+    }));
+  };
+
+  const toggleCNPJ = () => {
+    setFormData((prev) => ({
+      ...prev,
+      mostrarCNPJ: !prev.mostrarCNPJ,
+      cnpj: !prev.mostrarCNPJ ? prev.cnpj : '',
+      mostrarCPF: false,
+      cpf: ''
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const novosErros = [];
+
+    if (!formData.nome.trim()) novosErros.push('O nome é obrigatório.');
+
+    if (!formData.mostrarCPF && !formData.mostrarCNPJ) {
+      novosErros.push('Marque CPF ou CNPJ.');
+    }
+    if (formData.mostrarCPF && !formData.cpf.trim()) {
+      novosErros.push('O CPF é obrigatório.');
+    }
+    if (formData.mostrarCNPJ && !formData.cnpj.trim()) {
+      novosErros.push('O CNPJ é obrigatório.');
+    }
+
+    if (novosErros.length > 0) {
+      setErros(novosErros);
+      setSucesso('');
+      return;
+    }
+
+    setErros([]);
+
+    const formDataFormatado = {
+      nome: formData.nome.trim(),
+      email: formData.email.trim(),
+      cpf: formData.cpf.replace(/\D/g, ''),
+      cnpj: formData.cnpj.replace(/\D/g, ''),
+      logradouro: formData.logradouro.trim(),
+      numero: formData.numero.trim(),
+      bairro: formData.bairro.trim(),
+      cidade: formData.cidade.trim(),
+      telefone: formData.telefone.replace(/\D/g, '')
+    };
+
+    try {
+      const response = await fetch('http://localhost/UNIFOOD/database/register-fornecedor.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formDataFormatado)
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setSucesso('Fornecedor cadastrado com sucesso!');
+        setFormData({
+          nome: '',
+          email: '',
+          cpf: '',
+          cnpj: '',
+          logradouro: '',
+          numero: '',
+          bairro: '',
+          cidade: '',
+          telefone: '',
+          mostrarCPF: false,
+          mostrarCNPJ: false
+        });
+      } else {
+        setErros([data.message || 'Erro ao cadastrar.']);
+        setSucesso('');
+      }
+    } catch (error) {
+      console.error('Erro ao enviar:', error);
+      setErros(['Erro na conexão com o servidor.']);
+      setSucesso('');
+    }
+  };
+
+  return (
+    <Dashboard>
+      <form
+        onSubmit={handleSubmit}
+        className="w-full max-w-4xl mx-auto bg-[#520000] text-white p-8 rounded-xl shadow-md grid grid-cols-1 md:grid-cols-2 gap-4"
+      >
+        <h1 className="text-3xl font-bold col-span-1 md:col-span-2 text-center mb-4">
+          Cadastro de Fornecedor
+        </h1>
+
+        <Input label="Nome" name="nome" value={formData.nome} onChange={handleChange} />
+        <Input label="Email" type="email" name="email" value={formData.email} onChange={handleChange} />
+
+        {/* Checkboxes para CPF e CNPJ */}
+        <div className="col-span-1 md:col-span-2 flex gap-6">
+          <label className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={formData.mostrarCPF}
+              onChange={toggleCPF}
+              disabled={formData.mostrarCNPJ}
+            />
+            <span>Usar CPF</span>
+          </label>
+
+          <label className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={formData.mostrarCNPJ}
+              onChange={toggleCNPJ}
+              disabled={formData.mostrarCPF}
+            />
+            <span>Usar CNPJ</span>
+          </label>
+        </div>
+
+        {/* Campos condicionais de CPF e CNPJ */}
+        {formData.mostrarCPF && (
+          <Input label="CPF" name="cpf" value={formData.cpf} onChange={handleChange} mask="000.000.000-00" />
+        )}
+        {formData.mostrarCNPJ && (
+          <Input label="CNPJ" name="cnpj" value={formData.cnpj} onChange={handleChange} mask="00.000.000/0000-00" />
+        )}
+
+        <Input label="Logradouro" name="logradouro" value={formData.logradouro} onChange={handleChange} />
+        <Input label="Número" name="numero" value={formData.numero} onChange={handleChange} />
+        <Input label="Bairro" name="bairro" value={formData.bairro} onChange={handleChange} />
+        <Input label="Cidade" name="cidade" value={formData.cidade} onChange={handleChange} />
+        <Input label="Telefone" name="telefone" value={formData.telefone} onChange={handleChange} mask="(00) 00000-0000" />
+
+        {erros.length > 0 && (
+          <ul className="col-span-1 md:col-span-2 text-red-400 list-disc pl-5">
+            {erros.map((erro, i) => (
+              <li key={i}>{erro}</li>
+            ))}
+          </ul>
+        )}
+
+        {sucesso && (
+          <p className="col-span-1 md:col-span-2 text-green-400 font-bold text-center">{sucesso}</p>
+        )}
+
+        <button
+          type="submit"
+          className="col-span-1 md:col-span-2 bg-green-600 hover:bg-blue-700 py-3 rounded text-white font-semibold transition"
+        >
+          Cadastrar Fornecedor
+        </button>
+      </form>
+    </Dashboard>
+  );
+}
+
+const Input = ({
+  label,
+  name,
+  value,
+  onChange,
+  type = 'text',
+  mask,
+  ...rest
+}) => (
+  <div>
+    <label htmlFor={name} className="block text-gray-200 mb-1">
+      {label}
+    </label>
+    {mask ? (
+      <IMaskInput
+        id={name}
+        name={name}
+        value={value}
+        mask={mask}
+        onAccept={(value) => onChange({ target: { name, value } })}
+        className="w-full p-2 rounded border border-gray-400 text-black"
+        {...rest}
+      />
+    ) : (
+      <input
+        id={name}
+        name={name}
+        type={type}
+        value={value}
+        onChange={onChange}
+        className="w-full p-2 rounded border border-gray-400 text-black"
+        {...rest}
+      />
+    )}
+  </div>
+);
+
+Input.propTypes = {
+  label: PropTypes.string.isRequired,
+  name: PropTypes.string.isRequired,
+  value: PropTypes.string.isRequired,
+  onChange: PropTypes.func.isRequired,
+  type: PropTypes.string,
+  mask: PropTypes.any
+};
+
+export default CadastroFornecedor;

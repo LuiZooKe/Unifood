@@ -7,9 +7,9 @@ function Dashboard({ children }) {
   const [menuAberto, setMenuAberto] = useState(false);
   const [produtosAberto, setProdutosAberto] = useState(false);
   const [funcionariosAberto, setFuncionariosAberto] = useState(false);
+  const [fornecedoresAberto, setFornecedoresAberto] = useState(false); // Novo estado
   const navigate = useNavigate();
 
-  // Pega o tipo_usuario do localStorage
   const tipoUsuario = Number(localStorage.getItem('tipo_usuario'));
 
   const handleLogout = () => {
@@ -49,7 +49,6 @@ function Dashboard({ children }) {
         </div>
 
         <nav className="flex flex-col space-y-3">
-          {/* Só mostra Funcionários se tipo_usuario for 0 */}
           {tipoUsuario === 0 && (
             <div>
               <button
@@ -77,7 +76,6 @@ function Dashboard({ children }) {
             </div>
           )}
 
-          {/* Menu Produtos */}
           <div>
             <button
               onClick={() => setProdutosAberto(!produtosAberto)}
@@ -98,6 +96,32 @@ function Dashboard({ children }) {
                 </a>
                 <a href="/cadastrar-produto" className="hover:bg-gray-700 p-2 rounded">
                   Cadastrar Produto
+                </a>
+              </div>
+            )}
+          </div>
+
+          {/* Menu Fornecedores */}
+          <div>
+            <button
+              onClick={() => setFornecedoresAberto(!fornecedoresAberto)}
+              className="w-full flex items-center justify-between hover:bg-gray-700 p-2 rounded focus:outline-none"
+            >
+              <span>Fornecedores</span>
+              <ChevronDown
+                size={20}
+                className={`transform transition-transform duration-300 ${
+                  fornecedoresAberto ? 'rotate-180' : ''
+                }`}
+              />
+            </button>
+            {fornecedoresAberto && (
+              <div className="ml-4 mt-2 flex flex-col space-y-2">
+                <a href="/lista-fornecedores" className="hover:bg-gray-700 p-2 rounded">
+                  Lista de Fornecedores
+                </a>
+                <a href="/cadastrar-fornecedor" className="hover:bg-gray-700 p-2 rounded">
+                  Cadastrar Fornecedor
                 </a>
               </div>
             )}

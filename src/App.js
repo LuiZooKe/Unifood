@@ -10,6 +10,7 @@ import CadastroFuncionario from './Routes/HomeFuncionario/CadastroFuncionario';
 import CadastroProduto from './Routes/HomeFuncionario/CadastroProduto';
 import ListaFuncionario from './Routes/HomeFuncionario/ListaFuncionario';
 import ListaProdutos from './Routes/HomeFuncionario/ListaProdutos';
+import CadastroFornecedor from './Routes/HomeFuncionario/CadastroFornecedor';
 import RedefinirSenha from './Routes/Login/RedefinirSenha';
 import SaibaMais from './Routes/Home/SaibaMais';
 
@@ -35,6 +36,11 @@ function App() {
         <Route path="/esqueci-senha" element={<EsqueciSenha />} />
         <Route path="/redefinir-senha" element={<RedefinirSenha />} />
         <Route path="/cadastro" element={<Cadastro />} />
+
+
+
+
+        {/* Rotas de admin/funcionario */}
         <Route path="/funcionario" element={
           <FunRoute>
             <Funcionario />
@@ -59,6 +65,11 @@ function App() {
           <AdminRoute>
             <ListaFuncionario />
           </AdminRoute>
+        } />
+        <Route path="/cadastrar-fornecedor" element={
+          <FunRoute>
+            <CadastroFornecedor />
+          </FunRoute>
         } />
       </Routes>
     </Router>

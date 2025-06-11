@@ -64,7 +64,8 @@ $sql4 = "CREATE TABLE IF NOT EXISTS fornecedor (
     numero VARCHAR(10),
     bairro VARCHAR(50),
     cidade VARCHAR(50),
-    telefone VARCHAR(20)
+    telefone VARCHAR(20),
+    data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 )";
 
 $conn->query($sql1);
