@@ -6,7 +6,7 @@ import fundocardapio from './img/fundo-cardapio.png';
 import pratodecomida from './img/prato de comida.png';
 import { useNavigate } from 'react-router-dom';
 import Slider from 'react-slick';
-import { ModalCategoria } from './ModalCategoria.tsx';
+import { ModalCategoria } from './ModalCategoria.tsx'; // Importando o modal
 
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
@@ -68,6 +68,7 @@ function Home() {
               nome: produto.nome,
               preco: `R$ ${parseFloat(produto.preco).toFixed(2)}`,
               imagem: `http://localhost/UNIFOOD/database/imgProdutos/${produto.imagem}`,
+              descricao: produto.descricao || '',
             });
           });
           setProdutosPorCategoria(agrupado);
@@ -136,7 +137,7 @@ function Home() {
             </Slider>
           </div>
 
-          <h3 className="text-2xl font-bold text-gray-800 mb-6">Categorias</h3>
+          <h3 className="text-4xl font-bold text-gray-800 mb-6">CATEGORIAS</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {Object.keys(produtosPorCategoria).map((categoria, i) => (
               <div
@@ -146,8 +147,7 @@ function Home() {
               >
                 <img
                   src={
-                    produtosPorCategoria[categoria][0]?.imagem ||
-                    pratodecomida
+                    produtosPorCategoria[categoria][0]?.imagem || pratodecomida
                   }
                   alt={categoria}
                   className="w-full h-56 object-cover transform group-hover:scale-105 transition duration-300"
@@ -192,8 +192,14 @@ function Home() {
         </div>
       </section>
 
-      <button className="back-to-top" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>➔</button>
+      <button
+        className="back-to-top"
+        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+      >
+        ➔
+      </button>
 
+      {/* Modal com os produtos da categoria selecionada */}
       <ModalCategoria
         isOpen={modalAberto}
         onClose={() => setModalAberto(false)}
