@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import Dashboard from './Dashboard';
 
 function CadastroFuncionario() {
-  const [tipoUsuario] = useState(0);
+  const [tipoUsuario] = useState(3);
 
   const [formData, setFormData] = useState({
     nome: '',
