@@ -1,6 +1,8 @@
 import React from 'react';
 import { Dialog } from '@headlessui/react';
 import { X } from 'lucide-react';
+import { ShoppingCart } from 'lucide-react';
+
 
 interface Produto {
   nome: string;
@@ -59,9 +61,17 @@ export const ModalCategoria = ({
                 <h3 className="text-lg font-bold leading-tight min-h-[3.5rem]">
                   {produto.nome}
                 </h3>
-                <p className="text-red-600 font-semibold text-[1.6rem] mt-3">
-                  {produto.preco}
-                </p>
+                <div className="flex items-center justify-between w-full mt-3">
+                  <p className="text-red-600 font-semibold text-[2rem]">{produto.preco}</p>
+                  <button
+                    className="text-white   bg-red-600 hover:bg-red-700 p-2 rounded-full transition"
+                    title="Adicionar ao carrinho"
+                    onClick={() => console.log(`Adicionar ${produto.nome} ao carrinho`)}
+                  >
+                    <ShoppingCart className="w-8 h-8" />
+                  </button>
+                </div>
+
               </div>
             ))}
           </div>
