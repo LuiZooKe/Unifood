@@ -79,18 +79,22 @@ if ($action === 'atualizar' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $nome = $_POST['nome'] ?? '';
     $descricao = $_POST['descricao'] ?? '';
     $preco = $_POST['preco'] ?? 0;
+    $custo = $_POST['custo'] ?? 0;
     $quantidade = $_POST['quantidade'] ?? 0;
+    $id_fornecedor = $_POST['id_fornecedor'] ?? '';
+    $nome_fornecedor = $_POST['nome_fornecedor'] ?? '';
+    $categoria = $_POST['categoria'] ?? '';
+    $unidade_medida = $_POST['unidade_medida'] ?? '';
+    $lucro = $_POST['lucro'] ?? 0;
 
-    if (!$id || !$nome || !$descricao || !$preco) {
+    if (!$id || !$nome || !$descricao || !$preco || !$custo || !$categoria || !$unidade_medida) {
         echo json_encode(['success' => false, 'message' => 'Dados incompletos']);
         exit;
     }
 
     $imagem_nome = null;
 
-    // Se uma nova imagem foi enviada
     if (!empty($_FILES['imagem']['name'])) {
-        // Buscar imagem anterior
         $res = $conn->query("SELECT imagem FROM produtos WHERE id = $id");
         if ($res && $row = $res->fetch_assoc()) {
             $imagem_antiga = $row['imagem'];
@@ -103,16 +107,25 @@ if ($action === 'atualizar' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         $imagem_nome = uniqid() . "." . $extensao;
         move_uploaded_file($_FILES['imagem']['tmp_name'], "imgProdutos/" . $imagem_nome);
 
-        $stmt = $conn->prepare("UPDATE produtos SET nome = ?, descricao = ?, preco = ?, quantidade = ?, imagem = ? WHERE id = ?");
-        $stmt->bind_param("ssdiss", $nome, $descricao, $preco, $quantidade, $imagem_nome, $id);
+        $stmt = $conn->prepare("UPDATE produtos SET 
+            nome = ?, descricao = ?, preco = ?, custo = ?, quantidade = ?, imagem = ?, 
+            id_fornecedor = ?, nome_fornecedor = ?, categoria = ?, unidade_medida = ?, lucro = ? 
+            WHERE id = ?");
+        $stmt->bind_param("ssddisssssdi", $nome, $descricao, $preco, $custo, $quantidade, $imagem_nome,
+            $id_fornecedor, $nome_fornecedor, $categoria, $unidade_medida, $lucro, $id);
     } else {
-        $stmt = $conn->prepare("UPDATE produtos SET nome = ?, descricao = ?, preco = ?, quantidade = ? WHERE id = ?");
-        $stmt->bind_param("ssdii", $nome, $descricao, $preco, $quantidade, $id);
+        $stmt = $conn->prepare("UPDATE produtos SET 
+            nome = ?, descricao = ?, preco = ?, custo = ?, quantidade = ?, 
+            id_fornecedor = ?, nome_fornecedor = ?, categoria = ?, unidade_medida = ?, lucro = ? 
+            WHERE id = ?");
+        $stmt->bind_param("ssddissssdi", $nome, $descricao, $preco, $custo, $quantidade,
+            $id_fornecedor, $nome_fornecedor, $categoria, $unidade_medida, $lucro, $id);
     }
 
     $stmt->execute();
     echo json_encode(['success' => true, 'message' => 'Produto atualizado com sucesso']);
     exit;
 }
+
 
 echo json_encode(['success' => false, 'message' => 'Ação inválida']);

@@ -109,7 +109,7 @@ function CadastroFuncionario() {
     <Dashboard>
       <form
         onSubmit={handleSubmit}
-        className="mx-auto bg-[#520000] text-white rounded-xl p-8 shadow-lg grid grid-cols-1 md:grid-cols-2 gap-6"
+        className="w-full max-w-6xl mx-auto bg-[#520000] text-white p-8 rounded-xl shadow-md grid grid-cols-1 md:grid-cols-2 gap-4"
       >
         <h1 className="text-3xl font-bold col-span-1 md:col-span-2 text-center mb-4">
           Cadastro Funcionário
@@ -178,7 +178,7 @@ function CadastroFuncionario() {
 
         <button
           type="submit"
-          className="col-span-1 md:col-span-2 bg-blue-600 hover:bg-blue-700 py-3 rounded text-white font-semibold transition"
+          className="col-span-1 md:col-span-2 bg-green-600 hover:bg-blue-700 py-3 rounded text-white font-semibold transition"
         >
           Cadastrar
         </button>

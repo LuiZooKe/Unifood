@@ -1,152 +1,170 @@
-import React, { useState, useRef } from 'react';
-import './Funcionario.css';
+import React, { useState, useEffect } from 'react';
 import Dashboard from './Dashboard';
 
 function CadastroProduto() {
-  const [nome, setNome] = useState('');
-  const [descricao, setDescricao] = useState('');
-  const [preco, setPreco] = useState('');
-  const [quantidade, setQuantidade] = useState('');
-  const [imagem, setImagem] = useState(null);
-  const [erros, setErros] = useState([]);
-  const [sucesso, setSucesso] = useState('');
+  const [produto, setProduto] = useState({
+    nome: '',
+    descricao: '',
+    preco: '',
+    custo: '',
+    quantidade: '',
+    imagem: null,
+    id_fornecedor: '',
+    nome_fornecedor: '',
+    categoria: '',
+    unidade_medida: '',
+    lucroRS: '',
+    lucroPorcentagem: ''
+  });
 
-  // Ref para o input file
-  const inputFileRef = useRef(null);
+  const [mensagem, setMensagem] = useState('');
+  const [erro, setErro] = useState('');
+
+  const categorias = ['JANTINHAS', 'SALGADOS', 'BEBIDAS', 'SOBREMESAS'];
+  const unidades = ['KG', 'LITRO', 'UNIDADE'];
+
+  useEffect(() => {
+    const preco = parseFloat(produto.preco);
+    const custo = parseFloat(produto.custo);
+    if (!isNaN(preco) && !isNaN(custo) && custo > 0) {
+      const lucroRS = preco - custo;
+      const lucroPorcentagem = (lucroRS / custo) * 100;
+      setProduto((prev) => ({
+        ...prev,
+        lucroRS: lucroRS.toFixed(2),
+        lucroPorcentagem: lucroPorcentagem.toFixed(2)
+      }));
+    }
+  }, [produto.preco, produto.custo]);
+
+  const handleChange = (e) => {
+    const { name, value, files } = e.target;
+    if (name === 'imagem') {
+      setProduto({ ...produto, imagem: files[0] });
+    } else {
+      setProduto({ ...produto, [name]: value });
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const novosErros = [];
-    if (!nome.trim()) novosErros.push('O nome do produto é obrigatório.');
-    if (!descricao.trim()) novosErros.push('A descrição é obrigatória.');
-    if (!preco || isNaN(preco) || Number(preco) <= 0) novosErros.push('Informe um preço válido.');
-    if (!quantidade || isNaN(quantidade) || Number(quantidade) < 0) novosErros.push('Informe uma quantidade válida.');
-    // A imagem NÃO é obrigatória conforme seu pedido, então não valida aqui
-
-    if (novosErros.length > 0) {
-      setErros(novosErros);
-      setSucesso('');
-      return;
-    }
-
     const formData = new FormData();
-    formData.append('nome', nome);
-    formData.append('descricao', descricao);
-    formData.append('preco', preco);
-    formData.append('quantidade', quantidade);
-    if (imagem) formData.append('imagem', imagem); // adiciona só se tiver imagem
+    Object.entries(produto).forEach(([key, value]) => {
+      if (key === 'lucroRS') formData.append('lucro', value);
+      else if (key !== 'lucroPorcentagem') formData.append(key, value);
+    });
 
     try {
       const response = await fetch('http://localhost/UNIFOOD/database/register_produto.php', {
         method: 'POST',
-        body: formData,
+        body: formData
       });
-
       const data = await response.json();
-
       if (data.success) {
-        setSucesso('Produto cadastrado com sucesso!');
-        setNome('');
-        setDescricao('');
-        setPreco('');
-        setQuantidade('');
-        setImagem(null);
-        setErros([]);
-
-        // Limpa o campo input file visualmente
-        if (inputFileRef.current) {
-          inputFileRef.current.value = '';
-        }
+        setMensagem('Produto cadastrado com sucesso!');
+        setErro('');
+        setProduto({
+          nome: '', descricao: '', preco: '', custo: '', quantidade: '', imagem: null,
+          id_fornecedor: '', nome_fornecedor: '', categoria: '', unidade_medida: '',
+          lucroRS: '', lucroPorcentagem: ''
+        });
       } else {
-        setErros([data.message || 'Erro ao cadastrar produto.']);
-        setSucesso('');
+        setErro(data.message || 'Erro ao cadastrar produto.');
+        setMensagem('');
       }
-    } catch (error) {
-      console.error('Erro ao enviar:', error);
-      setErros(['Erro na conexão com o servidor.']);
-      setSucesso('');
+    } catch (err) {
+      setErro('Erro na conexão com o servidor.');
+      setMensagem('');
     }
   };
 
   return (
     <Dashboard>
-      <form onSubmit={handleSubmit} className="flex items-center justify-center">
-        <div className="bg-[#520000] rounded-md p-8 shadow-xl w-full">
-          <h1 className="text-white text-3xl font-semibold mb-6 text-center">Cadastro de Produto</h1>
+      <form onSubmit={handleSubmit} className="w-full max-w-6xl mx-auto bg-[#520000] text-white p-8 rounded-xl shadow-md grid grid-cols-1 md:grid-cols-2 gap-4">
+        <h1 className="text-3xl font-bold col-span-1 md:col-span-2 text-center mb-4">
+          Cadastro Produto
+        </h1>
 
-          <label className="block text-gray-300 mb-2" htmlFor="nome">Nome</label>
-          <input
-            id="nome"
-            type="text"
-            placeholder="Nome do produto"
-            value={nome}
-            onChange={(e) => setNome(e.target.value)}
-            className="w-full p-3 mb-4 rounded border border-gray-500"
-          />
+        <Input label="Nome" name="nome" value={produto.nome} onChange={handleChange} />
+        <Input label="Descrição" name="descricao" value={produto.descricao} onChange={handleChange} />
+        <Input label="Preço (R$)" name="preco" value={produto.preco} onChange={handleChange} type="number" step="0.01" />
+        <Input label="Custo (R$)" name="custo" value={produto.custo} onChange={handleChange} type="number" step="0.01" />
+        <Input label="Quantidade" name="quantidade" value={produto.quantidade} onChange={handleChange} type="number" />
 
-          <label className="block text-gray-300 mb-2" htmlFor="descricao">Descrição</label>
-          <textarea
-            id="descricao"
-            placeholder="Descrição do produto"
-            value={descricao}
-            onChange={(e) => setDescricao(e.target.value)}
-            className="w-full p-3 mb-4 rounded border border-gray-500"
-          />
-
-          <label className="block text-gray-300 mb-2" htmlFor="preco">Preço (R$)</label>
-          <input
-            id="preco"
-            type="number"
-            step="0.01"
-            placeholder="Preço do produto"
-            value={preco}
-            onChange={(e) => setPreco(e.target.value)}
-            className="w-full p-3 mb-4 rounded border border-gray-500"
-          />
-
-          <label className="block text-gray-300 mb-2" htmlFor="quantidade">Quantidade</label>
-          <input
-            id="quantidade"
-            type="number"
-            placeholder="Quantidade em estoque"
-            value={quantidade}
-            onChange={(e) => setQuantidade(e.target.value)}
-            className="w-full p-3 mb-4 rounded border border-gray-500"
-          />
-
-          <label className="block text-gray-300 mb-2" htmlFor="imagem">Imagem do Produto</label>
-          <input
-            id="imagem"
-            type="file"
-            accept="image/*"
-            ref={inputFileRef}
-            onChange={(e) => setImagem(e.target.files[0])}
-            className="w-full p-3 mb-6 rounded border border-gray-500 text-gray-300"
-          />
-
-          {erros.length > 0 && (
-            <ul className="text-red-500 mb-4 list-disc pl-5">
-              {erros.map((erro, index) => (
-                <li key={index}>{erro}</li>
-              ))}
-            </ul>
-          )}
-
-          {sucesso && (
-            <p className="text-green-500 mb-4 text-center font-semibold">{sucesso}</p>
-          )}
-
-          <button
-            type="submit"
-            className="w-full mt-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded transition-colors"
+        <div>
+          <label className="block mb-1">Unidade de Medida</label>
+          <select
+            name="unidade_medida"
+            value={produto.unidade_medida}
+            onChange={handleChange}
+            className="w-full border p-2 rounded text-black"
+            required
           >
-            Cadastrar Produto
-          </button>
+            <option value="">Selecione a unidade</option>
+            {unidades.map((u) => (
+              <option key={u} value={u}>{u}</option>
+            ))}
+          </select>
         </div>
+
+        <Input label="ID do Fornecedor" name="id_fornecedor" value={produto.id_fornecedor} onChange={handleChange} />
+        <Input label="Nome do Fornecedor" name="nome_fornecedor" value={produto.nome_fornecedor} onChange={handleChange} />
+
+        <div>
+          <label className="block mb-1">Categoria</label>
+          <select
+            name="categoria"
+            value={produto.categoria}
+            onChange={handleChange}
+            className="w-full border p-2 rounded text-black"
+            required
+          >
+            <option value="">Selecione uma categoria</option>
+            {categorias.map((cat) => (
+              <option key={cat} value={cat}>{cat}</option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="block mb-1">Imagem</label>
+          <input type="file" name="imagem" onChange={handleChange} className="w-full border p-2 rounded text-black bg-white" accept="image/*" />
+        </div>
+
+        <div>
+          <label className="block mb-1">Lucro (R$ e %)</label>
+          <input
+            value={`R$ ${produto.lucroRS || '0.00'} (${produto.lucroPorcentagem || '0.00'}%)`}
+            disabled
+            className="w-full border p-2 rounded text-black bg-gray-200"
+          />
+        </div>
+
+        {mensagem && <p className="col-span-2 text-green-400 text-center font-bold">{mensagem}</p>}
+        {erro && <p className="col-span-2 text-red-400 text-center font-bold">{erro}</p>}
+
+        <button type="submit" className="col-span-2 bg-green-600 hover:bg-green-700 py-3 px-6 rounded text-white font-semibold">
+          Cadastrar Produto
+        </button>
       </form>
     </Dashboard>
   );
 }
+
+const Input = ({ label, name, value, onChange, type = 'text', ...rest }) => (
+  <div>
+    <label htmlFor={name} className="block mb-1">{label}</label>
+    <input
+      id={name}
+      name={name}
+      type={type}
+      value={value}
+      onChange={onChange}
+      className="w-full border p-2 rounded text-black"
+      {...rest}
+    />
+  </div>
+);
 
 export default CadastroProduto;
