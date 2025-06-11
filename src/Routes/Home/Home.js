@@ -4,6 +4,7 @@ import './css/elements.css';
 import pratodecomida from './img/prato de comida.png';
 import pastelImg from './img/pastel.png';
 import logoUnifood from './img/logounifood.png';
+import fundocardapio from './img/fundo-cardapio.png';
 
 import { useNavigate } from 'react-router-dom';
 import Slider from "react-slick";
@@ -98,6 +99,10 @@ function Home() {
       </aside>
 
       <section id="gallery" className="white-bg section">
+        <div
+          className="absolute inset-0 bg-no-repeat bg-center bg-[length:100%] opacity-[5%] z-0"
+          style={{ backgroundImage: `url(${fundocardapio})` }}
+        />
         <div className="main-content max-w-6xl mx-auto px-4 text-center">
           <h2 className="grid-main-heading">NOSSO CARDÁPIO</h2>
 
