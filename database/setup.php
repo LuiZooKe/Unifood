@@ -54,11 +54,23 @@ $sql3 = "CREATE TABLE IF NOT EXISTS funcionario (
     salario DECIMAL(10,2)
 )";
 
-
+$sql4 = "CREATE TABLE IF NOT EXISTS fornecedor (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    email VARCHAR(100),
+    cpf VARCHAR(14) UNIQUE,
+    cnpj VARCHAR(18) UNIQUE,
+    logradouro VARCHAR(100),
+    numero VARCHAR(10),
+    bairro VARCHAR(50),
+    cidade VARCHAR(50),
+    telefone VARCHAR(20)
+)";
 
 $conn->query($sql1);
 $conn->query($sql2);
 $conn->query($sql3);
+$conn->query($sql4);
   echo "Banco e tabela criados com sucesso.";
 $conn->close();
 ?>
