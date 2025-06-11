@@ -29,7 +29,13 @@ $sql2 = "CREATE TABLE IF NOT EXISTS produtos (
     descricao TEXT NOT NULL,
     preco DECIMAL(10,2) NOT NULL,
     quantidade INT NOT NULL,
-    imagem VARCHAR(255)
+    imagem VARCHAR(255),
+    custo DECIMAL(10,2) NOT NULL,
+    id_fornecedor INT NOT NULL,
+    nome_fornecedor VARCHAR(100) NOT NULL,
+    categoria VARCHAR(100) NOT NULL,
+    unidade_medida VARCHAR(50) NOT NULL,
+    lucro DECIMAL(10,2) NOT NULL
 )";
 
 $sql3 = "CREATE TABLE IF NOT EXISTS funcionario (

@@ -38,11 +38,18 @@ function ListaFuncionarios() {
 
   const salvarEdicao = async () => {
     try {
+      const dadosLimpos = {
+        ...editedFuncionario,
+        telefone: editedFuncionario.telefone.replace(/\D/g, ''),
+        cpf: editedFuncionario.cpf.replace(/\D/g, ''),
+      };
+
       const res = await fetch('http://localhost/UNIFOOD/database/funcionarios.php?action=atualizar', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(editedFuncionario),
+        body: JSON.stringify(dadosLimpos),
       });
+
       const data = await res.json();
       if (data.success) {
         setModalEditar(false);
@@ -55,20 +62,17 @@ function ListaFuncionarios() {
     }
   };
 
-  // Função para bloquear digitação manual no input date (permite só seleção via picker)
   const bloquearInputManual = (e) => {
     const teclasPermitidas = [
       'Tab', 'Shift', 'Control', 'Alt',
       'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown',
-      'Escape',
-      'Home', 'End'
+      'Escape', 'Home', 'End'
     ];
     if (!teclasPermitidas.includes(e.key)) {
       e.preventDefault();
     }
   };
 
-  // Função simples para formatar CPF: 00000000000 => 000.000.000-00
   const formatarCPF = (cpf) => {
     if (!cpf) return '';
     const cpfLimpo = cpf.replace(/\D/g, '');
@@ -105,7 +109,6 @@ function ListaFuncionarios() {
           ))}
         </div>
 
-        {/* Modal de detalhes */}
         {modalDetalhes && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 overflow-auto">
             <div className="bg-white text-black p-6 rounded shadow w-full max-w-[500px] mx-4">
@@ -123,7 +126,6 @@ function ListaFuncionarios() {
           </div>
         )}
 
-        {/* Modal de edição */}
         {modalEditar && editedFuncionario && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 overflow-auto">
             <div className="bg-white text-black p-6 rounded shadow w-full max-w-2xl mx-4">
@@ -160,7 +162,7 @@ function ListaFuncionarios() {
                           type="date"
                           value={editedFuncionario[key] || ''}
                           onChange={(e) => setEditedFuncionario({ ...editedFuncionario, [key]: e.target.value })}
-                          onKeyDown={bloquearInputManual} // bloqueia digitação manual
+                          onKeyDown={bloquearInputManual}
                           className="w-full border px-3 py-2"
                         />
                       ) : (

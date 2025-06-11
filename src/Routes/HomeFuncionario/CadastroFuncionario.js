@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import Dashboard from './Dashboard';
+import { IMaskInput } from 'react-imask';
 
 function CadastroFuncionario() {
   const [tipoUsuario] = useState(3);
@@ -19,25 +20,16 @@ function CadastroFuncionario() {
     telefone: '',
     data_admissao: '',
     cargo: '',
-    salario: ''
+    salario: '00,00'
   });
 
   const [erros, setErros] = useState([]);
   const [sucesso, setSucesso] = useState('');
 
-  useEffect(() => {
-    if (window.$) {
-      window.$('#cpf').mask('000.000.000-00');
-      window.$('#telefone').mask('(00) 00000-0000');
-      window.$('#salario').mask('000.000.000,00', { reverse: true });
-    }
-  }, []);
-
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // Bloqueia a digitação manual no input date (permite só seleção via picker)
   const bloquearInputManual = (e) => {
     e.preventDefault();
   };
@@ -52,7 +44,6 @@ function CadastroFuncionario() {
     if (formData.senha.length < 8) novosErros.push('A senha deve ter pelo menos 8 caracteres.');
     if (!formData.confirmarSenha) novosErros.push('A confirmação de senha é obrigatória.');
     if (formData.senha !== formData.confirmarSenha) novosErros.push('As senhas devem ser iguais.');
-
     if (!formData.data_nascimento) novosErros.push('Data de nascimento é obrigatória.');
     if (!formData.data_admissao) novosErros.push('Data de admissão é obrigatória.');
 
@@ -64,11 +55,15 @@ function CadastroFuncionario() {
 
     setErros([]);
 
+    const salarioNumerico = parseFloat(
+      formData.salario.replace(/\./g, '').replace(',', '.')
+    );
+
     const formDataFormatado = {
       ...formData,
       cpf: formData.cpf.replace(/\D/g, ''),
       telefone: formData.telefone.replace(/\D/g, ''),
-      salario: formData.salario.replace(/\./g, '').replace(',', '.'),
+      salario: isNaN(salarioNumerico) ? 0 : salarioNumerico.toFixed(2),
       tipo_usuario: tipoUsuario
     };
 
@@ -97,7 +92,7 @@ function CadastroFuncionario() {
           telefone: '',
           data_admissao: '',
           cargo: '',
-          salario: ''
+          salario: '00,00'
         });
       } else {
         setErros([data.message || 'Erro ao cadastrar.']);
@@ -130,8 +125,7 @@ function CadastroFuncionario() {
           value={formData.confirmarSenha}
           onChange={handleChange}
         />
-        <Input label="CPF" name="cpf" value={formData.cpf} onChange={handleChange} />
-
+        <Input label="CPF" name="cpf" value={formData.cpf} onChange={handleChange} mask="000.000.000-00" />
         <Input
           label="Data de Nascimento"
           type="date"
@@ -141,13 +135,11 @@ function CadastroFuncionario() {
           onKeyDown={bloquearInputManual}
           onPaste={bloquearInputManual}
         />
-
         <Input label="Logradouro" name="logradouro" value={formData.logradouro} onChange={handleChange} />
         <Input label="Número" name="numero" value={formData.numero} onChange={handleChange} />
         <Input label="Bairro" name="bairro" value={formData.bairro} onChange={handleChange} />
         <Input label="Cidade" name="cidade" value={formData.cidade} onChange={handleChange} />
-        <Input label="Telefone" name="telefone" value={formData.telefone} onChange={handleChange} />
-
+        <Input label="Telefone" name="telefone" value={formData.telefone} onChange={handleChange} mask="(00) 00000-0000" />
         <Input
           label="Data de Admissão"
           type="date"
@@ -157,9 +149,20 @@ function CadastroFuncionario() {
           onKeyDown={bloquearInputManual}
           onPaste={bloquearInputManual}
         />
-
         <Input label="Cargo" name="cargo" value={formData.cargo} onChange={handleChange} />
-        <Input label="Salário" name="salario" value={formData.salario} onChange={handleChange} />
+        <Input
+          label="Salário"
+          name="salario"
+          value={formData.salario}
+          onChange={handleChange}
+          mask={Number}
+          scale={2}
+          thousandsSeparator="."
+          radix=","
+          mapToRadix={["."]}
+          normalizeZeros
+          padFractionalZeros
+        />
 
         {erros.length > 0 && (
           <ul className="col-span-1 md:col-span-2 text-red-400 list-disc pl-5">
@@ -184,22 +187,40 @@ function CadastroFuncionario() {
   );
 }
 
-const Input = ({ label, name, value, onChange, type = 'text', onKeyDown, onPaste }) => (
+const Input = ({
+  label,
+  name,
+  value,
+  onChange,
+  type = 'text',
+  mask,
+  ...rest
+}) => (
   <div>
     <label htmlFor={name} className="block text-gray-200 mb-1">
       {label}
     </label>
-    <input
-      id={name}
-      name={name}
-      type={type}
-      value={value}
-      onChange={onChange}
-      onKeyDown={onKeyDown}
-      onPaste={onPaste}
-      className="w-full p-2 rounded border border-gray-400 text-black"
-      required
-    />
+    {mask ? (
+      <IMaskInput
+        id={name}
+        name={name}
+        value={value}
+        mask={mask}
+        onAccept={(value) => onChange({ target: { name, value } })}
+        className="w-full p-2 rounded border border-gray-400 text-black"
+        {...rest}
+      />
+    ) : (
+      <input
+        id={name}
+        name={name}
+        type={type}
+        value={value}
+        onChange={onChange}
+        className="w-full p-2 rounded border border-gray-400 text-black"
+        {...rest}
+      />
+    )}
   </div>
 );
 
@@ -209,8 +230,7 @@ Input.propTypes = {
   value: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
   type: PropTypes.string,
-  onKeyDown: PropTypes.func,
-  onPaste: PropTypes.func
+  mask: PropTypes.any
 };
 
 export default CadastroFuncionario;
