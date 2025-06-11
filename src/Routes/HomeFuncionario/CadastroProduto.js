@@ -9,7 +9,6 @@ function CadastroProduto() {
     custo: '',
     quantidade: '',
     imagem: null,
-    id_fornecedor: '',
     nome_fornecedor: '',
     categoria: '',
     unidade_medida: '',
@@ -66,7 +65,7 @@ function CadastroProduto() {
         setErro('');
         setProduto({
           nome: '', descricao: '', preco: '', custo: '', quantidade: '', imagem: null,
-          id_fornecedor: '', nome_fornecedor: '', categoria: '', unidade_medida: '',
+          nome_fornecedor: '', categoria: '', unidade_medida: '',
           lucroRS: '', lucroPorcentagem: ''
         });
       } else {
@@ -108,8 +107,21 @@ function CadastroProduto() {
           </select>
         </div>
 
-        <Input label="ID do Fornecedor" name="id_fornecedor" value={produto.id_fornecedor} onChange={handleChange} />
-        <Input label="Nome do Fornecedor" name="nome_fornecedor" value={produto.nome_fornecedor} onChange={handleChange} />
+        <div>
+          <label className="block mb-1">Nome Fornecedor</label>
+          <select
+            name="nome_fornecedor"
+            value={produto.nome_fornecedor}
+            onChange={handleChange}
+            className="w-full border p-2 rounded text-black"
+            required
+          >
+            <option value="">Selecione uma categoria</option>
+            {categorias.map((cat) => (
+              <option key={cat} value={cat}>{cat}</option>
+            ))}
+          </select>
+        </div>
 
         <div>
           <label className="block mb-1">Categoria</label>

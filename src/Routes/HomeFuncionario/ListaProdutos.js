@@ -43,7 +43,6 @@ function ListaProdutos() {
   };
 
   const salvarEdicao = async () => {
-    const lucroRS = parseFloat(editedProduto.preco) - parseFloat(editedProduto.custo);
     const formData = new FormData();
     formData.append('id', editedProduto.id);
     formData.append('nome', editedProduto.nome);
@@ -51,11 +50,10 @@ function ListaProdutos() {
     formData.append('preco', editedProduto.preco);
     formData.append('custo', editedProduto.custo);
     formData.append('quantidade', editedProduto.quantidade);
-    formData.append('id_fornecedor', editedProduto.id_fornecedor);
-    formData.append('categoria', editedProduto.categoria);
     formData.append('nome_fornecedor', editedProduto.nome_fornecedor);
+    formData.append('lucro', editedProduto.lucro);
     formData.append('unidade_medida', editedProduto.unidade_medida);
-    formData.append('lucro', lucroRS.toFixed(2));
+    formData.append('categoria', editedProduto.categoria);
     if (editedProduto.novaImagem) {
       formData.append('imagem', editedProduto.novaImagem);
     }
@@ -80,6 +78,15 @@ function ListaProdutos() {
   useEffect(() => {
     fetchProdutos();
   }, []);
+
+  useEffect(() => {
+    if (editedProduto) {
+      const preco = parseFloat(editedProduto.preco) || 0;
+      const custo = parseFloat(editedProduto.custo) || 0;
+      const lucro = preco - custo;
+      setEditedProduto((prev) => ({ ...prev, lucro: lucro.toFixed(2) }));
+    }
+  }, [editedProduto?.preco, editedProduto?.custo]);
 
   return (
     <Dashboard>
@@ -111,6 +118,7 @@ function ListaProdutos() {
                 </p>
                 <p className="text-lg text-gray-400">Quantidade: {produto.quantidade}</p>
               </div>
+
               <div className="flex gap-2 mt-4 md:mt-0">
                 <button
                   onClick={() => setModalDescricao(produto)}
@@ -158,14 +166,13 @@ function ListaProdutos() {
             <div className="bg-white text-black p-6 rounded shadow w-full max-w-[700px] mx-4 ml-[20%]">
               <h3 className="text-3xl font-bold mb-6">Editar Produto</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {[ 
+                {/* Campos básicos */}
+                {[
                   ['Nome', 'nome'],
                   ['Descrição', 'descricao'],
                   ['Preço', 'preco'],
                   ['Custo', 'custo'],
                   ['Quantidade', 'quantidade'],
-                  ['ID Fornecedor', 'id_fornecedor'],
-                  ['Nome Fornecedor', 'nome_fornecedor']
                 ].map(([label, key]) => (
                   <div key={key}>
                     <label className="block text-sm font-medium mb-1">{label}</label>
@@ -178,20 +185,7 @@ function ListaProdutos() {
                   </div>
                 ))}
 
-                <div>
-                  <label className="block text-sm font-medium mb-1">Categoria</label>
-                  <select
-                    value={editedProduto.categoria}
-                    onChange={(e) => setEditedProduto({ ...editedProduto, categoria: e.target.value })}
-                    className="w-full border px-3 py-2"
-                  >
-                    <option value="">Selecione a categoria</option>
-                    {categorias.map((cat) => (
-                      <option key={cat} value={cat}>{cat}</option>
-                    ))}
-                  </select>
-                </div>
-
+                {/* Unidade de medida após quantidade */}
                 <div>
                   <label className="block text-sm font-medium mb-1">Unidade de Medida</label>
                   <select
@@ -206,6 +200,48 @@ function ListaProdutos() {
                   </select>
                 </div>
 
+                {/* Outros campos */}
+                {[
+                  ['Nome Fornecedor', 'nome fornecedor'],
+                ].map(([label, key]) => (
+                  <div key={key}>
+                    <label className="block text-sm font-medium mb-1">{label}</label>
+                    <input
+                      type="text"
+                      value={editedProduto[key] || ''}
+                      onChange={(e) => setEditedProduto({ ...editedProduto, [key]: e.target.value })}
+                      className="w-full border px-3 py-2"
+                    />
+                  </div>
+                ))}
+
+                {/* Categoria */}
+                <div>
+                  <label className="block text-sm font-medium mb-1">Categoria</label>
+                  <select
+                    value={editedProduto.categoria}
+                    onChange={(e) => setEditedProduto({ ...editedProduto, categoria: e.target.value })}
+                    className="w-full border px-3 py-2"
+                  >
+                    <option value="">Selecione a categoria</option>
+                    {categorias.map((cat) => (
+                      <option key={cat} value={cat}>{cat}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Lucro */}
+                <div>
+                  <label className="block text-sm font-medium mb-1">Lucro (R$)</label>
+                  <input
+                    type="text"
+                    value={editedProduto.lucro || ''}
+                    readOnly
+                    className="w-full border px-3 py-2 bg-gray-100 cursor-not-allowed"
+                  />
+                </div>
+
+                {/* Upload de nova imagem */}
                 <div className="md:col-span-2">
                   <label className="block text-sm font-medium mb-1">Nova Imagem (opcional)</label>
                   <input
