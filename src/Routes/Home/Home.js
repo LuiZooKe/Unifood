@@ -22,24 +22,12 @@ const carouselSettings = {
   arrows: false,
 };
 
-const carouselItems = [
-  {
-    img: pratodecomida,
-    alt: 'Prato de comida',
-    caption: 'Refeições completas!',
-  },
-  {
-    img: logoUnifood,
-    alt: 'Logo Unifood',
-    caption: 'Sua melhor escolha em alimentos!',
-  },
-];
-
 function Home() {
   const navigate = useNavigate();
   const [modalAberto, setModalAberto] = useState(false);
   const [categoriaSelecionada, setCategoriaSelecionada] = useState('');
   const [produtosPorCategoria, setProdutosPorCategoria] = useState({});
+  const [imagensCarrossel, setImagensCarrossel] = useState([]); // NOVO
 
   const abrirModal = (categoria) => {
     setCategoriaSelecionada(categoria);
@@ -60,18 +48,33 @@ function Home() {
         const data = await res.json();
         if (data.success) {
           const agrupado = {};
+          const imagens = [];
+
           data.produtos.forEach((produto) => {
+            const imagemURL = `http://localhost/UNIFOOD/database/imgProdutos/${produto.imagem}`;
+
             if (!agrupado[produto.categoria]) {
               agrupado[produto.categoria] = [];
             }
+
             agrupado[produto.categoria].push({
               nome: produto.nome,
               preco: `R$ ${parseFloat(produto.preco).toFixed(2)}`,
-              imagem: `http://localhost/UNIFOOD/database/imgProdutos/${produto.imagem}`,
+              imagem: imagemURL,
               descricao: produto.descricao || '',
             });
+
+            if (produto.imagem) {
+              imagens.push({
+                img: imagemURL,
+                alt: produto.nome,
+                caption: produto.nome,
+              });
+            }
           });
+
           setProdutosPorCategoria(agrupado);
+          setImagensCarrossel(imagens);
         } else {
           console.error(data.message);
         }
@@ -122,7 +125,7 @@ function Home() {
 
           <div className="relative w-full h-[200px] md:h-[250px] lg:h-[280px] mx-auto rounded-2xl overflow-hidden shadow-xl mb-16">
             <Slider {...carouselSettings}>
-              {carouselItems.map((item, index) => (
+              {imagensCarrossel.map((item, index) => (
                 <div key={index} className="w-full">
                   <div className="relative w-full h-full">
                     <img src={item.img} alt={item.alt} className="w-full h-full object-cover rounded-2xl" />
@@ -199,7 +202,6 @@ function Home() {
         ➔
       </button>
 
-      {/* Modal com os produtos da categoria selecionada */}
       <ModalCategoria
         isOpen={modalAberto}
         onClose={() => setModalAberto(false)}
