@@ -11,6 +11,7 @@ import CadastroProduto from './Routes/HomeFuncionario/CadastroProduto';
 import ListaFuncionario from './Routes/HomeFuncionario/ListaFuncionario';
 import ListaProdutos from './Routes/HomeFuncionario/ListaProdutos';
 import CadastroFornecedor from './Routes/HomeFuncionario/CadastroFornecedor';
+import ListaFornecedores from './Routes/HomeFuncionario/ListaFornecedores';
 import RedefinirSenha from './Routes/Login/RedefinirSenha';
 import SaibaMais from './Routes/Home/SaibaMais';
 
@@ -69,6 +70,11 @@ function App() {
         <Route path="/cadastrar-fornecedor" element={
           <FunRoute>
             <CadastroFornecedor />
+          </FunRoute>
+        } />
+        <Route path="/lista-fornecedores" element={
+          <FunRoute>
+            <ListaFornecedores />
           </FunRoute>
         } />
       </Routes>
