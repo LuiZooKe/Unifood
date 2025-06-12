@@ -328,37 +328,82 @@ function Home() {
         </div>
       </section>
 
-      {/* Seção Contato */}
-      <section id="contact" className="intro main-bg section relative z-10">
-        <div className="main-content intro-content">
-          <div className="intro-text-content">
-            <h2 className="grid-main-heading">EM CASO DE DÚVIDAS, NOS CONTATE</h2>
-          </div>
-          <div className="intro-img">
-            <img src={pratodecomida} alt="prato de comida" />
-          </div>
+      <section id="contact" className="bg-red-700 py-32 px-8 text-white relative overflow-hidden">
+        <div className="max-w-5xl mx-auto relative z-[1]">
 
-          <div className="contact-form">
-            <fieldset className="form-grid">
-              <div className="form-group">
-                <label htmlFor="first-name">NOME COMPLETO</label>
-                <input type="text" name="first-name" id="first-name" placeholder="Digite seu nome completo aqui" />
+          {/* Título */}
+          <h2 className="text-6xl font-extrabold text-center leading-tight mb-10 mt-[2rem]">
+            EM CASO DE DÚVIDAS, NOS CONTATE
+          </h2>
+
+          {/* Formulário */}
+          <form className="w-full space-y-6 relative z-[10] px-6">
+
+            {/* Nome */}
+            <div className="space-y-4">
+              <label htmlFor="first-name" className="block text-2xl font-bold uppercase">
+                Nome Completo
+              </label>
+              <input
+                type="text"
+                name="first-name"
+                id="first-name"
+                placeholder="Digite seu nome completo aqui"
+                className="w-full px-6 py-6 rounded-xl text-black text-3xl"
+              />
+            </div>
+
+            {/* E-mail */}
+            <div className="space-y-4">
+              <label htmlFor="email" className="block text-2xl font-bold uppercase">
+                E-mail
+              </label>
+              <input
+                type="email"
+                name="email"
+                id="email"
+                placeholder="Digite seu e-mail de contato aqui"
+                className="w-full px-6 py-6 rounded-xl text-black text-3xl"
+              />
+            </div>
+
+            {/* Campo com imagem ao fundo */}
+            <div className="relative">
+              {/* Mensagem */}
+              <div className="space-y-4 relative z-[10]">
+                <label htmlFor="message" className="block text-2xl font-bold uppercase">
+                  Mensagem
+                </label>
+                <textarea
+                  name="message"
+                  id="message"
+                  rows="4"
+                  placeholder="Digite aqui sua dúvida, reclamação ou elogio"
+                  className="w-full px-6 py-6 rounded-xl text-black text-3xl resize-none"
+                ></textarea>
               </div>
-              <div className="form-group">
-                <label htmlFor="email">E-MAIL</label>
-                <input type="email" name="email" id="email" placeholder="Digite seu e-mail de contato aqui" />
-              </div>
-              <div className="form-group full-width">
-                <label htmlFor="message">MENSAGEM</label>
-                <textarea name="message" id="message" cols="30" rows="10" placeholder="Digite aqui sua dúvida, reclamação ou elogio "></textarea>
-              </div>
-              <div className="form-group full-width">
-                <button type="submit">ENVIAR MENSAGEM</button>
-              </div>
-            </fieldset>
-          </div>
+
+              {/* Imagem por trás saindo da direita */}
+              <img
+                src={pratodecomida}
+                alt="prato de comida"
+                className="absolute top-[9rem] right-[-7rem] w-[28rem] opacity-90 z-[-1] pointer-events-none"
+              />
+            </div>
+
+            {/* Botão */}
+            <div className="text-center pt-6">
+              <button
+                type="submit"
+                className="bg-white text-red-700 font-bold text-3xl py-6 px-16 rounded-xl hover:bg-gray-100 transition"
+              >
+                ENVIAR MENSAGEM
+              </button>
+            </div>
+          </form>
         </div>
       </section>
+
 
       {/* Botão de voltar ao topo */}
       <button
