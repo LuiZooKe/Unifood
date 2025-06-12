@@ -1,161 +1,134 @@
 import React from 'react';
-import './css/elements.css'; // Seu CSS original
-
+import './css/elements.css';
 import logoUnifood from './img/logounifood.png';
 import icone from './img/ícone.png';
 import pratodecomida from './img/prato de comida.png';
 import louis from './img/louis.jpg';
 import tanam from './img/tanam.jpg';
 import betin from './img/betin.jpg';
-
-// import fotoProprietaria from './img/foto-proprietaria.png'; // Exemplo
-
-
 import { useNavigate } from 'react-router-dom';
 
 function SaibaMais() {
   const navigate = useNavigate();
-
-  const handleVoltar = () => {
-    navigate('/');
-  };
+  const handleVoltar = () => navigate('/');
 
   return (
-    <div>
-      {/* MENU SUPERIOR - Ajustado para o seu CSS */}
-      <aside className="menu white-bg"> {/* Seu CSS já define a cor do menu */}
-        <div className="main-content menu-content"> {/* Seu CSS já define display flex etc. */}
-          <h1>
-            <div className="logo" style={{ cursor: 'pointer' }} onClick={handleVoltar}>
-              <img src={logoUnifood} alt="Logo Unifood" /> {/* Seu CSS já define o tamanho do .logo */}
-            </div>
-          </h1>
-          <nav>
-            <ul>
-              <li>
-                {/* Mantendo o botão com classes Tailwind, mas focando em estilos mais discretos */}
-                <button
-                  onClick={handleVoltar}
-                  className="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded transition-colors duration-200 ease-in-out" // Ajuste de transição
-                >
-                  Voltar ao Site
-                </button>
-              </li>
-            </ul>
-          </nav>
+    <div className="overflow-x-hidden text-[22px] leading-relaxed">
+      {/* MENU SUPERIOR */}
+      <aside className="menu white-bg w-full sticky top-0 z-50 shadow-md">
+        <div className="main-content menu-content flex items-center justify-between px-4 py-2">
+          <div className="logo cursor-pointer" onClick={handleVoltar}>
+            <img src={logoUnifood} alt="Logo Unifood" className="h-[7rem] w-auto object-contain min-w-[180px]" />
+          </div>
+          <button
+            onClick={handleVoltar}
+            className="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded transition-colors duration-200"
+          >
+            Voltar ao Site
+          </button>
         </div>
       </aside>
 
-      {/* CONTEÚDO PRINCIPAL - Conheça a Unifood! */}
-      <section id="intro" className="intro main-bg section">
-        <div className="main-content intro-content"> {/* Utiliza seu grid intro-content */}
-          <div className="intro-text-content">
-            <h2 className="grid-main-heading"> {/* Seu CSS já define o tamanho do h2 */}
+      {/* INTRO */}
+      <section id="intro" className="intro main-bg section py-12 px-4">
+        <div className="main-content flex flex-col-reverse md:grid md:grid-cols-2 gap-8 items-center">
+          <div className="intro-text-content text-white text-center md:text-left">
+            <h2 className="grid-main-heading text-4xl sm:text-5xl md:text-6xl font-extrabold mb-6 leading-tight">
               Conheça a Unifood!
               <img
                 src={icone}
                 alt="Ícone Unifood"
-                className="inline-block ml-4 w-[70px] h-[70px] align-middle" // Ajuste de tamanho do ícone para ficar proporcional
+                className="inline-block ml-4 w-[60px] md:w-[70px] h-auto align-middle"
               />
             </h2>
-            <p>Menos filas, mais tempo pra você. Uma nova experiência no seu dia a dia acadêmico.</p>
-            <p>Faça recargas de onde quiser, acesse o cardápio do dia e muito mais.</p>
-            <p>Um sistema moderno, pensado para quem não pode perder tempo — e merece qualidade em cada detalhe.</p>
+            <p className="mb-3 text-2xl">Menos filas, mais tempo pra você. Uma nova experiência no seu dia a dia acadêmico.</p>
+            <p className="mb-3 text-2xl">Faça recargas de onde quiser, acesse o cardápio do dia e muito mais.</p>
+            <p className="text-2xl">Um sistema moderno, pensado para quem não pode perder tempo — e merece qualidade em cada detalhe.</p>
           </div>
-          <div className="intro-img">
-            <img src={pratodecomida} alt="Prato de comida" className="rounded-lg shadow-md" /> {/* Leve sombra e borda arredondada */}
+          <div className="intro-img flex justify-center">
+            <img src={pratodecomida} alt="Prato de comida" className="w-full max-w-[400px] h-auto rounded-lg shadow-md" />
           </div>
         </div>
       </section>
 
-      ---
-
-      {/* SEÇÃO SOBRE A PROPRIETÁRIA */}
-      <section id="proprietaria" className="white-bg section">
-        <div className="main-content grid grid-cols-1 md:grid-cols-2 gap-12 items-center"> {/* Utiliza o grid para layout */}
+      {/* PROPRIETÁRIA */}
+      <section id="proprietaria" className="white-bg section py-12 px-4">
+        <div className="main-content grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
           <div className="flex justify-center md:justify-start">
-            {/* Imagem da proprietária - Use uma imagem de alta qualidade e com fundo neutro */}
-            {/* <img src={fotoProprietaria} alt="Foto da Proprietária" className="rounded-full w-80 h-80 object-cover border border-gray-300 shadow-lg" /> */}
-            <div className="rounded-full w-[400px] h-[400px] bg-gray-200 flex items-center justify-center text-gray-600 text-base border border-gray-300 shadow-lg">
-              <span className="text-center">Foto da Proprietária<br />(80x80)</span>
+            <div className="rounded-full w-[70vw] max-w-[320px] h-[70vw] max-h-[320px] bg-gray-200 flex items-center justify-center text-gray-600 border border-gray-300 shadow-lg">
+              <span className="text-center text-lg">Foto da Proprietária<br />(80x80)</span>
             </div>
           </div>
           <div>
-            <h2 className="grid-main-heading mb-8">A Proprietária</h2>
-            <p>
-              Conheça **[Nome da Proprietária]**, a cabeça por trás da Unifood. Que somando sua vasta experiência em comida, sempre preza pela qualidade de seus serviços, oferecendo assim, uma melhor experiência de seus clientes no ambiente acadêmico.
+            <h2 className="grid-main-heading text-center md:text-left text-4xl sm:text-5xl md:text-6xl font-bold mb-8 leading-tight">
+              <span>DIREÇÃO</span>
+            </h2>
+            <p className="text-2xl">
+              Conheça <strong>[Nome da Proprietária]</strong>, a mente por trás da Unifood. Com uma sólida experiência no setor de alimentação, ela lidera com paixão e excelência, assegurando que cada cliente desfrute de um atendimento de qualidade e de refeições cuidadosamente preparadas.
             </p>
-            <br />
-            <p>
-              Sua dedicação incansável e compromisso com a excelência são os pilares que sustentam nossa plataforma, garantindo que cada interação seja fluida, eficiente e de alta qualidade.
+            <p className="mt-4 text-2xl">
+              Sua dedicação à inovação e seu olhar atento aos detalhes impulsionam nossa missão de transformar a rotina acadêmica em uma experiência mais prática, moderna e prazerosa.
             </p>
           </div>
         </div>
       </section>
 
-      ---
-
-      {/* SEÇÃO SOBRE A EQUIPE DE DESENVOLVIMENTO */}
-      <section id="equipe" className="main-bg section">
+      {/* EQUIPE */}
+      <section id="equipe" className="main-bg section py-12 px-4">
         <div className="main-content">
-          <h2 className="grid-main-heading text-white text-center mb-16">Nossa Equipe de Inovação</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4" style={{ gap: 'var(--gap)' }}>
+          <h2 className="grid-main-heading text-white text-center mb-16 text-4xl sm:text-5xl md:text-6xl font-bold leading-tight">
+            <span>Nossa Equipe de Inovação</span>
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {[{
+              nome: "Humberto G. Silva",
+              funcao: "UI/UX Designer",
+              descricao: "Responsável por planejar e desenhar a experiência e a interface do usuário, garantindo que a aplicação seja amigável e visualmente atraente para os clientes.",
+              imagem: betin
+            }, {
+              nome: "Nathan M. Pádua",
+              funcao: "Desenvolvedor Front-end",
+              descricao: "Transforma os designs em código-fonte, construindo a parte da aplicação com a qual o usuário interage diretamente no navegador, deixando o site intuitivo e funcional.",
+              imagem: tanam
+            }, {
+              nome: "Luiz Gustavo Dias",
+              funcao: "Desenvolvedor Back-end",
+              descricao: "Desenvolve a lógica e a estrutura que operam os sistemas por trás das aplicações, garantindo o processamento de dados e a segurança da plataforma.",
+              imagem: louis
+            }].map((pessoa, i) => (
+              <div key={i} className="bg-white p-6 rounded-lg shadow-md text-center flex flex-col items-center w-full">
+                <div className="w-36 h-36 sm:w-40 sm:h-40 rounded-full overflow-hidden border border-gray-300">
+                  <img src={pessoa.imagem} alt={pessoa.nome} className="w-full h-full object-cover" />
+                </div>
+                <div className="mt-4">
+                  <h3 className="font-bold text-gray-800 leading-tight text-2xl md:text-3xl">{pessoa.nome}</h3>
+                  <p className="text-red-600 font-semibold text-lg md:text-xl">{pessoa.funcao}</p>
+                </div>
+                <p className="text-gray-600 font-medium mt-4 leading-relaxed text-justify text-lg md:text-xl">{pessoa.descricao}</p>
+              </div>
+            ))}
 
-            <div className="bg-white p-6 rounded-lg shadow-md text-center flex flex-col items-center min-h-[400px]">
-              <div className="mx-auto rounded-full w-80 h-80 bg-gray-200 flex items-center justify-center text-gray-600 text-base mb-4 border border-gray-200">
-                <img src={betin} className="mx-auto rounded-full w-80 h-80 object-cover mb-4 border border-gray-200"></img>
+            <div className="bg-white p-6 rounded-lg shadow-md text-center flex flex-col items-center w-full">
+              <div className="w-36 h-36 sm:w-40 sm:h-40 rounded-full bg-gray-200 flex items-center justify-center border border-gray-300">
+                <span className="text-gray-600 text-center">Foto do Professor</span>
               </div>
-              <div className="flex flex-col justify-start w-full min-h-[90px]">
-                <h3 className="text-xl font-bold mb-1 text-gray-800 break-words leading-tight">Humberto G. Silva</h3>
-                <p className="text-red-600 font-bold text-[18px]">UI/UX Designer</p>
+              <div className="mt-4">
+                <h3 className="font-bold text-gray-800 text-2xl md:text-3xl">Prof. Luiz Gustavo</h3>
+                <p className="text-red-600 font-semibold text-lg md:text-xl">Gerente de Projeto</p>
               </div>
-              <p className="text-gray-600 font-bold text-[14px] text-center leading-relaxed mt-10">Responsável por planejar e desenhar a experiência e a interface do usuário, garantindo que a aplicação seja amigável e visualmente atraente para os clientes.</p>
+              <p className="text-gray-600 font-medium mt-4 leading-relaxed text-justify text-lg md:text-xl">Líder estratégico e mentor da equipe, o professor Luiz Gustavo orienta cada etapa do projeto com sabedoria, assegurando o cumprimento de prazos e o alto padrão de qualidade.</p>
             </div>
-
-            <div className="bg-white p-6 rounded-lg shadow-md text-center flex flex-col items-center min-h-[400px]">
-              <div className="mx-auto rounded-full w-80 h-80 bg-gray-200 flex items-center justify-center text-gray-600 text-base mb-4 border border-gray-200">
-                <img src={tanam} className="mx-auto rounded-full w-80 h-80 object-cover mb-4 border border-gray-200"></img>
-              </div>
-              <div className="flex flex-col justify-start w-full min-h-[90px]">
-                <h3 className="text-xl font-bold mb-1 text-gray-800 break-words leading-tight">Nathan M. Pádua</h3>
-                <p className="text-red-600 font-bold text-[18px]">Desenvolvedor Front-end</p>
-              </div>
-              <p className="text-gray-600 font-bold text-[14px] text-center leading-relaxed mt-10">Transforma os designs em código-fonte, construindo a parte da aplicação com a qual o usuário interage diretamente no navegador, deixando o site intuitivo e funcional.</p>
-            </div>
-
-            <div className="bg-white p-6 rounded-lg shadow-md text-center flex flex-col items-center min-h-[400px]">
-              <div className="mx-auto rounded-full w-80 h-80 bg-gray-200 flex items-center justify-center text-gray-600 text-base mb-4 border border-gray-200">
-                <img src={louis} className="mx-auto rounded-full w-80 h-80 object-cover mb-4 border border-gray-200"></img>
-              </div>
-              <div className="flex flex-col justify-start w-full min-h-[90px]">
-                <h3 className="text-xl font-bold mb-1 text-gray-800 break-words leading-tight">Luiz Gustavo Dias</h3>
-                <p className="text-red-600 font-bold text-[18px]">Desenvolvedor Back-end</p>
-              </div>
-              <p className="text-gray-600 font-bold text-[14px] text-center leading-relaxed mt-10">Desenvolve a lógica e a estrutura que operam os sistemas por trás das aplicações, garantindo o processamento de dados e a segurança da plataforma.</p>
-            </div>
-
-            {/* Card para Prof. Luiz Gustavo */}
-            <div className="bg-white p-6 rounded-lg shadow-md text-center flex flex-col items-center min-h-[400px]">
-              <div className="mx-auto rounded-full w-80 h-80 bg-gray-200 flex items-center justify-center text-gray-600 text-base mb-4 border border-gray-200">
-                <span>Foto do Professor<br /></span>
-                {/* <img src={tanam} className="mx-auto rounded-full w-80 h-80 object-cover mb-4 border border-gray-200"></img> */}
-              </div>
-              <div className="flex flex-col justify-start w-full min-h-[90px]">
-                <h3 className="text-xl font-bold mb-1 text-gray-800 break-words leading-tight">Prof. Luiz Gustavo</h3>
-                <p className="text-red-600 font-bold text-[18px]">Gerente de Projeto</p>
-              </div>
-              <p className="text-gray-600 font-bold text-[14px] text-center leading-relaxed mt-10">Líder estratégico que guia a equipe rumo ao sucesso, garantindo a entrega e qualidade.</p>
-            </div>
-
           </div>
         </div>
       </section>
 
+      {/* VOLTAR AO TOPO */}
       <button
-        className="back-to-top"
+        className="fixed bottom-4 right-4 bg-red-600 hover:bg-red-700 text-white p-3 sm:p-4 rounded-full shadow-lg z-50"
         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+        aria-label="Voltar ao topo"
       >
-        ➔
+        ↑
       </button>
     </div>
   );

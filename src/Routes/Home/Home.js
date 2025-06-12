@@ -160,23 +160,22 @@ function Home() {
     <div>
       {/* Topo do menu mobile – visível somente quando o menu está fechado */}
       {!menuMobileAberto && (
-        <div className="fixed top-0 left-0 right-0 z-[1000] md:hidden bg-[rgb(82,0,0)] shadow-md h-[6.5rem] relative flex items-center justify-center">
-
-          {/* Logo centralizada absolutamente */}
-          <div className="absolute left-1/2 transform -translate-x-1/2 flex justify-center items-center">
+        <div className="fixed top-0 left-0 right-0 z-[9999] md:hidden bg-[rgb(82,0,0)] shadow-md h-[9rem] flex items-center">
+          {/* Logo à esquerda */}
+          <div className="pl-4 flex items-center">
             <img
               src={logoUnifood}
               alt="Unifood"
-              className="h-[15rem] object-contain drop-shadow-lg"
+              className="h-[18rem] object-contain drop-shadow-lg"
             />
           </div>
 
           {/* Botão do menu à direita com texto */}
           <button
             onClick={() => setMenuMobileAberto(true)}
-            className="absolute right-4 top-1/2 transform -translate-y-1/2 px-5 py-3 rounded text-white shadow-lg text-2xl font-extrabold flex items-center gap-3"
+            className="absolute right-4 top-1/2 transform -translate-y-1/2 px-12 py-3 rounded text-white shadow-lg text-4xl font-extrabold flex items-center gap-3"
           >
-            MENU <span className="text-3xl">☰</span>
+            MENU <span className="text-5xl">☰</span>
           </button>
         </div>
       )}
@@ -189,10 +188,10 @@ function Home() {
           <div className="w-[90%] h-[90%] flex flex-col justify-center items-center p-6 overflow-y-auto text-center rounded-3xl relative">
 
             {/* Botão fechar no topo direito */}
-            <div className="absolute top-4 right-4">
+            <div className="absolute top-1 right-6">
               <button
                 onClick={() => setMenuMobileAberto(false)}
-                className="p-3 text-white text-xl font-bold flex items-center gap-2"
+                className="text-white text-3xl font-bold flex items-center gap-2"
               >
                 FECHAR MENU ✕
               </button>
@@ -242,7 +241,11 @@ function Home() {
                 🛒 Carrinho
               </button>
               <button
-                onClick={() => setModalPerfilAberto(true)}
+                onClick={() => {
+                  setModalPerfilAberto(true);
+                  setMenuMobileAberto(false);
+
+                }}
                 className="w-full bg-gradient-to-r from-gray-700 to-black text-white font-bold text-2xl py-5 rounded-2xl shadow-xl hover:scale-105 transition"
               >
                 👤 Perfil
@@ -255,12 +258,12 @@ function Home() {
 
       {/* Menu lateral desktop */}
       <aside className="menu white-bg z-[999] hidden md:block">
-        <div className="h-[15rem] main-content menu-content">
+        <div className="h-[14rem] main-content menu-content">
           <h1>
             <div className="logo">
               <a href="#home">
                 <img src={logoUnifood} alt="unifood"
-                  className="min-w-[14rem] object-contain drop-shadow-lg" />
+                  className="min-w-[15rem] object-contain drop-shadow-lg" />
               </a>
             </div>
           </h1>
@@ -452,7 +455,7 @@ function Home() {
 
       {/* --- Modal do Carrinho --- */}
       {modalCarrinhoAberto && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-[1000] px-4">
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[1000] px-4">
           <div className="bg-white w-full max-w-[100vh] max-h-[100vh] overflow-auto rounded-2xl shadow-xl p-6 sm:p-10 relative text-[clamp(1rem,2.5vw,2rem)]">
 
             {/* Botão de fechar */}
@@ -552,7 +555,7 @@ function Home() {
       {/* --- Fim do Modal do Carrinho --- */}
 
       {modalPerfilAberto && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[1001]">
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[1001]">
           <div className="bg-white w-full max-w-lg rounded-2xl shadow-xl p-12 relative">
             <button
               onClick={fecharModalPerfil}
@@ -560,7 +563,7 @@ function Home() {
             >
               <X className="w-8 h-8" />
             </button>
-            <h2 className="text-3xl font-bold text-gray-800 mb-6">Meu Perfil</h2>
+            <h2 className="text-5xl font-bold text-gray-800 mb-6">Meu Perfil</h2>
             {/* AQUI você pode inserir campos/links futuros, ex: editar nome, foto, pedidos, etc. */}
             <p className="text-gray-600 mb-6">Funcionalidades de perfil serão adicionadas aqui.</p>
             <button

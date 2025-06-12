@@ -38,7 +38,7 @@ export const ModalCategoria = ({
   };
 
   return (
-    <Dialog open={isOpen} onClose={onClose} className="relative z-50">
+    <Dialog open={isOpen} onClose={onClose} className="fixed inset-0 backdrop-blur-sm flex items-center justify-center z-[1000] px-4">
       <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" aria-hidden="true" />
       <div className="fixed inset-0 flex items-center justify-center p-4 overflow-auto">
         <Dialog.Panel className="bg-white w-full max-w-6xl max-h-[90vh] overflow-y-auto rounded-2xl shadow-xl p-12 relative">
