@@ -162,18 +162,38 @@ function ListaProdutos() {
 
         {modalDescricao && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 overflow-auto">
-            <div className="bg-white text-black p-6 rounded shadow w-full max-w-md mx-4">
+            <div className="bg-white text-black p-6 rounded shadow w-full max-w-md mx-4  ml-[20%]">
               <h3 className="text-3xl font-bold mb-4">{modalDescricao.nome}</h3>
-              <p className="mb-4">{modalDescricao.descricao}</p>
+
+              {modalDescricao.imagem && (
+                <img
+                  src={`http://localhost/UNIFOOD/database/imgProdutos/${modalDescricao.imagem}`}
+                  alt={modalDescricao.nome}
+                  className="w-full h-48 object-cover rounded mb-4"
+                />
+              )}
+
+              <div className="space-y-2">
+                <p><strong>Descrição:</strong> {modalDescricao.descricao}</p>
+                <p><strong>Preço:</strong> R$ {parseFloat(modalDescricao.preco).toFixed(2)}</p>
+                <p><strong>Custo:</strong> R$ {parseFloat(modalDescricao.custo).toFixed(2)}</p>
+                <p><strong>Lucro:</strong> R$ {(parseFloat(modalDescricao.preco) - parseFloat(modalDescricao.custo)).toFixed(2)}</p>
+                <p><strong>Quantidade:</strong> {modalDescricao.quantidade}</p>
+                <p><strong>Unidade:</strong> {modalDescricao.unidade_medida}</p>
+                <p><strong>Categoria:</strong> {modalDescricao.categoria}</p>
+                <p><strong>Fornecedor:</strong> {modalDescricao.nome_fornecedor}</p>
+              </div>
+
               <button
                 onClick={() => setModalDescricao(null)}
-                className="bg-blue-500 text-white px-4 py-2 rounded"
+                className="bg-blue-500 text-white px-4 py-2 rounded mt-6 w-full"
               >
                 Fechar
               </button>
             </div>
           </div>
         )}
+
 
         {modalEditar && editedProduto && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 overflow-auto">
