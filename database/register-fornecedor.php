@@ -24,7 +24,7 @@ if (json_last_error() !== JSON_ERROR_NONE) {
     exit;
 }
 
-// Pegar e limpar dados (trim e normalizar null)
+// Pegar e limpar dados
 $nome       = isset($input['nome']) ? trim($input['nome']) : '';
 $email      = isset($input['email']) ? trim($input['email']) : '';
 $cpf        = isset($input['cpf']) && $input['cpf'] !== null && $input['cpf'] !== '' ? trim($input['cpf']) : null;
@@ -35,7 +35,7 @@ $bairro     = isset($input['bairro']) ? trim($input['bairro']) : '';
 $cidade     = isset($input['cidade']) ? trim($input['cidade']) : '';
 $telefone   = isset($input['telefone']) && $input['telefone'] !== null && $input['telefone'] !== '' ? trim($input['telefone']) : null;
 
-// Validações básicas
+// Validações
 if (!$nome) {
     echo json_encode(['success' => false, 'message' => 'O nome é obrigatório']);
     exit;
@@ -46,27 +46,58 @@ if (!$cpf && !$cnpj) {
     exit;
 }
 
-// Conexão com o banco
+// Conexão
 $conn = new mysqli("localhost", "root", "", "unifood_db");
 if ($conn->connect_error) {
     echo json_encode(['success' => false, 'message' => 'Erro ao conectar ao banco: ' . $conn->connect_error]);
     exit;
 }
 
-// Preparar insert (ajuste os nomes dos campos conforme sua tabela)
+// Verificar duplicidade de CPF
+if ($cpf !== null) {
+    $verificaCpf = $conn->prepare("SELECT id FROM fornecedor WHERE cpf = ?");
+    $verificaCpf->bind_param("s", $cpf);
+    $verificaCpf->execute();
+    $verificaCpf->store_result();
+
+    if ($verificaCpf->num_rows > 0) {
+        echo json_encode(['success' => false, 'message' => 'CPF já cadastrado']);
+        $verificaCpf->close();
+        $conn->close();
+        exit;
+    }
+
+    $verificaCpf->close();
+}
+
+// Verificar duplicidade de CNPJ
+if ($cnpj !== null) {
+    $verificaCnpj = $conn->prepare("SELECT id FROM fornecedor WHERE cnpj = ?");
+    $verificaCnpj->bind_param("s", $cnpj);
+    $verificaCnpj->execute();
+    $verificaCnpj->store_result();
+
+    if ($verificaCnpj->num_rows > 0) {
+        echo json_encode(['success' => false, 'message' => 'CNPJ já cadastrado']);
+        $verificaCnpj->close();
+        $conn->close();
+        exit;
+    }
+
+    $verificaCnpj->close();
+}
+
+// Preparar INSERT
 $stmt = $conn->prepare("INSERT INTO fornecedor (
     nome, email, cpf, cnpj, logradouro, numero, bairro, cidade, telefone
 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
 if (!$stmt) {
     echo json_encode(['success' => false, 'message' => 'Erro na preparação da query: ' . $conn->error]);
+    $conn->close();
     exit;
 }
 
-// Atenção: para enviar null para banco, a variável em PHP precisa ser mesmo null.
-// Caso contrário, mysqli envia string vazia.
-
-// Faz bind_param. Todos são strings, mas cpf, cnpj e telefone podem ser null.
 $stmt->bind_param(
     "sssssssss",
     $nome,

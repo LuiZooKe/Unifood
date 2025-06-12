@@ -29,26 +29,6 @@ function CadastroFornecedor() {
     }));
   };
 
-  const toggleCPF = () => {
-    setFormData((prev) => ({
-      ...prev,
-      mostrarCPF: !prev.mostrarCPF,
-      mostrarCNPJ: false,
-      cpf: !prev.mostrarCPF ? (prev.cpf ?? '') : null,
-      cnpj: null
-    }));
-  };
-
-  const toggleCNPJ = () => {
-    setFormData((prev) => ({
-      ...prev,
-      mostrarCNPJ: !prev.mostrarCNPJ,
-      mostrarCPF: false,
-      cnpj: !prev.mostrarCNPJ ? (prev.cnpj ?? '') : null,
-      cpf: null
-    }));
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     const novosErros = [];
@@ -139,8 +119,23 @@ function CadastroFornecedor() {
             <input
               type="checkbox"
               checked={formData.mostrarCPF}
-              onChange={toggleCPF}
-              disabled={formData.mostrarCNPJ}
+              onChange={() => {
+                if (!formData.mostrarCPF) {
+                  setFormData((prev) => ({
+                    ...prev,
+                    mostrarCPF: true,
+                    mostrarCNPJ: false,
+                    cpf: prev.cpf ?? '',
+                    cnpj: null
+                  }));
+                } else {
+                  setFormData((prev) => ({
+                    ...prev,
+                    mostrarCPF: false,
+                    cpf: null
+                  }));
+                }
+              }}
             />
             <span>Usar CPF</span>
           </label>
@@ -149,8 +144,23 @@ function CadastroFornecedor() {
             <input
               type="checkbox"
               checked={formData.mostrarCNPJ}
-              onChange={toggleCNPJ}
-              disabled={formData.mostrarCPF}
+              onChange={() => {
+                if (!formData.mostrarCNPJ) {
+                  setFormData((prev) => ({
+                    ...prev,
+                    mostrarCNPJ: true,
+                    mostrarCPF: false,
+                    cnpj: prev.cnpj ?? '',
+                    cpf: null
+                  }));
+                } else {
+                  setFormData((prev) => ({
+                    ...prev,
+                    mostrarCNPJ: false,
+                    cnpj: null
+                  }));
+                }
+              }}
             />
             <span>Usar CNPJ</span>
           </label>
