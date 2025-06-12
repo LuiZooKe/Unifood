@@ -124,22 +124,24 @@ function Home() {
           data.produtos.forEach((produto) => {
             const imagemURL = `http://localhost/UNIFOOD/database/imgProdutos/${produto.imagem}`;
 
-            if (!agrupado[produto.categoria]) {
-              agrupado[produto.categoria] = [];
-            }
-            agrupado[produto.categoria].push({
-              nome: produto.nome,
-              preco: `R$ ${parseFloat(produto.preco).toFixed(2)}`,
-              imagem: imagemURL,
-              descricao: produto.descricao || '',
-            });
-
-            if (produto.imagem && produto.nome) {
-              imagens.push({
-                img: imagemURL,
-                alt: produto.nome,
-                caption: produto.nome,
+            if (produto.categoria !== 'ESTOQUE') {
+              if (!agrupado[produto.categoria]) {
+                agrupado[produto.categoria] = [];
+              }
+              agrupado[produto.categoria].push({
+                nome: produto.nome,
+                preco: `R$ ${parseFloat(produto.preco).toFixed(2)}`,
+                imagem: imagemURL,
+                descricao: produto.descricao || '',
               });
+
+              if (produto.imagem && produto.nome) {
+                imagens.push({
+                  img: imagemURL,
+                  alt: produto.nome,
+                  caption: produto.nome,
+                });
+              }
             }
           });
 
