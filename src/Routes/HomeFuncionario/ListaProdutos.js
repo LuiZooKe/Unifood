@@ -1,3 +1,4 @@
+// ⚠️ CÓDIGO COMPLETO – ListaProdutos.js com filtro de PRODUTOS e ESTOQUE
 import React, { useEffect, useState } from 'react';
 import Dashboard from './Dashboard';
 
@@ -8,8 +9,9 @@ function ListaProdutos() {
   const [modalDescricao, setModalDescricao] = useState(null);
   const [modalEditar, setModalEditar] = useState(false);
   const [editedProduto, setEditedProduto] = useState(null);
+  const [filtro, setFiltro] = useState('PRODUTOS');
 
-  const categorias = ['JANTINHAS', 'SALGADOS', 'BEBIDAS', 'SOBREMESAS'];
+  const categorias = ['JANTINHAS', 'SALGADOS', 'BEBIDAS', 'SOBREMESAS', 'ESTOQUE'];
   const unidades = ['KG', 'LITRO', 'UNIDADE'];
 
   const fetchProdutos = async () => {
@@ -102,15 +104,34 @@ function ListaProdutos() {
     }
   }, [editedProduto?.preco, editedProduto?.custo]);
 
+  const produtosFiltrados = produtos.filter(p => {
+    return filtro === 'ESTOQUE' ? p.categoria === 'ESTOQUE' : p.categoria !== 'ESTOQUE';
+  });
+
   return (
     <Dashboard>
       <div className="p-6 text-white overflow-x-hidden w-full">
-        <h1 className="text-3xl font-bold mb-[30px] text-center">Lista de Produtos</h1>
+        <h1 className="text-3xl font-bold mb-4 text-center">Lista de Produtos</h1>
 
-        {erro && <p className="text-red-400 mb-4">{erro}</p>}
+        <div className="flex justify-center gap-4 mb-6">
+          <button
+            className={`px-6 py-2 rounded font-semibold ${filtro === 'PRODUTOS' ? 'bg-blue-600' : 'bg-gray-600 hover:bg-gray-700'}`}
+            onClick={() => setFiltro('PRODUTOS')}
+          >
+            PRODUTOS
+          </button>
+          <button
+            className={`px-6 py-2 rounded font-semibold ${filtro === 'ESTOQUE' ? 'bg-blue-600' : 'bg-gray-600 hover:bg-gray-700'}`}
+            onClick={() => setFiltro('ESTOQUE')}
+          >
+            ESTOQUE
+          </button>
+        </div>
 
-        <div className="grid grid-cols-1">
-          {produtos.map((produto) => (
+        {erro && <p className="text-red-400 mb-4 text-center">{erro}</p>}
+
+        <div className="grid grid-cols-1 gap-4">
+          {produtosFiltrados.map((produto) => (
             <div
               key={produto.id}
               className="bg-[#1f2f3f] p-4 rounded shadow flex justify-between items-center flex-wrap md:flex-nowrap gap-4"
@@ -162,9 +183,8 @@ function ListaProdutos() {
 
         {modalDescricao && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 overflow-auto">
-            <div className="bg-white text-black p-6 rounded shadow w-full max-w-md mx-4  ml-[20%]">
+            <div className="bg-white text-black p-6 rounded shadow w-full max-w-md mx-4 ml-[20%]">
               <h3 className="text-3xl font-bold mb-4">{modalDescricao.nome}</h3>
-
               {modalDescricao.imagem && (
                 <img
                   src={`http://localhost/UNIFOOD/database/imgProdutos/${modalDescricao.imagem}`}
@@ -172,7 +192,6 @@ function ListaProdutos() {
                   className="w-full h-48 object-cover rounded mb-4"
                 />
               )}
-
               <div className="space-y-2">
                 <p><strong>Descrição:</strong> {modalDescricao.descricao}</p>
                 <p><strong>Preço:</strong> R$ {parseFloat(modalDescricao.preco).toFixed(2)}</p>
@@ -183,7 +202,6 @@ function ListaProdutos() {
                 <p><strong>Categoria:</strong> {modalDescricao.categoria}</p>
                 <p><strong>Fornecedor:</strong> {modalDescricao.nome_fornecedor}</p>
               </div>
-
               <button
                 onClick={() => setModalDescricao(null)}
                 className="bg-blue-500 text-white px-4 py-2 rounded mt-6 w-full"
@@ -193,7 +211,6 @@ function ListaProdutos() {
             </div>
           </div>
         )}
-
 
         {modalEditar && editedProduto && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 overflow-auto">

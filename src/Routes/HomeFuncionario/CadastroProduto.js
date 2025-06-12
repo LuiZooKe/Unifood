@@ -21,7 +21,7 @@ function CadastroProduto() {
   const [erro, setErro] = useState('');
   const [fornecedores, setFornecedores] = useState([]);
 
-  const categorias = ['JANTINHAS', 'SALGADOS', 'BEBIDAS', 'SOBREMESAS'];
+  const categorias = ['JANTINHAS', 'SALGADOS', 'BEBIDAS', 'SOBREMESAS', 'ESTOQUE'];
   const unidades = ['KG', 'LITRO', 'UNIDADE'];
 
   useEffect(() => {
