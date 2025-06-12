@@ -25,19 +25,21 @@ export const ModalCategoria = ({
   onAddToCart,
 }: ModalCategoriaProps) => {
   const [indexVisivel, setIndexVisivel] = useState<number | null>(null);
+  const [animacaoCarrinho, setAnimacaoCarrinho] = useState<number | null>(null);
 
   const toggleDescricao = (index: number) => {
-    if (indexVisivel === index) {
-      setIndexVisivel(null); // Oculta se clicar de novo
-    } else {
-      setIndexVisivel(index); // Mostra a descrição desse card
-    }
+    setIndexVisivel(indexVisivel === index ? null : index);
+  };
+
+  const handleAddToCart = (produto: Produto, index: number) => {
+    onAddToCart(produto);
+    setAnimacaoCarrinho(index);
+    setTimeout(() => setAnimacaoCarrinho(null), 1750);
   };
 
   return (
     <Dialog open={isOpen} onClose={onClose} className="relative z-50">
       <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" aria-hidden="true" />
-
       <div className="fixed inset-0 flex items-center justify-center p-4 overflow-auto">
         <Dialog.Panel className="bg-white w-full max-w-6xl max-h-[90vh] overflow-y-auto rounded-2xl shadow-xl p-12 relative">
           <button
@@ -47,9 +49,17 @@ export const ModalCategoria = ({
             <X className="w-12 h-12" />
           </button>
 
-          <Dialog.Title className="text-3xl font-extrabold mb-8 uppercase text-gray-900 text-center">
-            {categoria}
-          </Dialog.Title>
+          <Dialog.Title
+  className="font-extrabold uppercase text-gray-900 mb-8 text-center mx-auto block leading-tight max-w-[90vw]"
+  style={{
+    fontSize: 'clamp(1rem, 10vw, 2.5rem)', // Adapta de 16px até 40px
+    textAlign: 'center',
+  }}
+>
+  {categoria}
+</Dialog.Title>
+
+
 
           <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
             {produtos.map((produto, index) => (
@@ -57,10 +67,8 @@ export const ModalCategoria = ({
                 key={index}
                 className="relative border rounded-xl p-4 shadow-md hover:shadow-lg transition flex flex-col justify-between items-center text-center h-full overflow-hidden"
               >
-                {/* Overlay de descrição visível apenas quando selecionado */}
                 {indexVisivel === index && (
                   <div className="absolute inset-0 bg-white bg-opacity-95 z-20 flex flex-col justify-center items-center p-6">
-                    {/* Botão para fechar o overlay */}
                     <button
                       onClick={() => setIndexVisivel(null)}
                       className="absolute top-2 right-2 text-gray-500 hover:text-red-600 transition"
@@ -80,6 +88,7 @@ export const ModalCategoria = ({
                   alt={produto.nome}
                   className="w-full h-48 object-cover rounded mb-3"
                 />
+
                 <h3 className="text-lg font-bold leading-tight min-h-[3.5rem] z-10">
                   {produto.nome}
                 </h3>
@@ -93,15 +102,22 @@ export const ModalCategoria = ({
                       title="Ver descrição"
                       onClick={() => toggleDescricao(index)}
                     >
-                      <Info className="w-7 h-7 md:w-8 md:h-8" />
+                      <Info className="w-9 h-9 md:w-10 md:h-10" />
                     </button>
 
                     <button
-                      className="text-white bg-red-600 hover:bg-red-700 p-3 rounded-full transition"
+                      className="relative text-white bg-red-600 hover:bg-red-700 p-3 rounded-full transition"
                       title="Adicionar ao carrinho"
-                      onClick={() => onAddToCart(produto)}
+                      onClick={() => handleAddToCart(produto, index)}
                     >
-                      <ShoppingCart className="w-7 h-7 md:w-8 md:h-8" />
+                      <ShoppingCart className="w-10 h-10 md:w-12 md:h-12" />
+
+                      {/* +1 animação */}
+                      {animacaoCarrinho === index && (
+                        <span className="absolute -top-3 -right-3 bg-green-500 text-white rounded-full text-sm px-5 py-4 animate-bounce shadow-md pointer-events-none">
+                          +1
+                        </span>
+                      )}
                     </button>
                   </div>
                 </div>

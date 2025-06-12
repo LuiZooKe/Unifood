@@ -32,6 +32,17 @@ function Home() {
   const [imagensCarrossel, setImagensCarrossel] = useState([]);
   const [menuMobileAberto, setMenuMobileAberto] = useState(false);
 
+  // Novo estado para perfil
+  const [modalPerfilAberto, setModalPerfilAberto] = useState(false);
+
+  // Função para abrir/perfil modal
+  const abrirModalPerfil = () => {
+    setModalPerfilAberto(true);
+  };
+  const fecharModalPerfil = () => {
+    setModalPerfilAberto(false);
+  };
+
   // --- Novos estados para o carrinho ---
   const [modalCarrinhoAberto, setModalCarrinhoAberto] = useState(false); // Controla a visibilidade do modal do carrinho
   const [itensCarrinho, setItensCarrinho] = useState([]); // Armazena os itens adicionados ao carrinho
@@ -82,7 +93,6 @@ function Home() {
         return [...prevItens, { ...produto, quantidade: 1 }];
       }
     });
-    alert(`${produto.nome} adicionado ao carrinho!`); // Apenas para feedback visual
   };
 
   const removerDoCarrinho = (nomeProduto) => {
@@ -148,23 +158,51 @@ function Home() {
 
   return (
     <div>
-      {/* Botão de menu mobile */}
-      <div className="fixed top-4 right-4 z-[1000] md:hidden">
-        <button
-          onClick={() => setMenuMobileAberto(!menuMobileAberto)}
-          className="p-3 rounded bg-gray-800 text-white shadow-lg w-[50px] h-[]"
-        >
-          ☰
-        </button>
-      </div>
+      {/* Topo do menu mobile – visível somente quando o menu está fechado */}
+      {!menuMobileAberto && (
+        <div className="fixed top-0 left-0 right-0 z-[1000] md:hidden bg-[rgb(82,0,0)] shadow-md h-[6.5rem] relative flex items-center justify-center">
 
+          {/* Logo centralizada absolutamente */}
+          <div className="absolute left-1/2 transform -translate-x-1/2 flex justify-center items-center">
+            <img
+              src={logoUnifood}
+              alt="Unifood"
+              className="h-[15rem] object-contain drop-shadow-lg"
+            />
+          </div>
+
+          {/* Botão do menu à direita com texto */}
+          <button
+            onClick={() => setMenuMobileAberto(true)}
+            className="absolute right-4 top-1/2 transform -translate-y-1/2 px-5 py-3 rounded text-white shadow-lg text-2xl font-extrabold flex items-center gap-3"
+          >
+            MENU <span className="text-3xl">☰</span>
+          </button>
+        </div>
+      )}
+
+
+
+      {/* Menu mobile expandido */}
       {menuMobileAberto && (
         <div className="fixed top-0 left-0 w-full h-screen bg-black bg-opacity-50 backdrop-blur-xl z-[999] flex items-center justify-center md:hidden px-4">
-          <div className="w-[90%] h-[90%] flex flex-col justify-center items-center p-6 overflow-y-auto text-center rounded-3xl">
-            <nav className="flex flex-col items-center justify-center w-full gap-6">
+          <div className="w-[90%] h-[90%] flex flex-col justify-center items-center p-6 overflow-y-auto text-center rounded-3xl relative">
+
+            {/* Botão fechar no topo direito */}
+            <div className="absolute top-4 right-4">
+              <button
+                onClick={() => setMenuMobileAberto(false)}
+                className="p-3 text-white text-xl font-bold flex items-center gap-2"
+              >
+                FECHAR MENU ✕
+              </button>
+            </div>
+
+            <nav className="flex flex-col items-center justify-center w-full gap-6 mt-16">
+              {/* Logo dentro do menu */}
               <a href="#gallery"
                 onClick={() => setMenuMobileAberto(false)}
-                className="w-full flex justify-center mb-">
+                className="w-full flex justify-center">
                 <img
                   src={logoUnifood}
                   alt="Unifood"
@@ -172,7 +210,7 @@ function Home() {
                 />
               </a>
 
-              {/* Cardápio */}
+              {/* Links do menu */}
               <a
                 href="#gallery"
                 onClick={() => setMenuMobileAberto(false)}
@@ -180,8 +218,6 @@ function Home() {
               >
                 🍴 Cardápio
               </a>
-
-              {/* Contato */}
               <a
                 href="#contact"
                 onClick={() => setMenuMobileAberto(false)}
@@ -189,8 +225,6 @@ function Home() {
               >
                 📞 Contato
               </a>
-
-              {/* Saiba Mais */}
               <a
                 href="/saibamais"
                 onClick={() => setMenuMobileAberto(false)}
@@ -198,8 +232,6 @@ function Home() {
               >
                 ℹ️ Saiba Mais
               </a>
-
-              {/* Carrinho */}
               <button
                 onClick={() => {
                   abrirModalCarrinho();
@@ -209,16 +241,11 @@ function Home() {
               >
                 🛒 Carrinho
               </button>
-
-              {/* Sair */}
               <button
-                onClick={() => {
-                  handleLogout();
-                  setMenuMobileAberto(false);
-                }}
+                onClick={() => setModalPerfilAberto(true)}
                 className="w-full bg-gradient-to-r from-gray-700 to-black text-white font-bold text-2xl py-5 rounded-2xl shadow-xl hover:scale-105 transition"
               >
-                🚪 Sair
+                👤 Perfil
               </button>
             </nav>
           </div>
@@ -233,7 +260,7 @@ function Home() {
             <div className="logo">
               <a href="#home">
                 <img src={logoUnifood} alt="unifood"
-                  className="h-[48rem] object-contain drop-shadow-lg" />
+                  className="min-w-[14rem] object-contain drop-shadow-lg" />
               </a>
             </div>
           </h1>
@@ -256,12 +283,13 @@ function Home() {
               </li>
 
               <li>
-                <button
-                  onClick={handleLogout}
-                  className="m-4 bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded w-full"
-                >
-                  Sair
-                </button>
+                <a>
+                  <button
+                    onClick={() => setModalPerfilAberto(true)}
+                  >
+                    Perfil 👤
+                  </button>
+                </a>
               </li>
             </ul>
           </nav>
@@ -424,95 +452,93 @@ function Home() {
 
       {/* --- Modal do Carrinho --- */}
       {modalCarrinhoAberto && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-[1000]">
-          <div className="bg-white w-full max-w-6xl max-h-[90vh] overflow-y-auto rounded-2xl shadow-xl p-12 relative">
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-[1000] px-4">
+          <div className="bg-white w-full max-w-[100vh] max-h-[100vh] overflow-auto rounded-2xl shadow-xl p-6 sm:p-10 relative text-[clamp(1rem,2.5vw,2rem)]">
 
             {/* Botão de fechar */}
             <button
               onClick={fecharModalCarrinho}
-              className="absolute top-4 right-4 text-gray-500 hover:text-red-500"
+              className="absolute top-6 right-6 text-gray-500 hover:text-red-500"
             >
-              <X className="w-12 h-12" />
+              <X className="w-10 h-10 sm:w-12 sm:h-12" />
             </button>
 
             {/* Título */}
-            <h2 className="text-5xl font-extrabold text-gray-800 text-center mb-8 mt-2">
-              Seu Carrinho 🛒
+            <h2 className="text-center mb-10 mt-4 font-extrabold text-gray-800 leading-tight">
+              <span className="block whitespace-nowrap text-[clamp(2.5rem,6vw,4rem)]">CARRINHO</span>
+              <span className="block whitespace-nowrap text-[clamp(2.5rem,5vw,4rem)]">🛒</span>
             </h2>
 
-            {/* Lista de itens ou mensagem de vazio */}
-
+            {/* Lista de itens */}
             {itensCarrinho.length === 0 ? (
-              <p className="text-gray-500 text-center text-lg">
+              <p className="text-gray-600 text-center text-[clamp(1.25rem,3vw,2rem)]">
                 Seu carrinho está vazio.
               </p>
             ) : (
-              <ul className="space-y-4 max-h-[60%] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
+              <ul className="space-y-6 max-h-[55vh] overflow-y-auto pr-4 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
                 {itensCarrinho.map((item, index) => (
                   <li
                     key={index}
-                    className="flex gap-4 bg-gray-50 p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow"
+                    className="flex gap-6 bg-gray-50 p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow"
                   >
+                    {/* Imagem */}
                     <img
                       src={item.imagem}
                       alt={item.nome}
-                      className="w-[150px] h-[150px] object-cover rounded-lg flex-shrink-0"
+                      className="w-[120px] h-[120px] md:w-[150px] md:h-[150px] object-cover rounded-lg flex-shrink-0"
                     />
 
-                    <div className="flex flex-grow justify-between w-full items-end">
-                      {/* Nome e Preço - alinhados na parte inferior esquerda */}
-                      <div className="flex flex-col justify-end w-full mr-4">
-                        <h4 className="font-bold text-[30px] text-gray-800 break-words leading-snug">
+                    {/* Infos e ações */}
+                    <div className="flex flex-col justify-between w-full">
+                      {/* Nome e preço */}
+                      <div className="flex flex-col justify-end flex-grow">
+                        <h4 className="font-bold text-gray-800 leading-tight text-[clamp(1.5rem,3vw,2.5rem)] break-words">
                           {item.nome}
                         </h4>
-                        <p className="text-md text-gray-500 mb-2">
-                          Preço: {item.preco}
+                        <p className="text-gray-600 mt-1 text-[clamp(1.25rem,2.5vw,2rem)]">
+                          Preço: <span className="font-semibold">{item.preco}</span>
                         </p>
                       </div>
 
-                      {/* Controle de Quantidade + Botão Remover - ambos alinhados à direita e na parte inferior */}
-                      <div className="flex flex-col items-end justify-end gap-y-2">
-                        {/* Controle de quantidade */}
-                        <div className="flex items-center gap-2">
+                      {/* Quantidade e remover */}
+                      <div className="flex flex-col items-end mt-4 gap-2">
+                        <div className="flex items-center gap-4">
                           <button
                             onClick={() => alterarQuantidadeProduto(item.nome, item.quantidade - 1)}
-                            className="px-3 py-1 bg-gray-300 rounded hover:bg-gray-400 text-md font-bold"
+                            className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 text-xl font-bold"
                           >
                             −
                           </button>
-                          <span className="text-md font-semibold">{item.quantidade}</span>
+                          <span className="text-2xl font-semibold">{item.quantidade}</span>
                           <button
                             onClick={() => alterarQuantidadeProduto(item.nome, item.quantidade + 1)}
-                            className="px-3 py-1 bg-gray-300 rounded hover:bg-gray-400 text-md font-bold"
+                            className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 text-xl font-bold"
                           >
                             +
                           </button>
                         </div>
 
-                        {/* Botão Remover */}
                         <button
                           onClick={() => removerDoCarrinho(item.nome)}
-                          className="text-red-500 hover:text-red-700 text-md font-semibold transition"
+                          className="text-red-600 hover:text-red-800 text-lg font-medium"
                         >
                           Remover
                         </button>
                       </div>
                     </div>
-
-
                   </li>
                 ))}
               </ul>
             )}
 
-            {/* Total e botão de compra */}
-            <div className="mt-10 pt-6 border-t border-gray-200 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-              <p className="text-x2 font-bold text-gray-800">
+            {/* Total e botão */}
+            <div className="mt-10 pt-6 border-t border-gray-300 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-6">
+              <p className="text-2xl font-bold text-gray-800">
                 TOTAL: <span className="text-green-600">R$ {calcularTotalCarrinho()}</span>
               </p>
               <button
-                onClick={() => alert('Funcionalidade de finalizar compra ainda não implementada!')}
-                className="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-xl transition-all shadow-sm hover:shadow-md"
+                onClick={() => alert("Funcionalidade de finalizar compra ainda não implementada!")}
+                className="bg-green-600 hover:bg-green-700 text-white font-bold text-2xl py-4 px-8 rounded-xl shadow-md hover:shadow-xl transition-all"
               >
                 Finalizar Compra
               </button>
@@ -520,7 +546,32 @@ function Home() {
           </div>
         </div>
       )}
+
+
+
       {/* --- Fim do Modal do Carrinho --- */}
+
+      {modalPerfilAberto && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[1001]">
+          <div className="bg-white w-full max-w-lg rounded-2xl shadow-xl p-12 relative">
+            <button
+              onClick={fecharModalPerfil}
+              className="absolute top-4 right-4 text-gray-500 hover:text-red-500"
+            >
+              <X className="w-8 h-8" />
+            </button>
+            <h2 className="text-3xl font-bold text-gray-800 mb-6">Meu Perfil</h2>
+            {/* AQUI você pode inserir campos/links futuros, ex: editar nome, foto, pedidos, etc. */}
+            <p className="text-gray-600 mb-6">Funcionalidades de perfil serão adicionadas aqui.</p>
+            <button
+              onClick={handleLogout}
+              className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded w-full"
+            >
+              Desconectar
+            </button>
+          </div>
+        </div>
+      )}
 
     </div>
   );
