@@ -14,6 +14,7 @@ interface ModalCategoriaProps {
   onClose: () => void;
   categoria: string;
   produtos: Produto[];
+  onAddToCart: (produto: Produto) => void;
 }
 
 export const ModalCategoria = ({
@@ -21,6 +22,7 @@ export const ModalCategoria = ({
   onClose,
   categoria,
   produtos,
+  onAddToCart,
 }: ModalCategoriaProps) => {
   const [indexVisivel, setIndexVisivel] = useState<number | null>(null);
 
@@ -97,7 +99,7 @@ export const ModalCategoria = ({
                     <button
                       className="text-white bg-red-600 hover:bg-red-700 p-3 rounded-full transition"
                       title="Adicionar ao carrinho"
-                      onClick={() => console.log(`Adicionar ${produto.nome} ao carrinho`)}
+                      onClick={() => onAddToCart(produto)}
                     >
                       <ShoppingCart className="w-7 h-7 md:w-8 md:h-8" />
                     </button>
