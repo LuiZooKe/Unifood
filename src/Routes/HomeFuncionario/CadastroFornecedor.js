@@ -7,8 +7,8 @@ function CadastroFornecedor() {
   const [formData, setFormData] = useState({
     nome: '',
     email: '',
-    cpf: '',
-    cnpj: '',
+    cpf: null,
+    cnpj: null,
     logradouro: '',
     numero: '',
     bairro: '',
@@ -22,16 +22,20 @@ function CadastroFornecedor() {
   const [sucesso, setSucesso] = useState('');
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
   const toggleCPF = () => {
     setFormData((prev) => ({
       ...prev,
       mostrarCPF: !prev.mostrarCPF,
-      cpf: !prev.mostrarCPF ? prev.cpf : '',
       mostrarCNPJ: false,
-      cnpj: ''
+      cpf: !prev.mostrarCPF ? (prev.cpf ?? '') : null,
+      cnpj: null
     }));
   };
 
@@ -39,9 +43,9 @@ function CadastroFornecedor() {
     setFormData((prev) => ({
       ...prev,
       mostrarCNPJ: !prev.mostrarCNPJ,
-      cnpj: !prev.mostrarCNPJ ? prev.cnpj : '',
       mostrarCPF: false,
-      cpf: ''
+      cnpj: !prev.mostrarCNPJ ? (prev.cnpj ?? '') : null,
+      cpf: null
     }));
   };
 
@@ -54,10 +58,10 @@ function CadastroFornecedor() {
     if (!formData.mostrarCPF && !formData.mostrarCNPJ) {
       novosErros.push('Marque CPF ou CNPJ.');
     }
-    if (formData.mostrarCPF && !formData.cpf.trim()) {
+    if (formData.mostrarCPF && (!formData.cpf || !formData.cpf.trim())) {
       novosErros.push('O CPF é obrigatório.');
     }
-    if (formData.mostrarCNPJ && !formData.cnpj.trim()) {
+    if (formData.mostrarCNPJ && (!formData.cnpj || !formData.cnpj.trim())) {
       novosErros.push('O CNPJ é obrigatório.');
     }
 
@@ -72,13 +76,13 @@ function CadastroFornecedor() {
     const formDataFormatado = {
       nome: formData.nome.trim(),
       email: formData.email.trim(),
-      cpf: formData.cpf.replace(/\D/g, ''),
-      cnpj: formData.cnpj.replace(/\D/g, ''),
+      cpf: formData.mostrarCPF ? formData.cpf.replace(/\D/g, '') : null,
+      cnpj: formData.mostrarCNPJ ? formData.cnpj.replace(/\D/g, '') : null,
       logradouro: formData.logradouro.trim(),
       numero: formData.numero.trim(),
       bairro: formData.bairro.trim(),
       cidade: formData.cidade.trim(),
-      telefone: formData.telefone.replace(/\D/g, '')
+      telefone: formData.telefone ? formData.telefone.replace(/\D/g, '') : null
     };
 
     try {
@@ -95,8 +99,8 @@ function CadastroFornecedor() {
         setFormData({
           nome: '',
           email: '',
-          cpf: '',
-          cnpj: '',
+          cpf: null,
+          cnpj: null,
           logradouro: '',
           numero: '',
           bairro: '',
@@ -154,10 +158,22 @@ function CadastroFornecedor() {
 
         {/* Campos condicionais de CPF e CNPJ */}
         {formData.mostrarCPF && (
-          <Input label="CPF" name="cpf" value={formData.cpf} onChange={handleChange} mask="000.000.000-00" />
+          <Input
+            label="CPF"
+            name="cpf"
+            value={formData.cpf ?? ''}
+            onChange={handleChange}
+            mask="000.000.000-00"
+          />
         )}
         {formData.mostrarCNPJ && (
-          <Input label="CNPJ" name="cnpj" value={formData.cnpj} onChange={handleChange} mask="00.000.000/0000-00" />
+          <Input
+            label="CNPJ"
+            name="cnpj"
+            value={formData.cnpj ?? ''}
+            onChange={handleChange}
+            mask="00.000.000/0000-00"
+          />
         )}
 
         <Input label="Logradouro" name="logradouro" value={formData.logradouro} onChange={handleChange} />
@@ -229,7 +245,7 @@ const Input = ({
 Input.propTypes = {
   label: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
-  value: PropTypes.string.isRequired,
+  value: PropTypes.oneOfType([PropTypes.string, PropTypes.oneOf([null])]).isRequired,
   onChange: PropTypes.func.isRequired,
   type: PropTypes.string,
   mask: PropTypes.any

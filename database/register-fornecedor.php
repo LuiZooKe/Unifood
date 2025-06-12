@@ -24,34 +24,32 @@ if (json_last_error() !== JSON_ERROR_NONE) {
     exit;
 }
 
-// Verifica campos obrigatórios básicos
-$nome      = trim($input['nome'] ?? '');
-$email     = trim($input['email'] ?? '');
-$cpf       = trim($input['cpf'] ?? '');
-$cnpj      = trim($input['cnpj'] ?? '');
-$logradouro= trim($input['logradouro'] ?? '');
-$numero    = trim($input['numero'] ?? '');
-$bairro    = trim($input['bairro'] ?? '');
-$cidade    = trim($input['cidade'] ?? '');
-$telefone  = trim($input['telefone'] ?? '');
+// Pegar e limpar dados (trim e normalizar null)
+$nome       = isset($input['nome']) ? trim($input['nome']) : '';
+$email      = isset($input['email']) ? trim($input['email']) : '';
+$cpf        = isset($input['cpf']) && $input['cpf'] !== null && $input['cpf'] !== '' ? trim($input['cpf']) : null;
+$cnpj       = isset($input['cnpj']) && $input['cnpj'] !== null && $input['cnpj'] !== '' ? trim($input['cnpj']) : null;
+$logradouro = isset($input['logradouro']) ? trim($input['logradouro']) : '';
+$numero     = isset($input['numero']) ? trim($input['numero']) : '';
+$bairro     = isset($input['bairro']) ? trim($input['bairro']) : '';
+$cidade     = isset($input['cidade']) ? trim($input['cidade']) : '';
+$telefone   = isset($input['telefone']) && $input['telefone'] !== null && $input['telefone'] !== '' ? trim($input['telefone']) : null;
 
+// Validações básicas
 if (!$nome) {
     echo json_encode(['success' => false, 'message' => 'O nome é obrigatório']);
     exit;
 }
 
-// Você pode adicionar outras validações (email, cpf/cnpj, telefone)...
+if (!$cpf && !$cnpj) {
+    echo json_encode(['success' => false, 'message' => 'CPF ou CNPJ é obrigatório']);
+    exit;
+}
 
 // Conexão com o banco
 $conn = new mysqli("localhost", "root", "", "unifood_db");
 if ($conn->connect_error) {
     echo json_encode(['success' => false, 'message' => 'Erro ao conectar ao banco: ' . $conn->connect_error]);
-    exit;
-}
-
-// Exemplo de validação simples para CPF ou CNPJ
-if (!$cpf && !$cnpj) {
-    echo json_encode(['success' => false, 'message' => 'CPF ou CNPJ é obrigatório']);
     exit;
 }
 
@@ -65,6 +63,10 @@ if (!$stmt) {
     exit;
 }
 
+// Atenção: para enviar null para banco, a variável em PHP precisa ser mesmo null.
+// Caso contrário, mysqli envia string vazia.
+
+// Faz bind_param. Todos são strings, mas cpf, cnpj e telefone podem ser null.
 $stmt->bind_param(
     "sssssssss",
     $nome,
