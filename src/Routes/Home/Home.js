@@ -31,6 +31,11 @@ function Home() {
   const [imagensCarrossel, setImagensCarrossel] = useState([]);
   const [menuMobileAberto, setMenuMobileAberto] = useState(false);
 
+  // --- Novos estados para o carrinho ---
+  const [modalCarrinhoAberto, setModalCarrinhoAberto] = useState(false); // Controla a visibilidade do modal do carrinho
+  const [itensCarrinho, setItensCarrinho] = useState([]); // Armazena os itens adicionados ao carrinho
+  // --- Fim dos novos estados ---
+
   const abrirModal = (categoria) => {
     setCategoriaSelecionada(categoria);
     setModalAberto(true);
@@ -40,6 +45,46 @@ function Home() {
     localStorage.removeItem('usuarioLogado');
     navigate('/login');
   };
+
+  // --- Funções para o carrinho ---
+  const abrirModalCarrinho = () => {
+    setModalCarrinhoAberto(true);
+  };
+
+  const fecharModalCarrinho = () => {
+    setModalCarrinhoAberto(false);
+  };
+
+  // Função simulada para adicionar item ao carrinho
+  // Você precisaria integrar essa função a botões de "Adicionar ao Carrinho"
+  // nos seus produtos/ModalCategoria.
+  const adicionarAoCarrinho = (produto) => {
+    setItensCarrinho((prevItens) => {
+      const itemExistente = prevItens.find((item) => item.nome === produto.nome);
+      if (itemExistente) {
+        return prevItens.map((item) =>
+          item.nome === produto.nome ? { ...item, quantidade: item.quantidade + 1 } : item
+        );
+      } else {
+        return [...prevItens, { ...produto, quantidade: 1 }];
+      }
+    });
+    alert(`${produto.nome} adicionado ao carrinho!`); // Apenas para feedback visual
+  };
+
+  const removerDoCarrinho = (nomeProduto) => {
+    setItensCarrinho((prevItens) =>
+      prevItens.filter((item) => item.nome !== nomeProduto)
+    );
+  };
+
+  const calcularTotalCarrinho = () => {
+    return itensCarrinho
+      .reduce((total, item) => total + parseFloat(item.preco.replace('R$', '').replace(',', '.')) * item.quantidade, 0)
+      .toFixed(2);
+  };
+  // --- Fim das funções do carrinho ---
+
 
   useEffect(() => {
     const fetchProdutos = async () => {
@@ -122,9 +167,15 @@ function Home() {
                   </a>
                 </li>
                 <li>
-                  <a href="#" onClick={() => setMenuMobileAberto(false)}>
+                  <button
+                    onClick={() => {
+                      abrirModalCarrinho(); // Abre o modal do carrinho
+                      setMenuMobileAberto(false); // Fecha o menu mobile
+                    }}
+                    className="w-full text-left py-2 px-4"
+                  >
                     Carrinho 🛒
-                  </a>
+                  </button>
                 </li>
                 <li>
                   <button
@@ -152,7 +203,7 @@ function Home() {
       {/* Menu lateral desktop */}
       <aside className="menu white-bg z-[999] hidden md:block">
         <div className="h-[150px] main-content menu-content">
-          <h1 onClick={() => (document.getElementById('close-menu').checked = false)}>
+          <h1>
             <div className="logo">
               <a href="#home">
                 <img src={logoUnifood} alt="unifood" />
@@ -160,11 +211,18 @@ function Home() {
             </div>
           </h1>
           <nav>
-            <ul onClick={() => (document.getElementById('close-menu').checked = false)}>
+            <ul>
               <li><a href="#gallery">Cardápio 🍴</a></li>
               <li><a href="#contact">Contato 📞</a></li>
               <li><a href="/saibamais">Saiba Mais ℹ️</a></li>
-              <li><a href="#">Carrinho 🛒</a></li>
+              <li>
+                <button
+                  onClick={abrirModalCarrinho} // Abre o modal do carrinho
+                  className="w-full text-left py-2 px-4"
+                >
+                  Carrinho 🛒
+                </button>
+              </li>
               <li>
                 <button
                   onClick={handleLogout}
@@ -284,7 +342,59 @@ function Home() {
         onClose={() => setModalAberto(false)}
         categoria={categoriaSelecionada}
         produtos={produtosPorCategoria[categoriaSelecionada] || []}
+        onAddToCart={adicionarAoCarrinho} // Passa a função de adicionar ao carrinho para o ModalCategoria
       />
+
+      {/* --- Modal do Carrinho (diretamente no Home.tsx) --- */}
+      {modalCarrinhoAberto && (
+        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-[1000]">
+          <div className="bg-white p-8 rounded-2xl shadow-2xl w-11/12 max-w-lg relative">
+            <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">Seu Carrinho 🛒</h2>
+
+            {itensCarrinho.length === 0 ? (
+              <p className="text-gray-600 text-center text-lg">Seu carrinho está vazio.</p>
+            ) : (
+              <ul className="space-y-4 max-h-80 overflow-y-auto pr-2">
+                {itensCarrinho.map((item, index) => (
+                  <li key={index} className="flex items-center justify-between border-b pb-2">
+                    <div className="flex items-center">
+                      <img src={item.imagem} alt={item.nome} className="w-16 h-16 object-cover rounded-md mr-4" />
+                      <div>
+                        <h4 className="font-semibold text-lg">{item.nome}</h4>
+                        <p className="text-gray-600">Preço: {item.preco} x {item.quantidade}</p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => removerDoCarrinho(item.nome)}
+                      className="text-red-500 hover:text-red-700 transition-colors"
+                    >
+                      Remover
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            <div className="mt-8 pt-4 border-t flex justify-between items-center">
+              <p className="text-xl font-bold">Total: R$ {calcularTotalCarrinho()}</p>
+              <button
+                onClick={() => alert('Funcionalidade de finalizar compra ainda não implementada!')}
+                className="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition-colors"
+              >
+                Finalizar Compra
+              </button>
+            </div>
+
+            <button
+              onClick={fecharModalCarrinho}
+              className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-3xl font-bold"
+            >
+              &times;
+            </button>
+          </div>
+        </div>
+      )}
+      {/* --- Fim do Modal do Carrinho --- */}
     </div>
   );
 }
