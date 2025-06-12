@@ -1,9 +1,9 @@
-// ListaProdutos.jsx
 import React, { useEffect, useState } from 'react';
 import Dashboard from './Dashboard';
 
 function ListaProdutos() {
   const [produtos, setProdutos] = useState([]);
+  const [fornecedores, setFornecedores] = useState([]);
   const [erro, setErro] = useState('');
   const [modalDescricao, setModalDescricao] = useState(null);
   const [modalEditar, setModalEditar] = useState(false);
@@ -23,6 +23,18 @@ function ListaProdutos() {
       }
     } catch {
       setErro('Erro ao carregar produtos.');
+    }
+  };
+
+  const fetchFornecedores = async () => {
+    try {
+      const res = await fetch('http://localhost/UNIFOOD/database/fornecedores.php?action=listar');
+      const data = await res.json();
+      if (data.success) {
+        setFornecedores(data.fornecedores);
+      }
+    } catch (error) {
+      console.error('Erro ao carregar fornecedores:', error);
     }
   };
 
@@ -51,6 +63,7 @@ function ListaProdutos() {
     formData.append('custo', editedProduto.custo);
     formData.append('quantidade', editedProduto.quantidade);
     formData.append('nome_fornecedor', editedProduto.nome_fornecedor);
+    formData.append('id_fornecedor', editedProduto.id_fornecedor);
     formData.append('lucro', editedProduto.lucro);
     formData.append('unidade_medida', editedProduto.unidade_medida);
     formData.append('categoria', editedProduto.categoria);
@@ -77,6 +90,7 @@ function ListaProdutos() {
 
   useEffect(() => {
     fetchProdutos();
+    fetchFornecedores();
   }, []);
 
   useEffect(() => {
@@ -166,7 +180,6 @@ function ListaProdutos() {
             <div className="bg-white text-black p-6 rounded shadow w-full max-w-[700px] mx-4 ml-[20%]">
               <h3 className="text-3xl font-bold mb-6">Editar Produto</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Campos básicos */}
                 {[
                   ['Nome', 'nome'],
                   ['Descrição', 'descricao'],
@@ -185,7 +198,6 @@ function ListaProdutos() {
                   </div>
                 ))}
 
-                {/* Unidade de medida após quantidade */}
                 <div>
                   <label className="block text-sm font-medium mb-1">Unidade de Medida</label>
                   <select
@@ -200,22 +212,29 @@ function ListaProdutos() {
                   </select>
                 </div>
 
-                {/* Outros campos */}
-                {[
-                  ['Nome Fornecedor', 'nome fornecedor'],
-                ].map(([label, key]) => (
-                  <div key={key}>
-                    <label className="block text-sm font-medium mb-1">{label}</label>
-                    <input
-                      type="text"
-                      value={editedProduto[key] || ''}
-                      onChange={(e) => setEditedProduto({ ...editedProduto, [key]: e.target.value })}
-                      className="w-full border px-3 py-2"
-                    />
-                  </div>
-                ))}
+                <div>
+                  <label className="block text-sm font-medium mb-1">Fornecedor</label>
+                  <select
+                    value={editedProduto.id_fornecedor || ''}
+                    onChange={(e) => {
+                      const selectedId = e.target.value;
+                      const fornecedorSelecionado = fornecedores.find(f => f.id.toString() === selectedId);
+                      setEditedProduto(prev => ({
+                        ...prev,
+                        id_fornecedor: selectedId,
+                        nome_fornecedor: fornecedorSelecionado?.nome || ''
+                      }));
+                    }}
+                    className="w-full border px-3 py-2"
+                    required
+                  >
+                    <option value="">Selecione o fornecedor</option>
+                    {fornecedores.map(f => (
+                      <option key={f.id} value={f.id}>{f.nome}</option>
+                    ))}
+                  </select>
+                </div>
 
-                {/* Categoria */}
                 <div>
                   <label className="block text-sm font-medium mb-1">Categoria</label>
                   <select
@@ -230,7 +249,6 @@ function ListaProdutos() {
                   </select>
                 </div>
 
-                {/* Lucro */}
                 <div>
                   <label className="block text-sm font-medium mb-1">Lucro (R$)</label>
                   <input
@@ -241,7 +259,6 @@ function ListaProdutos() {
                   />
                 </div>
 
-                {/* Upload de nova imagem */}
                 <div className="md:col-span-2">
                   <label className="block text-sm font-medium mb-1">Nova Imagem (opcional)</label>
                   <input

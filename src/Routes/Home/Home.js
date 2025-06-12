@@ -29,6 +29,7 @@ function Home() {
   const [categoriaSelecionada, setCategoriaSelecionada] = useState('');
   const [produtosPorCategoria, setProdutosPorCategoria] = useState({});
   const [imagensCarrossel, setImagensCarrossel] = useState([]);
+  const [menuMobileAberto, setMenuMobileAberto] = useState(false);
 
   const abrirModal = (categoria) => {
     setCategoriaSelecionada(categoria);
@@ -89,14 +90,73 @@ function Home() {
 
   return (
     <div>
-      <input id="close-menu" className="close-menu" type="checkbox" aria-label="Close menu" role="button" />
-      <label className="close-menu-label z-[9999]" htmlFor="close-menu" title="close menu"></label>
+      {/* Botão de menu mobile */}
+      <div className="fixed top-4 right-4 z-[1000] md:hidden">
+        <button
+          onClick={() => setMenuMobileAberto(!menuMobileAberto)}
+          className="p-2 rounded bg-gray-800 text-white shadow-lg"
+        >
+          ☰
+        </button>
+      </div>
 
-      <aside className="menu white-bg z-[999]">
+      {/* Menu lateral mobile */}
+      {menuMobileAberto && (
+        <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-80 z-[999] flex flex-col items-center justify-center md:hidden">
+          <div className="bg-white rounded-2xl shadow-2xl p-8 w-11/12 max-w-md text-center">
+            <nav>
+              <ul className="space-y-4 text-lg font-semibold">
+                <li>
+                  <a href="#gallery" onClick={() => setMenuMobileAberto(false)}>
+                    Cardápio 🍴
+                  </a>
+                </li>
+                <li>
+                  <a href="#contact" onClick={() => setMenuMobileAberto(false)}>
+                    Contato 📞
+                  </a>
+                </li>
+                <li>
+                  <a href="/saibamais" onClick={() => setMenuMobileAberto(false)}>
+                    Saiba Mais ℹ️
+                  </a>
+                </li>
+                <li>
+                  <a href="#" onClick={() => setMenuMobileAberto(false)}>
+                    Carrinho 🛒
+                  </a>
+                </li>
+                <li>
+                  <button
+                    onClick={() => {
+                      handleLogout();
+                      setMenuMobileAberto(false);
+                    }}
+                    className="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded w-full"
+                  >
+                    Sair
+                  </button>
+                </li>
+              </ul>
+              <button
+                onClick={() => setMenuMobileAberto(false)}
+                className="mt-6 text-gray-500 hover:text-gray-800"
+              >
+                Fechar ✕
+              </button>
+            </nav>
+          </div>
+        </div>
+      )}
+
+      {/* Menu lateral desktop */}
+      <aside className="menu white-bg z-[999] hidden md:block">
         <div className="h-[150px] main-content menu-content">
           <h1 onClick={() => (document.getElementById('close-menu').checked = false)}>
             <div className="logo">
-              <a href="#home"><img src={logoUnifood} alt="unifood" /></a>
+              <a href="#home">
+                <img src={logoUnifood} alt="unifood" />
+              </a>
             </div>
           </h1>
           <nav>
@@ -105,17 +165,20 @@ function Home() {
               <li><a href="#contact">Contato 📞</a></li>
               <li><a href="/saibamais">Saiba Mais ℹ️</a></li>
               <li><a href="#">Carrinho 🛒</a></li>
-              <button
-                onClick={handleLogout}
-                className="m-4 bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded w-full"
-              >
-                Sair
-              </button>
+              <li>
+                <button
+                  onClick={handleLogout}
+                  className="m-4 bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded w-full"
+                >
+                  Sair
+                </button>
+              </li>
             </ul>
           </nav>
         </div>
       </aside>
 
+      {/* Seção Cardápio */}
       <section id="gallery" className="white-bg section relative z-10">
         <div
           className="absolute inset-0 bg-no-repeat bg-center bg-[length:100%] opacity-[5%] z-0"
@@ -124,26 +187,19 @@ function Home() {
         <div className="main-content max-w-6xl mx-auto px-4 text-center relative z-20">
           <h2 className="grid-main-heading">NOSSO CARDÁPIO</h2>
 
-          <div className="relative w-full
-            h-[250px] md:h-[320px] lg:h-[380px] 
-            mx-auto rounded-2xl overflow-hidden shadow-xl mb-16 z-30">
+          <div className="relative w-full h-[200px] md:h-[260px] lg:h-[300px] mx-auto rounded-2xl overflow-hidden shadow-xl mb-16 z-30">
             <Slider {...carouselSettings}>
               {imagensCarrossel.length > 0 ? (
                 imagensCarrossel.map((item, index) => (
                   <div key={index} className="relative w-full h-full">
-                    <div className="relative w-full h-[250px] md:h-[320px] lg:h-[380px] overflow-hidden">
+                    <div className="relative w-full h-[200px] md:h-[260px] lg:h-[300px] overflow-hidden">
                       <img
                         src={item.img}
                         alt={item.alt}
                         className="w-full h-full object-cover object-center"
                       />
                       {item.caption && (
-                        <div
-                          className="absolute bottom-0 left-0 right-0
-                           bg-gradient-to-t from-black via-black/70 to-transparent 
-                           text-white text-center px-4 py-6
-                           text-xl md:text-2xl lg:text-3xl font-bold z-10"
-                        >
+                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black via-black/70 to-transparent text-white text-center px-4 py-6 text-xl md:text-2xl lg:text-3xl font-bold z-10">
                           <p className="drop-shadow-lg">
                             QUERIDINHOS DA GALERA: {item.caption}
                           </p>
@@ -160,7 +216,6 @@ function Home() {
             </Slider>
           </div>
 
-
           <h3 className="text-4xl font-bold text-gray-800 mb-6">CATEGORIAS</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {Object.keys(produtosPorCategoria).map((categoria, i) => (
@@ -170,9 +225,7 @@ function Home() {
                 onClick={() => abrirModal(categoria)}
               >
                 <img
-                  src={
-                    produtosPorCategoria[categoria][0]?.imagem || pratodecomida
-                  }
+                  src={produtosPorCategoria[categoria][0]?.imagem || pratodecomida}
                   alt={categoria}
                   className="w-full h-56 object-cover transform group-hover:scale-105 transition duration-300"
                 />
@@ -185,6 +238,7 @@ function Home() {
         </div>
       </section>
 
+      {/* Seção Contato */}
       <section id="contact" className="intro main-bg section relative z-10">
         <div className="main-content intro-content">
           <div className="intro-text-content">
@@ -216,6 +270,7 @@ function Home() {
         </div>
       </section>
 
+      {/* Botão de voltar ao topo */}
       <button
         className="back-to-top z-[990]"
         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
@@ -223,6 +278,7 @@ function Home() {
         ➔
       </button>
 
+      {/* Modal de categoria */}
       <ModalCategoria
         isOpen={modalAberto}
         onClose={() => setModalAberto(false)}

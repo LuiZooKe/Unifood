@@ -9,6 +9,7 @@ function CadastroProduto() {
     custo: '',
     quantidade: '',
     imagem: null,
+    id_fornecedor: '',
     nome_fornecedor: '',
     categoria: '',
     unidade_medida: '',
@@ -18,6 +19,7 @@ function CadastroProduto() {
 
   const [mensagem, setMensagem] = useState('');
   const [erro, setErro] = useState('');
+  const [fornecedores, setFornecedores] = useState([]);
 
   const categorias = ['JANTINHAS', 'SALGADOS', 'BEBIDAS', 'SOBREMESAS'];
   const unidades = ['KG', 'LITRO', 'UNIDADE'];
@@ -35,6 +37,21 @@ function CadastroProduto() {
       }));
     }
   }, [produto.preco, produto.custo]);
+
+  useEffect(() => {
+    const fetchFornecedores = async () => {
+      try {
+        const res = await fetch('http://localhost/UNIFOOD/database/fornecedores.php?action=listar');
+        const data = await res.json();
+        if (data.success) {
+          setFornecedores(data.fornecedores);
+        }
+      } catch (err) {
+        console.error('Erro ao buscar fornecedores');
+      }
+    };
+    fetchFornecedores();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
@@ -65,7 +82,7 @@ function CadastroProduto() {
         setErro('');
         setProduto({
           nome: '', descricao: '', preco: '', custo: '', quantidade: '', imagem: null,
-          nome_fornecedor: '', categoria: '', unidade_medida: '',
+          id_fornecedor: '', nome_fornecedor: '', categoria: '', unidade_medida: '',
           lucroRS: '', lucroPorcentagem: ''
         });
       } else {
@@ -108,17 +125,25 @@ function CadastroProduto() {
         </div>
 
         <div>
-          <label className="block mb-1">Nome Fornecedor</label>
+          <label className="block mb-1">Fornecedor</label>
           <select
-            name="nome_fornecedor"
-            value={produto.nome_fornecedor}
-            onChange={handleChange}
+            name="id_fornecedor"
+            value={produto.id_fornecedor}
+            onChange={(e) => {
+              const selectedId = e.target.value;
+              const selectedFornecedor = fornecedores.find(f => f.id.toString() === selectedId);
+              setProduto(prev => ({
+                ...prev,
+                id_fornecedor: selectedId,
+                nome_fornecedor: selectedFornecedor?.nome || ''
+              }));
+            }}
             className="w-full border p-2 rounded text-black"
             required
           >
-            <option value="">Selecione uma categoria</option>
-            {categorias.map((cat) => (
-              <option key={cat} value={cat}>{cat}</option>
+            <option value="">Selecione o fornecedor</option>
+            {fornecedores.map(f => (
+              <option key={f.id} value={f.id}>{f.nome}</option>
             ))}
           </select>
         </div>
