@@ -68,10 +68,24 @@ $sql4 = "CREATE TABLE IF NOT EXISTS fornecedor (
     data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 )";
 
+$sql5 = "CREATE TABLE IF NOT EXISTS clientes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    logradouro VARCHAR(100),
+    numero VARCHAR(10),
+    bairro VARCHAR(50),
+    cidade VARCHAR(50),
+    telefone VARCHAR(20),
+    saldo DECIMAL(10,2),
+    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)";
+
 $conn->query($sql1);
 $conn->query($sql2);
 $conn->query($sql3);
 $conn->query($sql4);
+$conn->query($sql5);
   echo "Banco e tabela criados com sucesso.";
 $conn->close();
 ?>

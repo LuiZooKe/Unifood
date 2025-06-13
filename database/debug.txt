@@ -1,0 +1,7 @@
+Array
+(
+    [nome] => Louis
+    [email] => louis@unifucamp.edu.br
+    [senha] => 12345678
+    [tipo_usuario] => 1
+)

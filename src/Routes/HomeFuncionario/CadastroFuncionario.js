@@ -91,7 +91,7 @@ function CadastroFuncionario() {
     };
 
     try {
-      const response = await fetch('http://localhost/UNIFOOD/database/register.php', {
+      const response = await fetch('http://localhost/UNIFOOD/database/register_funcionario.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formDataFormatado)

@@ -54,7 +54,7 @@ function Cadastro() {
     setErros([]); // limpa erros anteriores
 
     try {
-      const response = await fetch('http://localhost/UNIFOOD/database/register.php', {
+      const response = await fetch('http://localhost/UNIFOOD/database/register_cliente.php', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
