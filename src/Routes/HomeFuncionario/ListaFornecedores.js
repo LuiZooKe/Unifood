@@ -39,10 +39,16 @@ function ListaFornecedores() {
   const salvarEdicao = async () => {
     try {
       const dadosLimpos = {
-        ...editedFornecedor,
-        telefone: editedFornecedor.telefone.replace(/\D/g, ''),
-        cpf: editedFornecedor.cpf.replace(/\D/g, ''),
-        cnpj: editedFornecedor.cnpj.replace(/\D/g, ''),
+        id: editedFornecedor.id, // 👈 garante que o ID seja enviado!
+        nome: editedFornecedor.nome?.trim() || '',
+        email: editedFornecedor.email?.trim() || '',
+        cpf: editedFornecedor.cpf ? editedFornecedor.cpf.replace(/\D/g, '') : '',
+        cnpj: editedFornecedor.cnpj ? editedFornecedor.cnpj.replace(/\D/g, '') : '',
+        logradouro: editedFornecedor.logradouro?.trim() || '',
+        numero: editedFornecedor.numero?.trim() || '',
+        bairro: editedFornecedor.bairro?.trim() || '',
+        cidade: editedFornecedor.cidade?.trim() || '',
+        telefone: editedFornecedor.telefone ? editedFornecedor.telefone.replace(/\D/g, '') : ''
       };
 
       const res = await fetch('http://localhost/UNIFOOD/database/fornecedores.php?action=atualizar', {
@@ -116,8 +122,8 @@ function ListaFornecedores() {
                 {[
                   ['Nome', 'nome'],
                   ['Email', 'email'],
-                  ['CPF', 'cpf', '000.000.000-00', editedFornecedor?.cnpj],
-                  ['CNPJ', 'cnpj', '00.000.000/0000-00', editedFornecedor?.cpf],
+                  ['CPF', 'cpf', '000.000.000-00', 'bloqueado'],
+                  ['CNPJ', 'cnpj', '00.000.000/0000-00', 'bloqueado'],
                   ['Logradouro', 'logradouro'],
                   ['Número', 'numero'],
                   ['Bairro', 'bairro'],
@@ -131,7 +137,7 @@ function ListaFornecedores() {
                         mask={mask}
                         value={editedFornecedor[key] || ''}
                         onAccept={(value) => setEditedFornecedor({ ...editedFornecedor, [key]: value })}
-                        disabled={Boolean(disableIf)}
+                        disabled={disableIf === 'bloqueado'}
                         className="w-full border px-3 py-2 bg-white disabled:bg-gray-200"
                       />
                     ) : (
@@ -139,7 +145,8 @@ function ListaFornecedores() {
                         type="text"
                         value={editedFornecedor[key] || ''}
                         onChange={(e) => setEditedFornecedor({ ...editedFornecedor, [key]: e.target.value })}
-                        className="w-full border px-3 py-2"
+                        disabled={disableIf === 'bloqueado'}
+                        className="w-full border px-3 py-2 bg-white disabled:bg-gray-200"
                       />
                     )}
                   </div>
@@ -147,12 +154,17 @@ function ListaFornecedores() {
               </div>
 
               <div className="flex justify-end gap-2 mt-6">
-                <button onClick={() => setModalEditar(false)} className="bg-gray-400 px-4 py-2 rounded">Cancelar</button>
-                <button onClick={salvarEdicao} className="bg-green-600 px-4 py-2 rounded text-white">Salvar</button>
+                <button onClick={() => setModalEditar(false)} className="bg-gray-400 px-4 py-2 rounded">
+                  Cancelar
+                </button>
+                <button onClick={salvarEdicao} className="bg-green-600 px-4 py-2 rounded text-white">
+                  Salvar
+                </button>
               </div>
             </div>
           </div>
         )}
+
       </div>
     </Dashboard>
   );

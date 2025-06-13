@@ -47,6 +47,29 @@ function CadastroFuncionario() {
     if (!formData.data_nascimento) novosErros.push('Data de nascimento é obrigatória.');
     if (!formData.data_admissao) novosErros.push('Data de admissão é obrigatória.');
 
+    function validarCPF(cpf) {
+      cpf = cpf.replace(/\D/g, '');
+      if (cpf.length !== 11 || /^(\\d)\1+$/.test(cpf)) return false;
+
+      const calcularDigito = (base, fator) => {
+        let soma = 0;
+        for (let i = 0; i < base.length; i++) {
+          soma += parseInt(base.charAt(i)) * (fator - i);
+        }
+        const resto = (soma * 10) % 11;
+        return resto === 10 ? 0 : resto;
+      };
+
+      const d1 = calcularDigito(cpf.slice(0, 9), 10);
+      const d2 = calcularDigito(cpf.slice(0, 10), 11);
+
+      return cpf[9] == d1 && cpf[10] == d2;
+    }
+
+    if (!validarCPF(formData.cpf)) {
+      novosErros.push("CPF inválido.");
+    }
+
     if (novosErros.length > 0) {
       setErros(novosErros);
       setSucesso('');

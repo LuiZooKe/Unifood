@@ -44,6 +44,11 @@ function ListaFuncionarios() {
         cpf: editedFuncionario.cpf.replace(/\D/g, ''),
       };
 
+      if (editedFuncionario.cpf && !validarCPF(editedFuncionario.cpf)) {
+        alert("CPF inválido.");
+        return;
+      }
+
       const res = await fetch('http://localhost/UNIFOOD/database/funcionarios.php?action=atualizar', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -78,6 +83,25 @@ function ListaFuncionarios() {
     const cpfLimpo = cpf.replace(/\D/g, '');
     return cpfLimpo.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
   };
+
+  function validarCPF(cpf) {
+    cpf = cpf.replace(/\D/g, '');
+    if (cpf.length !== 11 || /^(\\d)\1+$/.test(cpf)) return false;
+
+    const calcularDigito = (base, fator) => {
+      let soma = 0;
+      for (let i = 0; i < base.length; i++) {
+        soma += parseInt(base.charAt(i)) * (fator - i);
+      }
+      const resto = (soma * 10) % 11;
+      return resto === 10 ? 0 : resto;
+    };
+
+    const d1 = calcularDigito(cpf.slice(0, 9), 10);
+    const d2 = calcularDigito(cpf.slice(0, 10), 11);
+
+    return cpf[9] == d1 && cpf[10] == d2;
+  }
 
   useEffect(() => {
     fetchFuncionarios();

@@ -81,11 +81,15 @@ if ($action === 'atualizar' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt->bind_param($params, ...$values);
 
     if ($stmt->execute()) {
-        echo json_encode(['success' => true, 'message' => 'Fornecedor atualizado.']);
-    } else {
-        echo json_encode(['success' => false, 'message' => 'Erro ao atualizar fornecedor.']);
-    }
-
+    echo json_encode(['success' => true, 'message' => 'Fornecedor atualizado.']);
+} else {
+    echo json_encode([
+        'success' => false,
+        'message' => 'Erro ao atualizar fornecedor.',
+        'erro_sql' => $stmt->error,         // mostra o erro do MySQL (ex: duplicate key)
+        'dados_recebidos' => $data          // mostra os dados que chegaram via JSON
+    ]);
+}
     $stmt->close();
     $conn->close();
     exit;
