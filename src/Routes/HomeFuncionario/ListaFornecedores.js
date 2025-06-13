@@ -116,14 +116,14 @@ function ListaFornecedores() {
                 {[
                   ['Nome', 'nome'],
                   ['Email', 'email'],
-                  ['CPF', 'cpf', '000.000.000-00'],
-                  ['CNPJ', 'cnpj', '00.000.000/0000-00'],
+                  ['CPF', 'cpf', '000.000.000-00', editedFornecedor?.cnpj],
+                  ['CNPJ', 'cnpj', '00.000.000/0000-00', editedFornecedor?.cpf],
                   ['Logradouro', 'logradouro'],
                   ['Número', 'numero'],
                   ['Bairro', 'bairro'],
                   ['Cidade', 'cidade'],
                   ['Telefone', 'telefone', '(00) 00000-0000'],
-                ].map(([label, key, mask]) => (
+                ].map(([label, key, mask, disableIf]) => (
                   <div key={key}>
                     <label className="block text-sm font-medium mb-1">{label}</label>
                     {mask ? (
@@ -131,7 +131,8 @@ function ListaFornecedores() {
                         mask={mask}
                         value={editedFornecedor[key] || ''}
                         onAccept={(value) => setEditedFornecedor({ ...editedFornecedor, [key]: value })}
-                        className="w-full border px-3 py-2"
+                        disabled={Boolean(disableIf)}
+                        className="w-full border px-3 py-2 bg-white disabled:bg-gray-200"
                       />
                     ) : (
                       <input

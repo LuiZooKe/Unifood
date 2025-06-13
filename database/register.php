@@ -22,7 +22,6 @@ if (!isset($data['nome'], $data['email'], $data['senha'], $data['tipo_usuario'])
 
 function formatDateToSQL($date) {
     if (!$date) return null;
-    // Espera string no formato YYYY-MM-DD
     $dateParts = explode('-', $date);
     if (count($dateParts) === 3) {
         return $date;
@@ -67,6 +66,23 @@ if ($checkStmt->num_rows > 0) {
 }
 $checkStmt->close();
 
+// Verifica se o CPF já existe na tabela funcionario
+if (!empty($cpf)) {
+    $cpfLimpo = preg_replace('/\D/', '', $cpf);
+    $checkCpf = $conn->prepare("SELECT id FROM funcionario WHERE cpf = ?");
+    $checkCpf->bind_param("s", $cpfLimpo);
+    $checkCpf->execute();
+    $checkCpf->store_result();
+
+    if ($checkCpf->num_rows > 0) {
+        echo json_encode(['success' => false, 'message' => 'CPF já cadastrado.']);
+        $checkCpf->close();
+        $conn->close();
+        exit;
+    }
+    $checkCpf->close();
+}
+
 // Inserir na tabela users
 $stmt = $conn->prepare("INSERT INTO users (nome, email, senha, email_confirmado, tipo_usuario) VALUES (?, ?, ?, 'nao', ?)");
 $stmt->bind_param("sssi", $nome, $email, $senha, $tipo_usuario);
@@ -81,7 +97,7 @@ if ($stmt->execute()) {
 
     $stmtFuncionario->bind_param(
         "sssssssssssd",
-        $nome, $email, $cpf, $data_nascimento, $logradouro, $numero,
+        $nome, $email, $cpfLimpo, $data_nascimento, $logradouro, $numero,
         $bairro, $cidade, $telefone, $data_admissao, $cargo, $salario
     );
 

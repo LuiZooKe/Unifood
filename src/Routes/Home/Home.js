@@ -10,7 +10,10 @@ import logoUnifood from './img/logounifood.png';
 import fundocardapio from './img/fundo-cardapio.png';
 import pratodecomida from './img/prato de comida.png';
 
-import { ModalCategoria } from './ModalCategoria.tsx';
+import ModalCategoria from './ts/ModalCategoria.tsx';
+import ModalCarrinho from './ts/ModalCarrinho.tsx';
+import ModalPerfil from './ts/ModalPerfil.tsx';
+
 import './css/elements.css';
 
 const carouselSettings = {
@@ -26,104 +29,31 @@ const carouselSettings = {
 
 function Home() {
   const navigate = useNavigate();
+
   const [modalAberto, setModalAberto] = useState(false);
-  const [abaAberta, setAbaAberta] = useState('inicio');
+  const [abaAberta, setAbaAberta] = useState('dados');
   const [usuario, setUsuario] = useState({ nome: '', email: '', tipo_usuario: '' });
   const [categoriaSelecionada, setCategoriaSelecionada] = useState('');
   const [produtosPorCategoria, setProdutosPorCategoria] = useState({});
   const [imagensCarrossel, setImagensCarrossel] = useState([]);
   const [menuMobileAberto, setMenuMobileAberto] = useState(false);
 
-  // Novo estado para perfil
+  const [modalCarrinhoAberto, setModalCarrinhoAberto] = useState(false);
   const [modalPerfilAberto, setModalPerfilAberto] = useState(false);
-
-  // Função para abrir/perfil modal
-  const abrirModalPerfil = () => {
-    setModalPerfilAberto(true);
-  };
-  const fecharModalPerfil = () => {
-    setModalPerfilAberto(false);
-  };
-
-  // --- Novos estados para o carrinho ---
-  const [modalCarrinhoAberto, setModalCarrinhoAberto] = useState(false); // Controla a visibilidade do modal do carrinho
-  const [itensCarrinho, setItensCarrinho] = useState([]); // Armazena os itens adicionados ao carrinho
-  // --- Fim dos novos estados ---
-  const alterarQuantidadeProduto = (nomeProduto, novaQuantidade) => {
-    if (novaQuantidade < 1) return; // evita quantidade zero ou negativa
-
-    setItensCarrinho((prevItens) =>
-      prevItens.map((item) =>
-        item.nome === nomeProduto
-          ? { ...item, quantidade: novaQuantidade }
-          : item
-      )
-    );
-  };
-
+  const [itensCarrinho, setItensCarrinho] = useState([]);
 
   const abrirModal = (categoria) => {
     setCategoriaSelecionada(categoria);
     setModalAberto(true);
   };
 
-  const renderConteudo = () => {
-    if (abaAberta === 'dados') {
-      return (
-        <div className="mt-6">
-          <h3 className="text-2xl font-semibold mb-4">Seus Dados</h3>
-          <ul className="mb-6 space-y-2 text-gray-700">
-            <li><strong>Nome:</strong> {usuario.nome || 'Não informado'}</li>
-            <li><strong>Email:</strong> {usuario.email || 'Não informado'}</li>
-            <li><strong>Tipo de usuário:</strong> {usuario.tipo_usuario === '1' ? 'Aluno/Professor' : usuario.tipo_usuario === '2' ? 'Responsável' : 'Não informado'}</li>
-          </ul>
+  const abrirModalCarrinho = () => setModalCarrinhoAberto(true);
+  const fecharModalCarrinho = () => setModalCarrinhoAberto(false);
 
-          <button className="mb-3 w-full py-2 px-4 rounded bg-blue-600 hover:bg-blue-700 text-white font-semibold">
-            Alterar Senha
-          </button>
-          <button className="w-full py-2 px-4 rounded bg-yellow-500 hover:bg-yellow-600 text-white font-semibold">
-            Atualizar Dados
-          </button>
-        </div>
-      );
-    }
-
-    if (abaAberta === 'carteira') {
-      return (
-        <div className="mt-6 text-gray-600">
-          Funcionalidade de carteira será adicionada futuramente.
-        </div>
-      );
-    }
-
-    return (
-      <p className="text-gray-600 mt-6">
-        Escolha uma opção abaixo para gerenciar seu perfil.
-      </p>
-    );
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem('usuarioLogado');
-    navigate('/login');
-  };
-
-  // --- Funções para o carrinho ---
-  const abrirModalCarrinho = () => {
-    setModalCarrinhoAberto(true);
-  };
-
-  const fecharModalCarrinho = () => {
-    setModalCarrinhoAberto(false);
-  };
-
-  // Função simulada para adicionar item ao carrinho
-  // Você precisaria integrar essa função a botões de "Adicionar ao Carrinho"
-  // nos seus produtos/ModalCategoria.
   const adicionarAoCarrinho = (produto) => {
     setItensCarrinho((prevItens) => {
-      const itemExistente = prevItens.find((item) => item.nome === produto.nome);
-      if (itemExistente) {
+      const existente = prevItens.find((item) => item.nome === produto.nome);
+      if (existente) {
         return prevItens.map((item) =>
           item.nome === produto.nome ? { ...item, quantidade: item.quantidade + 1 } : item
         );
@@ -139,13 +69,29 @@ function Home() {
     );
   };
 
+  const alterarQuantidadeProduto = (nomeProduto, novaQuantidade) => {
+    if (novaQuantidade < 1) return;
+    setItensCarrinho((prevItens) =>
+      prevItens.map((item) =>
+        item.nome === nomeProduto ? { ...item, quantidade: novaQuantidade } : item
+      )
+    );
+  };
+
   const calcularTotalCarrinho = () => {
     return itensCarrinho
-      .reduce((total, item) => total + parseFloat(item.preco.replace('R$', '').replace(',', '.')) * item.quantidade, 0)
+      .reduce(
+        (total, item) =>
+          total + parseFloat(item.preco.replace('R$', '').replace(',', '.')) * item.quantidade,
+        0
+      )
       .toFixed(2);
   };
-  // --- Fim das funções do carrinho ---
 
+  const handleLogout = () => {
+    localStorage.removeItem('usuarioLogado');
+    navigate('/login');
+  };
 
   useEffect(() => {
     const fetchProdutos = async () => {
@@ -197,7 +143,6 @@ function Home() {
   }, []);
 
   useEffect(() => {
-    // Simulação: busca os dados do usuário logado
     const dadosUsuario = JSON.parse(localStorage.getItem('dadosUsuario') || '{}');
     setUsuario(dadosUsuario);
   }, []);
@@ -494,157 +439,31 @@ function Home() {
         ➔
       </button>
 
-      {/* Modal de categoria */}
       <ModalCategoria
         isOpen={modalAberto}
         onClose={() => setModalAberto(false)}
         categoria={categoriaSelecionada}
         produtos={produtosPorCategoria[categoriaSelecionada] || []}
-        onAddToCart={adicionarAoCarrinho} // Passa a função de adicionar ao carrinho para o ModalCategoria
+        onAddToCart={adicionarAoCarrinho}
       />
 
-      {/* --- Modal do Carrinho --- */}
-      {modalCarrinhoAberto && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[1000] px-4">
-          <div className="bg-white w-full max-w-[100vh] max-h-[100vh] overflow-auto rounded-2xl shadow-xl p-6 sm:p-10 relative text-[clamp(1rem,2.5vw,2rem)]">
+      <ModalCarrinho
+        aberto={modalCarrinhoAberto}
+        itens={itensCarrinho}
+        onFechar={fecharModalCarrinho}
+        onRemover={removerDoCarrinho}
+        onAlterarQuantidade={alterarQuantidadeProduto}
+        calcularTotal={calcularTotalCarrinho}
+      />
 
-            {/* Botão de fechar */}
-            <button
-              onClick={fecharModalCarrinho}
-              className="absolute top-6 right-6 text-gray-500 hover:text-red-500"
-            >
-              <X className="w-10 h-10 sm:w-12 sm:h-12" />
-            </button>
-
-            {/* Título */}
-            <h2 className="text-center mb-10 mt-4 font-extrabold text-gray-800 leading-tight">
-              <span className="block whitespace-nowrap text-[clamp(2.5rem,6vw,4rem)]">CARRINHO</span>
-              <span className="block whitespace-nowrap text-[clamp(2.5rem,5vw,4rem)]">🛒</span>
-            </h2>
-
-            {/* Lista de itens */}
-            {itensCarrinho.length === 0 ? (
-              <p className="text-gray-600 text-center text-[clamp(1.25rem,3vw,2rem)]">
-                Seu carrinho está vazio.
-              </p>
-            ) : (
-              <ul className="space-y-6 max-h-[55vh] overflow-y-auto pr-4 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
-                {itensCarrinho.map((item, index) => (
-                  <li
-                    key={index}
-                    className="flex gap-6 bg-gray-50 p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow"
-                  >
-                    {/* Imagem */}
-                    <img
-                      src={item.imagem}
-                      alt={item.nome}
-                      className="w-[120px] h-[120px] md:w-[150px] md:h-[150px] object-cover rounded-lg flex-shrink-0"
-                    />
-
-                    {/* Infos e ações */}
-                    <div className="flex flex-col justify-between w-full">
-                      {/* Nome e preço */}
-                      <div className="flex flex-col justify-end flex-grow">
-                        <h4 className="font-bold text-gray-800 leading-tight text-[clamp(1.5rem,3vw,2.5rem)] break-words">
-                          {item.nome}
-                        </h4>
-                        <p className="text-gray-600 mt-1 text-[clamp(1.25rem,2.5vw,2rem)]">
-                          Preço: <span className="font-semibold">{item.preco}</span>
-                        </p>
-                      </div>
-
-                      {/* Quantidade e remover */}
-                      <div className="flex flex-col items-end mt-4 gap-2">
-                        <div className="flex items-center gap-4">
-                          <button
-                            onClick={() => alterarQuantidadeProduto(item.nome, item.quantidade - 1)}
-                            className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 text-xl font-bold"
-                          >
-                            −
-                          </button>
-                          <span className="text-2xl font-semibold">{item.quantidade}</span>
-                          <button
-                            onClick={() => alterarQuantidadeProduto(item.nome, item.quantidade + 1)}
-                            className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 text-xl font-bold"
-                          >
-                            +
-                          </button>
-                        </div>
-
-                        <button
-                          onClick={() => removerDoCarrinho(item.nome)}
-                          className="text-red-600 hover:text-red-800 text-lg font-medium"
-                        >
-                          Remover
-                        </button>
-                      </div>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
-
-            {/* Total e botão */}
-            <div className="mt-10 pt-6 border-t border-gray-300 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-6">
-              <p className="text-2xl font-bold text-gray-800">
-                TOTAL: <span className="text-green-600">R$ {calcularTotalCarrinho()}</span>
-              </p>
-              <button
-                onClick={() => alert("Funcionalidade de finalizar compra ainda não implementada!")}
-                className="bg-green-600 hover:bg-green-700 text-white font-bold text-2xl py-4 px-8 rounded-xl shadow-md hover:shadow-xl transition-all"
-              >
-                Finalizar Compra
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-
-
-      {/* --- Fim do Modal do Carrinho --- */}
-
-
-      {modalPerfilAberto && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[1001]">
-          <div className="bg-white w-full max-w-[100vh] max-h-[100vh] overflow-auto rounded-2xl shadow-xl p-6 sm:p-10 relative text-[clamp(1rem,2.5vw,2rem)]">
-            <button
-              onClick={() => setModalPerfilAberto(false)}
-              className="absolute top-4 right-4 text-gray-500 hover:text-red-500"
-            >
-              <X className="w-8 h-8" />
-            </button>
-
-            <h2 className="text-5xl font-bold text-gray-800 mb-4">Meu Perfil</h2>
-
-            <div className="flex gap-4 mt-4">
-              <button
-                onClick={() => setAbaAberta('dados')}
-                className={`flex-1 py-2 px-4 rounded-lg font-semibold ${abaAberta === 'dados' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'}`}
-              >
-                Dados
-              </button>
-              <button
-                onClick={() => setAbaAberta('carteira')}
-                className={`flex-1 py-2 px-4 rounded-lg font-semibold ${abaAberta === 'carteira' ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'}`}
-              >
-                Carteira
-              </button>
-            </div>
-
-            {renderConteudo()}
-
-            <div className="mt-3">
-              <button
-                onClick={handleLogout}
-                className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded w-full"
-              >
-                Desconectar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ModalPerfil
+        aberto={modalPerfilAberto}
+        usuario={usuario}
+        abaAberta={abaAberta}
+        setAbaAberta={setAbaAberta}
+        onFechar={() => setModalPerfilAberto(false)}
+        onLogout={handleLogout}
+      />
 
     </div>
   );

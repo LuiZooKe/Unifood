@@ -46,6 +46,11 @@ if (!$cpf && !$cnpj) {
     exit;
 }
 
+if ($cpf && $cnpj) {
+    echo json_encode(['success' => false, 'message' => 'Preencha apenas CPF ou apenas CNPJ, não ambos']);
+    exit;
+}
+
 // Conexão
 $conn = new mysqli("localhost", "root", "", "unifood_db");
 if ($conn->connect_error) {
