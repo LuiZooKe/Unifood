@@ -65,7 +65,7 @@ function Cadastro() {
       const data = await response.json();
 
       if (data.success) {
-        setErros([]);
+        localStorage.setItem('dadosUsuario', JSON.stringify({ nome, email }));
         navigate('/');
       } else {
         setErros([data.message || 'Erro ao cadastrar.']);
@@ -88,10 +88,10 @@ function Cadastro() {
             Novo por aqui?<br />
           </h2>
           <h3 className="text-4xl font-bold mb-[-30px] leading-snug">Crie sua conta e aproveite</h3>
-          <br/>
+          <br />
           <h3 className="text-4xl font-bold mb-[-20px] leading-snug">todas as vantagens da UNIFOOD!</h3>
           <div className="flex justify-center items-center gap-6 mt-6">
-              <img src={logoUnifood} alt="unifood" className="h-80" />
+            <img src={logoUnifood} alt="unifood" className="h-80" />
             <a href="https://www.unifucamp.edu.br/">
               <img src={logoUniFUCAMP} alt="unifucamp" className="h-22" />
             </a>
@@ -100,8 +100,8 @@ function Cadastro() {
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} 
-      className="w-full lg:w-1/2 flex items-center justify-center bg-white p-10 rounded-r-1x3">
+      <form onSubmit={handleSubmit}
+        className="w-full lg:w-1/2 flex items-center justify-center bg-white p-10 rounded-r-1x3">
         <div className="max-w-md w-full">
           <h1 className="text-gray-800 text-3xl font-bold mb-6 text-center">CADASTRO</h1>
           <label className="block text-gray-700 mb-2" htmlFor="tipoUsuario">Tipo de Usuário</label>

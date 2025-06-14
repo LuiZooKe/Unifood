@@ -13,6 +13,8 @@ import pratodecomida from './img/prato de comida.png';
 import ModalCategoria from './ts/ModalCategoria.tsx';
 import ModalCarrinho from './ts/ModalCarrinho.tsx';
 import ModalPerfil from './ts/ModalPerfil.tsx';
+import PerfilDropdown from './ts/PerfilDropDown.tsx';
+
 
 import './css/elements.css';
 
@@ -33,11 +35,11 @@ function Home() {
   const [modalAberto, setModalAberto] = useState(false);
   const [abaAberta, setAbaAberta] = useState('dados');
   const [usuario, setUsuario] = useState({ nome: '', email: '', tipo_usuario: '' });
+  const [perfilAberto, setPerfilAberto] = useState(false);
   const [categoriaSelecionada, setCategoriaSelecionada] = useState('');
   const [produtosPorCategoria, setProdutosPorCategoria] = useState({});
   const [imagensCarrossel, setImagensCarrossel] = useState([]);
   const [menuMobileAberto, setMenuMobileAberto] = useState(false);
-
   const [modalCarrinhoAberto, setModalCarrinhoAberto] = useState(false);
   const [modalPerfilAberto, setModalPerfilAberto] = useState(false);
   const [itensCarrinho, setItensCarrinho] = useState([]);
@@ -49,6 +51,8 @@ function Home() {
 
   const abrirModalCarrinho = () => setModalCarrinhoAberto(true);
   const fecharModalCarrinho = () => setModalCarrinhoAberto(false);
+  const alternarPerfil = () => setPerfilAberto(!perfilAberto);
+
 
   const adicionarAoCarrinho = (produto) => {
     setItensCarrinho((prevItens) => {
@@ -92,6 +96,22 @@ function Home() {
     localStorage.removeItem('usuarioLogado');
     navigate('/login');
   };
+
+  useEffect(() => {
+  const dadosUsuario = JSON.parse(localStorage.getItem('dadosUsuario') || '{}');
+  if (dadosUsuario.email) {
+    fetch(`http://localhost/UNIFOOD/database/get_perfil.php?email=${dadosUsuario.email}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          setUsuario(data.dados);
+          localStorage.setItem('dadosUsuario', JSON.stringify(data.dados));
+        }
+      })
+      .catch(err => console.error('Erro ao buscar perfil:', err));
+  }
+}, []);
+
 
   useEffect(() => {
     const fetchProdutos = async () => {
@@ -233,8 +253,7 @@ function Home() {
               </button>
               <button
                 onClick={() => {
-                  setModalPerfilAberto(true)
-                  setMenuMobileAberto(false);
+                  alternarPerfil
                 }}
                 className="w-full bg-gradient-to-r from-gray-600 to-gray-900 text-white font-bold text-2xl py-5 rounded-2xl shadow-xl hover:scale-105 transition"
               >
@@ -277,16 +296,21 @@ function Home() {
 
               <li>
                 <a>
-                  <button
-                    onClick={() => {
-
-                      setModalPerfilAberto(true)
-                      setMenuMobileAberto(false);
-                    }}
-                    className="block w-full text-left"
-                  >
-                    Perfil 👤
-                  </button>
+                  <button onClick={alternarPerfil} className="block w-full text-left">Perfil 👤</button>
+                  {perfilAberto && (
+                    <PerfilDropdown
+                      aberto={perfilAberto}
+                      usuario={usuario}
+                      abaAberta={abaAberta}
+                      setAbaAberta={setAbaAberta}
+                      onFechar={() => setPerfilAberto(false)}
+                      onLogout={handleLogout}
+                      onSalvar={(dadosAtualizados) => {
+                        setUsuario(dadosAtualizados);
+                        localStorage.setItem('dadosUsuario', JSON.stringify(dadosAtualizados));
+                      }}
+                    />
+                  )}
                 </a>
               </li>
             </ul>
