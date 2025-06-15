@@ -98,19 +98,19 @@ function Home() {
   };
 
   useEffect(() => {
-  const dadosUsuario = JSON.parse(localStorage.getItem('dadosUsuario') || '{}');
-  if (dadosUsuario.email) {
-    fetch(`http://localhost/UNIFOOD/database/get_perfil.php?email=${dadosUsuario.email}`)
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) {
-          setUsuario(data.dados);
-          localStorage.setItem('dadosUsuario', JSON.stringify(data.dados));
-        }
-      })
-      .catch(err => console.error('Erro ao buscar perfil:', err));
-  }
-}, []);
+    const dadosUsuario = JSON.parse(localStorage.getItem('dadosUsuario') || '{}');
+    if (dadosUsuario.email) {
+      fetch(`http://localhost/UNIFOOD/database/get_perfil.php?email=${dadosUsuario.email}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            setUsuario(data.dados);
+            localStorage.setItem('dadosUsuario', JSON.stringify(data.dados));
+          }
+        })
+        .catch(err => console.error('Erro ao buscar perfil:', err));
+    }
+  }, []);
 
 
   useEffect(() => {
@@ -480,14 +480,17 @@ function Home() {
         calcularTotal={calcularTotalCarrinho}
       />
 
-      <ModalPerfil
-        aberto={modalPerfilAberto}
+      <PerfilDropdown
+        aberto={perfilAberto}
         usuario={usuario}
-        abaAberta={abaAberta}
-        setAbaAberta={setAbaAberta}
-        onFechar={() => setModalPerfilAberto(false)}
+        onFechar={() => setPerfilAberto(false)}
         onLogout={handleLogout}
+        onSalvar={(dadosAtualizados) => {
+          setUsuario(dadosAtualizados);
+          localStorage.setItem('dadosUsuario', JSON.stringify(dadosAtualizados));
+        }}
       />
+
 
     </div>
   );

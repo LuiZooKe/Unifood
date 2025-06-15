@@ -11,17 +11,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 $data = json_decode(file_get_contents("php://input"), true);
 
-if (!isset($data['email'])) {
+if (!isset($data['email']) || !isset($data['senha'])) {
     echo json_encode(['success' => false, 'message' => 'Dados incompletos']);
     exit;
 }
 
-$logradouro = $data['logradouro'] ?? '';
-$numero = $data['numero'] ?? '';
-$bairro = $data['bairro'] ?? '';
-$cidade = $data['cidade'] ?? '';
-$telefone = $data['telefone'] ?? '';
-$email = $data['email'];
+$email = trim($data['email']);
+$senha = password_hash($data['senha'], PASSWORD_DEFAULT);
 
 $conn = new mysqli("localhost", "root", "", "unifood_db");
 
@@ -30,13 +26,13 @@ if ($conn->connect_error) {
     exit;
 }
 
-$stmt = $conn->prepare("UPDATE clientes SET logradouro=?, numero=?, bairro=?, cidade=?, telefone=? WHERE email=?");
-$stmt->bind_param("ssssss", $logradouro, $numero, $bairro, $cidade, $telefone, $email);
+$stmt = $conn->prepare("UPDATE users SET senha = ? WHERE email = ?");
+$stmt->bind_param("ss", $senha, $email);
 
 if ($stmt->execute()) {
-    echo json_encode(['success' => true, 'message' => 'Dados atualizados com sucesso']);
+    echo json_encode(['success' => true, 'message' => 'Senha atualizada com sucesso']);
 } else {
-    echo json_encode(['success' => false, 'message' => 'Erro ao atualizar dados']);
+    echo json_encode(['success' => false, 'message' => 'Erro ao atualizar a senha']);
 }
 
 $stmt->close();
