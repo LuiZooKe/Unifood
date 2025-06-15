@@ -172,7 +172,22 @@ function CadastroFuncionario() {
           onKeyDown={bloquearInputManual}
           onPaste={bloquearInputManual}
         />
-        <Input label="Cargo" name="cargo" value={formData.cargo} onChange={handleChange} />
+        <div>
+          <label className="block mb-1">Cargo</label>
+          <select
+            name="cargo"
+            value={formData.cargo}
+            onChange={handleChange}
+            className="w-full border p-2 rounded text-black"
+            required
+          >
+            <option value="">Selecione o cargo</option>
+            <option value="Caixa">Caixa</option>
+            <option value="Atendente">Atendente</option>
+            <option value="Cozinheira">Cozinheira</option>
+          </select>
+        </div>
+
         <Input
           label="Salário"
           name="salario"

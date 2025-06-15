@@ -166,9 +166,7 @@ function ListaFuncionarios() {
                   ['Bairro', 'bairro'],
                   ['Cidade', 'cidade'],
                   ['Telefone', 'telefone', '(00) 00000-0000'],
-                  ['Data de Admissão', 'data_admissao'],
-                  ['Cargo', 'cargo'],
-                  ['Salário', 'salario']
+                  ['Data de Admissão', 'data_admissao']
                 ].map(([label, key, mask]) => {
                   const isDate = key.includes('data');
                   return (
@@ -200,6 +198,31 @@ function ListaFuncionarios() {
                     </div>
                   );
                 })}
+
+                {/* Cargo antes do Salário */}
+                <div>
+                  <label className="block text-sm font-medium mb-1">Cargo</label>
+                  <select
+                    value={editedFuncionario.cargo || ''}
+                    onChange={(e) => setEditedFuncionario({ ...editedFuncionario, cargo: e.target.value })}
+                    className="w-full border px-3 py-2"
+                  >
+                    <option value="">Selecione o cargo</option>
+                    <option value="Caixa">Caixa</option>
+                    <option value="Atendente">Atendente</option>
+                    <option value="Cozinheira">Cozinheira</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1">Salário</label>
+                  <input
+                    type="text"
+                    value={editedFuncionario.salario || ''}
+                    onChange={(e) => setEditedFuncionario({ ...editedFuncionario, salario: e.target.value })}
+                    className="w-full border px-3 py-2"
+                  />
+                </div>
               </div>
 
               <div className="flex justify-end gap-2 mt-6">
