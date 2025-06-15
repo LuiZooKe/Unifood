@@ -23,7 +23,9 @@ if ($conn->connect_error) {
     exit;
 }
 
-$stmt = $conn->prepare("SELECT nome, email, logradouro, numero, bairro, cidade, telefone, saldo FROM clientes WHERE email = ?");
+$stmt = $conn->prepare("SELECT nome, email, logradouro, numero, bairro, cidade, telefone, saldo,
+    numero_cartao, nome_cartao, validade_cartao, cvv_cartao
+    FROM clientes WHERE email = ?");
 $stmt->bind_param("s", $email);
 $stmt->execute();
 

@@ -81,10 +81,13 @@ $sql5 = "CREATE TABLE IF NOT EXISTS clientes (
     cidade VARCHAR(50),
     telefone VARCHAR(20),
     saldo DECIMAL(10,2),
+    numero_cartao VARCHAR(25),
+    nome_cartao VARCHAR(100),
+    validade_cartao VARCHAR(7),
+    cvv_cartao VARCHAR(5),
     criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 )";
 
-// 🔥 Nova tabela de categorias
 $sql6 = "CREATE TABLE IF NOT EXISTS categorias (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(100) NOT NULL UNIQUE
@@ -98,7 +101,7 @@ $conn->query($sql4);
 $conn->query($sql5);
 $conn->query($sql6);
 
-// Inserir categorias padrão se não existirem
+// Inserir categorias padrão
 $conn->query("INSERT IGNORE INTO categorias (nome) VALUES 
     ('JANTINHAS'), 
     ('SALGADOS'), 

@@ -4,7 +4,6 @@ import IMask from 'imask';
 import AdicionarSaldo from './AdicionarSaldo.tsx';
 import AdicionarCartao from './AdicionarCartao.tsx';
 
-
 interface Usuario {
   nome?: string;
   email?: string;
@@ -20,6 +19,7 @@ interface Cartao {
   numero: string;
   nome: string;
   validade: string;
+  cvv: string;
 }
 
 interface ModalPerfilProps {
@@ -66,6 +66,17 @@ const ModalPerfil: React.FC<ModalPerfilProps> = ({
 
             setDados(prev => ({ ...prev, ...dadosRecebidos }));
             localStorage.setItem('dadosUsuario', JSON.stringify(dadosRecebidos));
+
+            if (data.dados.numero_cartao) {
+              setCartao({
+                numero: data.dados.numero_cartao,
+                nome: data.dados.nome_cartao,
+                validade: data.dados.validade_cartao,
+                cvv: data.dados.cvv_cartao,
+              });
+            } else {
+              setCartao(null);
+            }
           }
         })
         .catch(err => console.error('Erro ao buscar perfil:', err));
@@ -171,8 +182,6 @@ const ModalPerfil: React.FC<ModalPerfilProps> = ({
         "
         onClick={(e) => e.stopPropagation()}
       >
-
-
         <button
           onClick={onFechar}
           className="absolute top-6 right-6 text-gray-500 hover:text-red-500"
@@ -233,7 +242,29 @@ const ModalPerfil: React.FC<ModalPerfilProps> = ({
                 <p><strong>Validade:</strong> {cartao.validade}</p>
                 <button
                   className="mt-3 w-full py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-semibold shadow-md"
-                  onClick={() => setCartao(null)}
+                  onClick={async () => {
+                    if (!dados.email) {
+                      alert('Email não encontrado');
+                      return;
+                    }
+
+                    const res = await fetch('http://localhost/UNIFOOD/database/update_cartao.php', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        email: dados.email,
+                        acao: 'remover'
+                      }),
+                    });
+
+                    const result = await res.json();
+                    if (result.success) {
+                      setCartao(null);
+                      alert('Cartão removido com sucesso!');
+                    } else {
+                      alert('Erro ao remover cartão: ' + result.message);
+                    }
+                  }}
                 >
                   Remover Cartão
                 </button>
@@ -264,10 +295,32 @@ const ModalPerfil: React.FC<ModalPerfilProps> = ({
               />
               <AdicionarCartao
                 visivel={cartaoAberto}
-                onAdicionar={(dadosCartao) => {
-                  setCartao(dadosCartao);
-                  alert('Cartão cadastrado com sucesso!');
-                  setCartaoAberto(false);
+                onAdicionar={async (dadosCartao) => {
+                  if (!dados.email) {
+                    alert('Email não encontrado');
+                    return;
+                  }
+
+                  const res = await fetch('http://localhost/UNIFOOD/database/update_cartao.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      email: dados.email,
+                      numero_cartao: dadosCartao.numero,
+                      nome_cartao: dadosCartao.nome,
+                      validade_cartao: dadosCartao.validade,
+                      cvv_cartao: dadosCartao.cvv,
+                    }),
+                  });
+
+                  const result = await res.json();
+                  if (result.success) {
+                    setCartao(dadosCartao);
+                    alert('Cartão cadastrado com sucesso!');
+                    setCartaoAberto(false);
+                  } else {
+                    alert('Erro ao cadastrar cartão: ' + result.message);
+                  }
                 }}
               />
             </div>

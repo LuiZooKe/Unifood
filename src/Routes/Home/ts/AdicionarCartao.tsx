@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { IMaskInput } from 'react-imask';
 
 interface AdicionarCartaoProps {
   visivel: boolean;
@@ -37,13 +38,14 @@ const AdicionarCartao: React.FC<AdicionarCartaoProps> = ({
     <div className="w-full bg-white/40 backdrop-blur-md rounded-2xl shadow-md p-4">
       <h2 className="text-5xl font-bold mb-4 text-center">Adicionar Cartão</h2>
       <div className="flex flex-col gap-2">
-        <input
-          type="text"
+        <IMaskInput
+          mask="0000 0000 0000 0000"
           placeholder="Número do Cartão"
           value={numero}
-          onChange={(e) => setNumero(e.target.value)}
+          onAccept={(value) => setNumero(value)}
           className="w-full border border-gray-300 rounded-xl px-3 py-2"
         />
+
         <input
           type="text"
           placeholder="Nome no Cartão"
@@ -51,20 +53,23 @@ const AdicionarCartao: React.FC<AdicionarCartaoProps> = ({
           onChange={(e) => setNome(e.target.value)}
           className="w-full border border-gray-300 rounded-xl px-3 py-2"
         />
-        <input
-          type="text"
+
+        <IMaskInput
+          mask="00/00"
           placeholder="Validade (MM/AA)"
           value={validade}
-          onChange={(e) => setValidade(e.target.value)}
+          onAccept={(value) => setValidade(value)}
           className="w-full border border-gray-300 rounded-xl px-3 py-2"
         />
-        <input
-          type="password"
+
+        <IMaskInput
+          mask="0000"
           placeholder="CVV"
           value={cvv}
-          onChange={(e) => setCvv(e.target.value)}
+          onAccept={(value) => setCvv(value)}
           className="w-full border border-gray-300 rounded-xl px-3 py-2"
         />
+
         <button
           onClick={handleAdicionar}
           className="w-full py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-semibold"

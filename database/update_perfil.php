@@ -16,12 +16,16 @@ if (!isset($data['email'])) {
     exit;
 }
 
-$logradouro = $data['logradouro'] ?? '';
-$numero = $data['numero'] ?? '';
-$bairro = $data['bairro'] ?? '';
-$cidade = $data['cidade'] ?? '';
-$telefone = $data['telefone'] ?? '';
-$email = $data['email'];
+function tratarCampo($valor) {
+    return (isset($valor) && trim($valor) !== '') ? trim($valor) : null;
+}
+
+$logradouro = tratarCampo($data['logradouro'] ?? null);
+$numero     = tratarCampo($data['numero'] ?? null);
+$bairro     = tratarCampo($data['bairro'] ?? null);
+$cidade     = tratarCampo($data['cidade'] ?? null);
+$telefone   = tratarCampo($data['telefone'] ?? null);
+$email      = trim($data['email']);
 
 $conn = new mysqli("localhost", "root", "", "unifood_db");
 
@@ -30,8 +34,21 @@ if ($conn->connect_error) {
     exit;
 }
 
-$stmt = $conn->prepare("UPDATE clientes SET logradouro=?, numero=?, bairro=?, cidade=?, telefone=? WHERE email=?");
-$stmt->bind_param("ssssss", $logradouro, $numero, $bairro, $cidade, $telefone, $email);
+$stmt = $conn->prepare("
+    UPDATE clientes 
+    SET logradouro = ?, numero = ?, bairro = ?, cidade = ?, telefone = ? 
+    WHERE email = ?
+");
+
+$stmt->bind_param(
+    "ssssss",
+    $logradouro,
+    $numero,
+    $bairro,
+    $cidade,
+    $telefone,
+    $email
+);
 
 if ($stmt->execute()) {
     echo json_encode(['success' => true, 'message' => 'Dados atualizados com sucesso']);
