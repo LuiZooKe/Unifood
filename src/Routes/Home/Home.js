@@ -12,7 +12,7 @@ import pratodecomida from './img/prato de comida.png';
 
 import ModalCategoria from './ts/ModalCategoria.tsx';
 import ModalCarrinho from './ts/ModalCarrinho.tsx';
-import PerfilDropdown from './ts/PerfilDropDown.tsx';
+import ModalPerfil from './ts/ModalPerfil.tsx';
 
 import './css/elements.css';
 
@@ -323,7 +323,7 @@ function Home() {
                   </button>
 
                   {perfilAberto && (
-                    <PerfilDropdown
+                    <ModalPerfil
                       aberto={perfilAberto}
                       usuario={usuario}
                       abaAberta={abaAberta}
@@ -506,7 +506,7 @@ function Home() {
         calcularTotal={calcularTotalCarrinho}
       />
 
-      <PerfilDropdown
+      <ModalPerfil
         aberto={perfilAberto}
         usuario={usuario}
         onFechar={() => setPerfilAberto(false)}

@@ -1,17 +1,16 @@
-// ⚠️ CÓDIGO COMPLETO – ListaProdutos.js com filtro de PRODUTOS e ESTOQUE
 import React, { useEffect, useState } from 'react';
 import Dashboard from './Dashboard';
 
 function ListaProdutos() {
   const [produtos, setProdutos] = useState([]);
   const [fornecedores, setFornecedores] = useState([]);
+  const [categorias, setCategorias] = useState([]);
   const [erro, setErro] = useState('');
   const [modalDescricao, setModalDescricao] = useState(null);
   const [modalEditar, setModalEditar] = useState(false);
   const [editedProduto, setEditedProduto] = useState(null);
   const [filtro, setFiltro] = useState('PRODUTOS');
 
-  const categorias = ['JANTINHAS', 'SALGADOS', 'BEBIDAS', 'SOBREMESAS', 'ESTOQUE'];
   const unidades = ['KG', 'LITRO', 'UNIDADE'];
 
   const fetchProdutos = async () => {
@@ -35,8 +34,20 @@ function ListaProdutos() {
       if (data.success) {
         setFornecedores(data.fornecedores);
       }
-    } catch (error) {
-      console.error('Erro ao carregar fornecedores:', error);
+    } catch {
+      console.error('Erro ao carregar fornecedores');
+    }
+  };
+
+  const fetchCategorias = async () => {
+    try {
+      const res = await fetch('http://localhost/UNIFOOD/database/categorias.php?action=listar');
+      const data = await res.json();
+      if (data.success) {
+        setCategorias(data.categorias);
+      }
+    } catch {
+      console.error('Erro ao carregar categorias');
     }
   };
 
@@ -93,6 +104,7 @@ function ListaProdutos() {
   useEffect(() => {
     fetchProdutos();
     fetchFornecedores();
+    fetchCategorias();
   }, []);
 
   useEffect(() => {
@@ -183,7 +195,7 @@ function ListaProdutos() {
 
         {modalDescricao && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 overflow-auto">
-            <div className="bg-white text-black p-6 rounded shadow w-full max-w-md mx-4 ml-[20%]">
+            <div className="bg-white text-black p-6 rounded shadow w-full max-w-md mx-4">
               <h3 className="text-3xl font-bold mb-4">{modalDescricao.nome}</h3>
               {modalDescricao.imagem && (
                 <img
@@ -214,7 +226,7 @@ function ListaProdutos() {
 
         {modalEditar && editedProduto && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 overflow-auto">
-            <div className="bg-white text-black p-6 rounded shadow w-full max-w-[700px] mx-4 ml-[20%]">
+            <div className="bg-white text-black p-6 rounded shadow w-full max-w-[700px] mx-4">
               <h3 className="text-3xl font-bold mb-6">Editar Produto</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {[
@@ -281,7 +293,7 @@ function ListaProdutos() {
                   >
                     <option value="">Selecione a categoria</option>
                     {categorias.map((cat) => (
-                      <option key={cat} value={cat}>{cat}</option>
+                      <option key={cat.id} value={cat.nome}>{cat.nome}</option>
                     ))}
                   </select>
                 </div>

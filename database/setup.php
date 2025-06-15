@@ -4,14 +4,17 @@ $user = "root";
 $pass = "";
 $dbName = "unifood_db";
 
+// Conectar
 $conn = new mysqli($host, $user, $pass);
 if ($conn->connect_error) {
     die("Falha na conexão: " . $conn->connect_error);
 }
 
+// Criar banco de dados
 $conn->query("CREATE DATABASE IF NOT EXISTS $dbName");
 $conn->select_db($dbName);
 
+// Criar tabelas
 $sql1 = "CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     tipo_usuario INT NOT NULL,
@@ -81,11 +84,30 @@ $sql5 = "CREATE TABLE IF NOT EXISTS clientes (
     criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 )";
 
+// 🔥 Nova tabela de categorias
+$sql6 = "CREATE TABLE IF NOT EXISTS categorias (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL UNIQUE
+)";
+
+// Executar criação das tabelas
 $conn->query($sql1);
 $conn->query($sql2);
 $conn->query($sql3);
 $conn->query($sql4);
 $conn->query($sql5);
-  echo "Banco e tabela criados com sucesso.";
+$conn->query($sql6);
+
+// Inserir categorias padrão se não existirem
+$conn->query("INSERT IGNORE INTO categorias (nome) VALUES 
+    ('JANTINHAS'), 
+    ('SALGADOS'), 
+    ('BEBIDAS'), 
+    ('SOBREMESAS'), 
+    ('ESTOQUE')
+");
+
+echo "Banco de dados e tabelas criados com sucesso.";
+
 $conn->close();
 ?>

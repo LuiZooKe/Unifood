@@ -42,9 +42,9 @@ const ModalCarrinho: React.FC<ModalCarrinhoProps> = ({
     >
       <div
         className="
-          bg-gradient-to-br from-white/80 to-white/50 backdrop-blur-lg
+          bg-white/95 backdrop-blur-md
           w-[90%] max-w-[500px] h-[90%]
-          md:w-[400px] md:h-auto 
+          md:w-[380px] md:h-auto 
           rounded-3xl shadow-xl 
           overflow-auto relative 
           px-6 py-8
@@ -56,11 +56,11 @@ const ModalCarrinho: React.FC<ModalCarrinhoProps> = ({
           onClick={onFechar}
           className="absolute top-6 right-6 text-gray-500 hover:text-red-500"
         >
-          <X className="w-8 h-8" />
+          <X className="w-10 h-10 sm:w-12 sm:h-12" />
         </button>
 
         {/* Título */}
-        <h2 className="text-center mb-6 font-extrabold text-gray-800 leading-tight">
+        <h2 className="text-center mb-8 mt-4 font-extrabold text-gray-800 leading-tight">
           <span className="block text-[clamp(2.5rem,6vw,4rem)]">CARRINHO 🛒</span>
         </h2>
 
@@ -72,7 +72,7 @@ const ModalCarrinho: React.FC<ModalCarrinhoProps> = ({
             {itens.map((item) => (
               <div
                 key={item.nome}
-                className="flex gap-4 bg-white/70 backdrop-blur-md rounded-xl p-4 shadow"
+                className="flex gap-4 bg-white rounded-xl p-4 shadow"
               >
                 <img
                   src={item.imagem}
