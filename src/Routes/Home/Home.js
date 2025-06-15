@@ -12,9 +12,7 @@ import pratodecomida from './img/prato de comida.png';
 
 import ModalCategoria from './ts/ModalCategoria.tsx';
 import ModalCarrinho from './ts/ModalCarrinho.tsx';
-import ModalPerfil from './ts/ModalPerfil.tsx';
 import PerfilDropdown from './ts/PerfilDropDown.tsx';
-
 
 import './css/elements.css';
 
@@ -41,19 +39,38 @@ function Home() {
   const [imagensCarrossel, setImagensCarrossel] = useState([]);
   const [menuMobileAberto, setMenuMobileAberto] = useState(false);
   const [modalCarrinhoAberto, setModalCarrinhoAberto] = useState(false);
-  const [modalPerfilAberto, setModalPerfilAberto] = useState(false);
   const [itensCarrinho, setItensCarrinho] = useState([]);
 
+  // 🔥 Funções de controle geral
+  const fecharTudo = () => {
+    setMenuMobileAberto(false);
+    setModalCarrinhoAberto(false);
+    setPerfilAberto(false);
+    setModalAberto(false);
+  };
+
+  const abrirMenu = () => {
+    fecharTudo();
+    setMenuMobileAberto(true);
+  };
+
   const abrirModal = (categoria) => {
+    fecharTudo();
     setCategoriaSelecionada(categoria);
     setModalAberto(true);
   };
 
-  const abrirModalCarrinho = () => setModalCarrinhoAberto(true);
-  const fecharModalCarrinho = () => setModalCarrinhoAberto(false);
-  const alternarPerfil = () => setPerfilAberto(!perfilAberto);
+  const abrirModalCarrinho = () => {
+    fecharTudo();
+    setModalCarrinhoAberto(true);
+  };
 
+  const abrirPerfil = () => {
+    fecharTudo();
+    setPerfilAberto(true);
+  };
 
+  // 🔥 Carrinho
   const adicionarAoCarrinho = (produto) => {
     setItensCarrinho((prevItens) => {
       const existente = prevItens.find((item) => item.nome === produto.nome);
@@ -97,6 +114,7 @@ function Home() {
     navigate('/login');
   };
 
+  // 🔥 Buscar dados do usuário
   useEffect(() => {
     const dadosUsuario = JSON.parse(localStorage.getItem('dadosUsuario') || '{}');
     if (dadosUsuario.email) {
@@ -112,7 +130,7 @@ function Home() {
     }
   }, []);
 
-
+  // 🔥 Buscar produtos
   useEffect(() => {
     const fetchProdutos = async () => {
       try {
@@ -162,17 +180,18 @@ function Home() {
     fetchProdutos();
   }, []);
 
+  // 🔥 Sincronizar dados do usuário local
   useEffect(() => {
     const dadosUsuario = JSON.parse(localStorage.getItem('dadosUsuario') || '{}');
     setUsuario(dadosUsuario);
   }, []);
 
+  // 🔥 Inicio do return
   return (
     <div>
-      {/* Topo do menu mobile – visível somente quando o menu está fechado */}
-      {!menuMobileAberto && (
+      {/* ✅ Topo do menu mobile */}
+      {!(menuMobileAberto || modalCarrinhoAberto || perfilAberto) && (
         <div className="fixed top-0 left-0 right-0 z-[9999] md:hidden bg-[rgb(82,0,0)] shadow-md h-[9rem] flex items-center">
-          {/* Logo à esquerda */}
           <div className="pl-4 flex items-center">
             <img
               src={logoUnifood}
@@ -181,9 +200,8 @@ function Home() {
             />
           </div>
 
-          {/* Botão do menu à direita com texto */}
           <button
-            onClick={() => setMenuMobileAberto(true)}
+            onClick={abrirMenu}
             className="absolute right-4 top-1/2 transform -translate-y-1/2 px-12 py-3 rounded text-white shadow-lg text-4xl font-extrabold flex items-center gap-3"
           >
             MENU <span className="text-5xl">☰</span>
@@ -191,71 +209,68 @@ function Home() {
         </div>
       )}
 
-
-
-      {/* Menu mobile expandido */}
+      {/* ✅ Menu mobile expandido */}
       {menuMobileAberto && (
-        <div className="fixed top-0 left-0 w-full h-screen bg-black bg-opacity-50 backdrop-blur-xl z-[999] flex items-center justify-center md:hidden px-4">
-          <div className="w-[90%] h-[90%] flex flex-col justify-center items-center p-6 overflow-y-auto text-center rounded-3xl relative">
+        <div
+          className="fixed inset-0 z-[9999] bg-black/70 backdrop-blur-xl flex items-center justify-center md:hidden"
+          onClick={fecharTudo}
+        >
+          <div
+            className="w-full h-full flex flex-col justify-center items-center p-6 overflow-y-auto text-center relative"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={fecharTudo}
+              className="absolute top-[3.3rem] right-[4.4rem] text-white text-4xl font-extrabold"
+            >
+              FECHAR MENU ✕
+            </button>
 
-            {/* Botão fechar no topo direito */}
-            <div className="absolute top-1 right-6">
-              <button
-                onClick={() => setMenuMobileAberto(false)}
-                className="text-white text-3xl font-bold flex items-center gap-2"
-              >
-                FECHAR MENU ✕
-              </button>
-            </div>
+            <img
+              src={logoUnifood}
+              alt="Unifood"
+              className="w-[24rem] object-contain drop-shadow-lg mb-[-6rem]"
+            />
 
-            <nav className="flex flex-col items-center justify-center w-full gap-6 mt-16">
-              {/* Logo dentro do menu */}
-              <a href="#gallery"
-                onClick={() => setMenuMobileAberto(false)}
-                className="w-full flex justify-center">
-                <img
-                  src={logoUnifood}
-                  alt="Unifood"
-                  className="h-[28rem] object-contain drop-shadow-lg mt-[-8rem]"
-                />
-              </a>
-
-              {/* Links do menu */}
+            <nav className="flex flex-col items-center justify-center w-full gap-5">
               <a
                 href="#gallery"
-                onClick={() => setMenuMobileAberto(false)}
-                className="w-full bg-gradient-to-r from-red-400 to-red-600 text-white font-bold text-2xl py-5 rounded-2xl shadow-xl hover:scale-105 transition mt-[-8rem]"
+                onClick={fecharTudo}
+                className="w-[90%] bg-gradient-to-r from-red-400 to-red-600 text-white font-bold text-2xl py-4 rounded-2xl shadow-xl hover:scale-105 transition"
               >
                 🍴 Cardápio
               </a>
               <a
                 href="#contact"
-                onClick={() => setMenuMobileAberto(false)}
-                className="w-full bg-gradient-to-r from-pink-300 to-pink-500 text-white font-bold text-2xl py-5 rounded-2xl shadow-xl hover:scale-105 transition"
+                onClick={fecharTudo}
+                className="w-[90%] bg-gradient-to-r from-pink-300 to-pink-500 text-white font-bold text-2xl py-4 rounded-2xl shadow-xl hover:scale-105 transition"
               >
                 📞 Contato
               </a>
               <a
                 href="/saibamais"
-                onClick={() => setMenuMobileAberto(false)}
-                className="w-full bg-gradient-to-r from-blue-300 to-blue-500 text-white font-bold text-2xl py-5 rounded-2xl shadow-xl hover:scale-105 transition"
+                onClick={fecharTudo}
+                className="w-[90%] bg-gradient-to-r from-blue-300 to-blue-500 text-white font-bold text-2xl py-4 rounded-2xl shadow-xl hover:scale-105 transition"
               >
                 ℹ️ Saiba Mais
               </a>
+
               <button
                 onClick={() => {
+                  fecharTudo();
                   abrirModalCarrinho();
-                  setMenuMobileAberto(false);
                 }}
-                className="w-full bg-gradient-to-r from-green-300 to-green-500 text-white font-bold text-2xl py-5 rounded-2xl shadow-xl hover:scale-105 transition"
+                className="w-[90%] bg-gradient-to-r from-green-300 to-green-500 text-white font-bold text-2xl py-4 rounded-2xl shadow-xl hover:scale-105 transition"
               >
                 🛒 Carrinho
               </button>
+
               <button
                 onClick={() => {
-                  alternarPerfil
+                  fecharTudo();
+                  abrirPerfil();
                 }}
-                className="w-full bg-gradient-to-r from-gray-600 to-gray-900 text-white font-bold text-2xl py-5 rounded-2xl shadow-xl hover:scale-105 transition"
+                className="w-[90%] bg-gradient-to-r from-gray-600 to-gray-900 text-white font-bold text-2xl py-4 rounded-2xl shadow-xl hover:scale-105 transition"
               >
                 👤 Perfil
               </button>
@@ -265,14 +280,17 @@ function Home() {
       )}
 
 
-      {/* Menu lateral desktop */}
+      {/* ✅ Menu lateral desktop */}
       <aside className="menu white-bg z-[999] hidden md:block">
         <div className="h-[14rem] main-content menu-content">
           <h1>
             <div className="logo">
               <a href="#home">
-                <img src={logoUnifood} alt="unifood"
-                  className="min-w-[15rem] object-contain drop-shadow-lg" />
+                <img
+                  src={logoUnifood}
+                  alt="unifood"
+                  className="min-w-[15rem] object-contain drop-shadow-lg"
+                />
               </a>
             </div>
           </h1>
@@ -281,6 +299,7 @@ function Home() {
               <li><a href="#gallery">Cardápio 🍴</a></li>
               <li><a href="#contact">Contato 📞</a></li>
               <li><a href="/saibamais">Saiba Mais ℹ️</a></li>
+
               <li>
                 <a
                   href="#"
@@ -296,14 +315,20 @@ function Home() {
 
               <li>
                 <a>
-                  <button onClick={alternarPerfil} className="block w-full text-left">Perfil 👤</button>
+                  <button
+                    onClick={abrirPerfil}
+                    className="block w-full text-left"
+                  >
+                    Perfil 👤
+                  </button>
+
                   {perfilAberto && (
                     <PerfilDropdown
                       aberto={perfilAberto}
                       usuario={usuario}
                       abaAberta={abaAberta}
                       setAbaAberta={setAbaAberta}
-                      onFechar={() => setPerfilAberto(false)}
+                      onFechar={fecharTudo}
                       onLogout={handleLogout}
                       onSalvar={(dadosAtualizados) => {
                         setUsuario(dadosAtualizados);
@@ -318,7 +343,8 @@ function Home() {
         </div>
       </aside>
 
-      {/* Seção Cardápio */}
+      {/*  Carrossel */}
+
       <section id="gallery" className="white-bg section relative z-10">
         <div
           className="absolute inset-0 bg-no-repeat bg-center bg-[length:100%] opacity-[5%] z-0"
@@ -474,7 +500,7 @@ function Home() {
       <ModalCarrinho
         aberto={modalCarrinhoAberto}
         itens={itensCarrinho}
-        onFechar={fecharModalCarrinho}
+        onFechar={fecharTudo}
         onRemover={removerDoCarrinho}
         onAlterarQuantidade={alterarQuantidadeProduto}
         calcularTotal={calcularTotalCarrinho}

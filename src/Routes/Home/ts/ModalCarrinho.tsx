@@ -10,56 +10,74 @@ interface Produto {
 
 interface ModalCarrinhoProps {
   aberto: boolean;
-  itens: Produto[];
   onFechar: () => void;
-  onRemover: (nomeProduto: string) => void;
-  onAlterarQuantidade: (nomeProduto: string, novaQuantidade: number) => void;
+  itens: Produto[];
   calcularTotal: () => string;
+  onAlterarQuantidade: (nome: string, novaQuantidade: number) => void;
+  onRemover: (nome: string) => void;
+  onFinalizarCompra: () => void;
 }
 
-function ModalCarrinho({
+const ModalCarrinho: React.FC<ModalCarrinhoProps> = ({
   aberto,
-  itens,
   onFechar,
-  onRemover,
-  onAlterarQuantidade,
+  itens,
   calcularTotal,
-}: ModalCarrinhoProps) {
+  onAlterarQuantidade,
+  onRemover,
+  onFinalizarCompra,
+}) => {
   if (!aberto) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[1000] px-4">
-      <div className="bg-white w-full max-w-[100vh] max-h-[100vh] overflow-auto rounded-2xl shadow-xl p-6 sm:p-10 relative text-[clamp(1rem,2.5vw,2rem)]">
-        {/* Botão de fechar */}
+    <div
+      className={`
+        fixed inset-0 z-[9999]
+        flex items-center justify-center
+        md:inset-auto md:top-28 md:right-[3.5rem] md:items-start md:justify-end
+        bg-black/70 backdrop-blur-xl md:bg-transparent
+        md:rounded-3xl shadow-2xl
+      `}
+      onClick={onFechar}
+    >
+      <div
+        className="
+          bg-gradient-to-br from-white/80 to-white/50 backdrop-blur-lg
+          w-[90%] max-w-[500px] h-[90%]
+          md:w-[400px] md:h-auto 
+          rounded-3xl shadow-xl 
+          overflow-auto relative 
+          px-6 py-8
+        "
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Botão fechar */}
         <button
           onClick={onFechar}
           className="absolute top-6 right-6 text-gray-500 hover:text-red-500"
         >
-          <X className="w-10 h-10 sm:w-12 sm:h-12" />
+          <X className="w-8 h-8" />
         </button>
 
         {/* Título */}
-        <h2 className="text-center mb-10 mt-4 font-extrabold text-gray-800 leading-tight">
-          <span className="block whitespace-nowrap text-[clamp(2.5rem,6vw,4rem)]">CARRINHO</span>
-          <span className="block whitespace-nowrap text-[clamp(2.5rem,5vw,4rem)]">🛒</span>
+        <h2 className="text-center mb-6 font-extrabold text-gray-800 leading-tight">
+          <span className="block text-[clamp(2.5rem,6vw,4rem)]">CARRINHO 🛒</span>
         </h2>
 
-        {/* Lista de itens */}
+        {/* Itens */}
         {itens.length === 0 ? (
-          <p className="text-gray-600 text-center text-[clamp(1.25rem,3vw,2rem)]">
-            Seu carrinho está vazio.
-          </p>
+          <p className="text-center text-gray-700">Seu carrinho está vazio.</p>
         ) : (
-          <ul className="space-y-6 max-h-[55vh] overflow-y-auto pr-4 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
-            {itens.map((item, index) => (
-              <li
-                key={index}
-                className="flex gap-6 bg-gray-50 p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow"
+          <div className="space-y-4 max-h-[50vh] md:max-h-[60vh] overflow-y-auto pr-2">
+            {itens.map((item) => (
+              <div
+                key={item.nome}
+                className="flex gap-4 bg-white/70 backdrop-blur-md rounded-xl p-4 shadow"
               >
                 <img
                   src={item.imagem}
                   alt={item.nome}
-                  className="w-[120px] h-[120px] md:w-[150px] md:h-[150px] object-cover rounded-lg flex-shrink-0"
+                  className="w-[80px] h-[80px] md:w-[100px] md:h-[100px] object-cover rounded-lg flex-shrink-0"
                 />
 
                 <div className="flex flex-col justify-between w-full">
@@ -97,25 +115,34 @@ function ModalCarrinho({
                     </button>
                   </div>
                 </div>
-              </li>
+              </div>
             ))}
-          </ul>
+          </div>
         )}
 
-        <div className="mt-10 pt-6 border-t border-gray-300 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-6">
-          <p className="text-2xl font-bold text-gray-800">
-            TOTAL: <span className="text-green-600">R$ {calcularTotal()}</span>
-          </p>
-          <button
-            onClick={() => alert("Funcionalidade de finalizar compra ainda não implementada!")}
-            className="bg-green-600 hover:bg-green-700 text-white font-bold text-2xl py-4 px-8 rounded-xl shadow-md hover:shadow-xl transition-all"
-          >
-            Finalizar Compra
-          </button>
-        </div>
+        {/* Total e Finalizar */}
+        {itens.length > 0 && (
+          <div className="mt-10 pt-6 border-t border-gray-300 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-6">
+            <p className="text-2xl font-bold text-gray-800">
+              TOTAL: <span className="text-green-600">R$ {calcularTotal()}</span>
+            </p>
+            <button
+              onClick={onFinalizarCompra}
+              className="
+                bg-green-600 hover:bg-green-700 
+                text-white font-bold text-2xl 
+                py-4 px-8 rounded-xl 
+                shadow-md hover:shadow-xl 
+                transition-all
+              "
+            >
+              Finalizar Compra
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
-}
+};
 
 export default ModalCarrinho;

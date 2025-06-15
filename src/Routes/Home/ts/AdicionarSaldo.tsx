@@ -1,19 +1,15 @@
 import React, { useState } from 'react';
 
 interface AdicionarSaldoProps {
-  aberto: boolean;
-  onFechar: () => void;
+  visivel: boolean;
   onAdicionar: (valor: number) => void;
 }
 
 const AdicionarSaldo: React.FC<AdicionarSaldoProps> = ({
-  aberto,
-  onFechar,
+  visivel,
   onAdicionar,
 }) => {
   const [valor, setValor] = useState('');
-
-  if (!aberto) return null;
 
   const formatarValor = (valor: string) => {
     const numeros = valor.replace(/\D/g, '');
@@ -37,36 +33,27 @@ const AdicionarSaldo: React.FC<AdicionarSaldoProps> = ({
     }
     onAdicionar(valorNum);
     setValor('');
-    onFechar();
   };
 
+  if (!visivel) return null;
+
   return (
-    <div className="absolute inset-0 z-[9999] bg-black/50 flex justify-center items-center">
-      <div className="bg-white rounded-2xl shadow-2xl p-6 w-[90%] md:w-[360px]">
-        <h2 className="text-5xl font-bold text-center mb-4">
-          Adicionar Saldo
-        </h2>
+    <div className="w-full bg-white/40 backdrop-blur-md rounded-2xl shadow-md p-4">
+      <h2 className="text-5xl font-bold mb-4 text-center">Adicionar Saldo</h2>
+      <div className="flex flex-col gap-3">
         <input
           type="text"
           placeholder="Digite o valor"
           value={valor}
           onChange={handleValorChange}
-          className="w-full border border-gray-300 rounded-xl px-3 py-2 mb-4"
+          className="w-full border border-gray-300 rounded-xl px-3 py-2"
         />
-        <div className="flex gap-2">
-          <button
-            onClick={handleAdicionar}
-            className="flex-1 py-2 rounded-xl bg-green-600 hover:bg-green-700 text-white font-semibold"
-          >
-            Adicionar
-          </button>
-          <button
-            onClick={onFechar}
-            className="flex-1 py-2 rounded-xl bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold"
-          >
-            Cancelar
-          </button>
-        </div>
+        <button
+          onClick={handleAdicionar}
+          className="w-full py-2 rounded-xl bg-green-600 hover:bg-green-700 text-white font-semibold"
+        >
+          Adicionar
+        </button>
       </div>
     </div>
   );
