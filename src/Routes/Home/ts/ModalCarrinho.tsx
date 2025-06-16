@@ -1,8 +1,5 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { X } from 'lucide-react';
-import Pagamento from './Pagamento.tsx';
-import Pix from './Pix.tsx';
-import PagamentoConfirm from './PagamentoConfirm.tsx';
 
 interface Produto {
   nome: string;
@@ -21,79 +18,30 @@ interface Usuario {
 interface ModalCarrinhoProps {
   aberto: boolean;
   onFechar: () => void;
+  onAbrirPagamento: () => void; // 🔥 Nova prop
   itens: Produto[];
   calcularTotal: () => string;
   onAlterarQuantidade: (nome: string, novaQuantidade: number) => void;
   onRemover: (nome: string) => void;
+  limparCarrinho: () => void;
   usuario: Usuario;
   atualizarUsuario: (usuarioAtualizado: Usuario) => void;
-  limparCarrinho: () => void; // 🔥 Isso tem que existir
 }
-
 
 const ModalCarrinho: React.FC<ModalCarrinhoProps> = ({
   aberto,
   onFechar,
+  onAbrirPagamento,
   itens,
   calcularTotal,
   onAlterarQuantidade,
   onRemover,
   usuario,
   atualizarUsuario,
-  limparCarrinho, // 🔥 Isso precisa estar aqui destruturado
+  limparCarrinho,
 }) => {
-  const [pagamentoAberto, setPagamentoAberto] = useState(false);
-  const [pixAberto, setPixAberto] = useState(false);
-  const [confirmacaoAberta, setConfirmacaoAberta] = useState(false);
 
   if (!aberto) return null;
-
-  const finalizarPagamento = async (metodo: 'pix' | 'cartao' | 'saldo') => {
-    const total = parseFloat(calcularTotal().replace(',', '.'));
-
-    if (metodo === 'cartao' && !usuario.numero_cartao) {
-      alert('Nenhum cartão cadastrado.');
-      return;
-    }
-
-    if (metodo === 'saldo' && (usuario.saldo || 0) < total) {
-      alert('Saldo insuficiente.');
-      return;
-    }
-
-    try {
-      const res = await fetch('http://localhost/UNIFOOD/database/finalizar_pedido.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          nome: usuario.nome,
-          email: usuario.email,
-          itens: itens,
-          valor_total: total,
-          tipo_pagamento: metodo,
-        }),
-      });
-
-      const data = await res.json();
-
-      if (data.success) {
-        alert('Pedido finalizado com sucesso!');
-
-        const usuarioAtualizado = { ...usuario, saldo: data.novo_saldo };
-        atualizarUsuario(usuarioAtualizado);
-        localStorage.setItem('dadosUsuario', JSON.stringify(usuarioAtualizado));
-
-        setPagamentoAberto(false);
-        setPixAberto(false);
-        setConfirmacaoAberta(true);
-      } else {
-        alert('Erro ao finalizar pedido: ' + data.message);
-      }
-    } catch (error) {
-      console.error('Erro na conexão:', error);
-      alert('Erro na conexão com o servidor.');
-    }
-  };
 
   return (
     <div
@@ -180,7 +128,7 @@ const ModalCarrinho: React.FC<ModalCarrinhoProps> = ({
               TOTAL: <span className="text-green-600">R$ {calcularTotal()}</span>
             </p>
             <button
-              onClick={() => setPagamentoAberto(true)}
+              onClick={onAbrirPagamento}
               className="
                 bg-green-600 hover:bg-green-700 
                 text-white font-bold text-2xl 
@@ -194,32 +142,6 @@ const ModalCarrinho: React.FC<ModalCarrinhoProps> = ({
           </div>
         )}
       </div>
-
-      <Pagamento
-        visivel={pagamentoAberto}
-        onFechar={() => setPagamentoAberto(false)}
-        onPix={() => {
-          setPagamentoAberto(false);
-          setPixAberto(true);
-        }}
-        onSaldo={() => finalizarPagamento('saldo')}
-        onCartao={() => finalizarPagamento('cartao')}
-      />
-
-      <Pix
-        visivel={pixAberto}
-        onFechar={() => setPixAberto(false)}
-        onConfirmar={() => finalizarPagamento('pix')}
-      />
-
-      <PagamentoConfirm
-        visivel={confirmacaoAberta}
-        onFechar={() => setConfirmacaoAberta(false)}
-        onConfirmar={() => {
-          limparCarrinho();
-          onFechar();
-        }}
-      />
     </div>
   );
 };

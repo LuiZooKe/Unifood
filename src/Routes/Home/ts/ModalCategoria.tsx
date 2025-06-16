@@ -34,7 +34,7 @@ const ModalCategoria: React.FC<ModalCategoriaProps> = ({
 
   return (
     <div
-      className="w-full max-w-[99%] md:max-w-[70%] mx-auto bg-white rounded-3xl shadow-xl border p-10 mt-10"
+      className="w-full max-w-[99%] md:max-w-[70%] mx-auto bg-white rounded-3xl shadow-xl border p-10 mb-10"
     >
       <div className="flex justify-between items-center mb-8 relative">
         <h3 className="text-5xl font-bold uppercase text-center w-full text-gray-900">

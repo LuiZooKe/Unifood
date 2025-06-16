@@ -51,6 +51,7 @@ const ModalPerfil: React.FC<ModalPerfilProps> = ({
 
   useEffect(() => {
     const dadosUsuario = JSON.parse(localStorage.getItem('dadosUsuario') || '{}');
+
     setDados({
       ...usuario,
       ...dadosUsuario,
@@ -67,32 +68,35 @@ const ModalPerfil: React.FC<ModalPerfilProps> = ({
       })
         .then(res => res.json())
         .then(data => {
-          if (data.success) {
+          if (data.success && data.dados) {
             const dadosRecebidos = {
-              ...data.usuario,
-              saldo: parseFloat(data.usuario.saldo) || 0,
-              numero_cartao: data.usuario.numero_cartao || '',
+              ...data.dados,
+              saldo: parseFloat(data.dados.saldo) || 0,
+              numero_cartao: data.dados.numero_cartao || '',
             };
 
             setDados(dadosRecebidos);
             localStorage.setItem('dadosUsuario', JSON.stringify(dadosRecebidos));
 
-            if (data.usuario.numero_cartao) {
+            if (data.dados.numero_cartao) {
               setCartao({
-                numero: data.usuario.numero_cartao,
-                nome: data.usuario.nome_cartao,
-                validade: data.usuario.validade_cartao,
-                cvv: data.usuario.cvv_cartao,
+                numero: data.dados.numero_cartao,
+                nome: data.dados.nome_cartao,
+                validade: data.dados.validade_cartao,
+                cvv: data.dados.cvv_cartao,
               });
             } else {
               setCartao(null);
             }
+          } else {
+            console.error('Erro ao buscar perfil:', data?.message || 'Dados não encontrados');
           }
         })
-        .catch(err => console.error('Erro ao buscar perfil:', err))
+        .catch(err => console.error('Erro na requisição do perfil:', err))
         .finally(() => setCarregandoUsuario(false));
     }
   }, [usuario]);
+
 
   if (!aberto) return null;
 

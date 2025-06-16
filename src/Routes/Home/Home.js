@@ -12,6 +12,8 @@ import pratodecomida from './img/prato de comida.png';
 
 import ModalCategoria from './ts/ModalCategoria.tsx';
 import ModalCarrinho from './ts/ModalCarrinho.tsx';
+import Pagamento from './ts/Pagamento.tsx';
+import PagamentoConfirm from './ts/PagamentoConfirm.tsx';
 import ModalPerfil from './ts/ModalPerfil.tsx';
 
 import './css/elements.css';
@@ -46,42 +48,48 @@ function Home() {
   const [menuMobileAberto, setMenuMobileAberto] = useState(false);
   const [modalCarrinhoAberto, setModalCarrinhoAberto] = useState(false);
   const [itensCarrinho, setItensCarrinho] = useState([]);
+  const [pagamentoAberto, setPagamentoAberto] = useState(false);
+  const [confirmacaoAberta, setConfirmacaoAberta] = useState(false);
 
-  // 🔥 Funções de controle geral
+  // 🔥 Fechar tudo
   const fecharTudo = () => {
     setMenuMobileAberto(false);
     setModalCarrinhoAberto(false);
     setPerfilAberto(false);
+    setPagamentoAberto(false);
+    setConfirmacaoAberta(false);
   };
 
+  // 🔥 Abrir menu
   const abrirMenu = () => {
     fecharTudo();
     setMenuMobileAberto(true);
   };
 
+  // 🔥 Abrir categoria
   const abrirCategoria = (categoria) => {
     setCategoriaSelecionada(categoria);
-
     setTimeout(() => {
       const elemento = document.getElementById('categorias-titulo');
       if (elemento) {
-        const y = elemento.getBoundingClientRect().top + window.pageYOffset - 120; // 120 é a altura do menu
+        const y = elemento.getBoundingClientRect().top + window.pageYOffset - 120;
         window.scrollTo({ top: y, behavior: 'smooth' });
       }
     }, 100);
   };
 
-
+  // 🔥 Fechar categoria
   const fecharCategoria = () => {
     setCategoriaSelecionada('');
   };
 
-
+  // 🔥 Abrir carrinho
   const abrirModalCarrinho = () => {
     fecharTudo();
     setModalCarrinhoAberto(true);
   };
 
+  // 🔥 Abrir perfil
   const abrirPerfil = () => {
     fecharTudo();
     setPerfilAberto(true);
@@ -102,9 +110,11 @@ function Home() {
   };
 
   const removerDoCarrinho = (nomeProduto) => {
-    setItensCarrinho((prevItens) =>
-      prevItens.filter((item) => item.nome !== nomeProduto)
-    );
+    setItensCarrinho((prevItens) => prevItens.filter((item) => item.nome !== nomeProduto));
+  };
+
+  const limparCarrinho = () => {
+    setItensCarrinho([]);
   };
 
   const alterarQuantidadeProduto = (nomeProduto, novaQuantidade) => {
@@ -120,12 +130,58 @@ function Home() {
     return itensCarrinho
       .reduce(
         (total, item) =>
-          total + parseFloat(item.preco.replace('R$', '').replace(',', '.')) * item.quantidade,
+          total +
+          parseFloat(item.preco.replace('R$', '').replace(',', '.')) * item.quantidade,
         0
       )
       .toFixed(2);
   };
 
+  // 🔥 Função de pagamento
+  const finalizarPagamento = async (metodo) => {
+    const total = parseFloat(calcularTotalCarrinho().replace(',', '.'));
+
+    if (metodo === 'cartao' && !usuario.numero_cartao) {
+      alert('Nenhum cartão cadastrado.');
+      return;
+    }
+
+    if (metodo === 'saldo' && (usuario.saldo || 0) < total) {
+      alert('Saldo insuficiente.');
+      return;
+    }
+
+    try {
+      const res = await fetch('http://localhost/UNIFOOD/database/finalizar_pedido.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nome: usuario.nome,
+          email: usuario.email,
+          itens: itensCarrinho,
+          valor_total: total,
+          tipo_pagamento: metodo,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        const usuarioAtualizado = { ...usuario, saldo: data.novo_saldo };
+        setUsuario(usuarioAtualizado);
+        localStorage.setItem('dadosUsuario', JSON.stringify(usuarioAtualizado));
+
+        limparCarrinho();
+        setPagamentoAberto(false);
+        setConfirmacaoAberta(true);
+      } else {
+        alert('Erro ao finalizar pedido: ' + data.message);
+      }
+    } catch (error) {
+      console.error('Erro na conexão:', error);
+      alert('Erro na conexão com o servidor.');
+    }
+  };
   const handleLogout = () => {
     localStorage.removeItem('usuarioLogado');
     navigate('/login');
@@ -140,10 +196,10 @@ function Home() {
       fetch(`http://localhost/UNIFOOD/database/get_perfil.php?email=${dadosUsuario.email}`)
         .then(res => res.json())
         .then(data => {
-          if (data.success) {
+          if (data.success && data.dados) {
             const dadosRecebidos = {
-              nome: data.dados.nome,
-              email: data.dados.email,
+              nome: data.dados.nome || '',
+              email: data.dados.email || '',
               saldo: parseFloat(data.dados.saldo) || 0,
               numero_cartao: data.dados.numero_cartao || '',
             };
@@ -151,7 +207,10 @@ function Home() {
             setUsuario(dadosRecebidos);
             localStorage.setItem('dadosUsuario', JSON.stringify(dadosRecebidos));
           } else {
-            console.error('Erro ao carregar perfil:', data.message);
+            console.error(
+              'Erro ao carregar perfil:',
+              data?.message || 'Dados não encontrados ou erro inesperado'
+            );
           }
         })
         .catch(err => {
@@ -160,6 +219,7 @@ function Home() {
         .finally(() => setCarregandoUsuario(false));
     }
   }, []);
+
 
   useEffect(() => {
     const fetchProdutos = async () => {
@@ -351,21 +411,6 @@ function Home() {
                   >
                     Perfil 👤
                   </button>
-
-                  {perfilAberto && (
-                    <ModalPerfil
-                      aberto={perfilAberto}
-                      usuario={usuario}
-                      abaAberta={abaAberta}
-                      setAbaAberta={setAbaAberta}
-                      onFechar={fecharTudo}
-                      onLogout={handleLogout}
-                      onSalvar={(dadosAtualizados) => {
-                        setUsuario(dadosAtualizados);
-                        localStorage.setItem('dadosUsuario', JSON.stringify(dadosAtualizados));
-                      }}
-                    />
-                  )}
                 </a>
               </li>
             </ul>
@@ -563,10 +608,15 @@ function Home() {
       <ModalCarrinho
         aberto={modalCarrinhoAberto}
         onFechar={fecharTudo}
+        onAbrirPagamento={() => {
+          setModalCarrinhoAberto(false);
+          setPagamentoAberto(true);
+        }}
         itens={itensCarrinho}
         calcularTotal={calcularTotalCarrinho}
         onAlterarQuantidade={alterarQuantidadeProduto}
         onRemover={removerDoCarrinho}
+        limparCarrinho={limparCarrinho}
         usuario={usuario}
         atualizarUsuario={(usuarioAtualizado) => {
           setUsuario(usuarioAtualizado);
@@ -575,6 +625,29 @@ function Home() {
       />
 
 
+      <Pagamento
+        visivel={pagamentoAberto}
+        onFechar={() => setPagamentoAberto(false)}
+        onPagar={(metodo) => {
+          finalizarPagamento(metodo);
+          setPagamentoAberto(false);
+        }}
+        itens={itensCarrinho}
+        total={calcularTotalCarrinho()}
+        usuario={usuario}
+      />
+
+      <PagamentoConfirm
+        visivel={confirmacaoAberta}
+        onFechar={() => {
+          setConfirmacaoAberta(false);
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }}
+        onConfirmar={() => {
+          setConfirmacaoAberta(false);
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }}
+      />
 
       <ModalPerfil
         aberto={perfilAberto}
