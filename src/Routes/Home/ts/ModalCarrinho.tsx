@@ -1,11 +1,21 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { X } from 'lucide-react';
+import Pagamento from './Pagamento.tsx';
+import Pix from './Pix.tsx';
+import PagamentoConfirm from './PagamentoConfirm.tsx';
 
 interface Produto {
   nome: string;
   preco: string;
   imagem: string;
   quantidade: number;
+}
+
+interface Usuario {
+  nome?: string;
+  email: string;
+  saldo: number;
+  numero_cartao?: string;
 }
 
 interface ModalCarrinhoProps {
@@ -15,7 +25,9 @@ interface ModalCarrinhoProps {
   calcularTotal: () => string;
   onAlterarQuantidade: (nome: string, novaQuantidade: number) => void;
   onRemover: (nome: string) => void;
-  onFinalizarCompra: () => void;
+  usuario: Usuario;
+  atualizarUsuario: (usuarioAtualizado: Usuario) => void;
+  limparCarrinho: () => void;
 }
 
 const ModalCarrinho: React.FC<ModalCarrinhoProps> = ({
@@ -25,9 +37,68 @@ const ModalCarrinho: React.FC<ModalCarrinhoProps> = ({
   calcularTotal,
   onAlterarQuantidade,
   onRemover,
-  onFinalizarCompra,
+  usuario,
+  atualizarUsuario,
+  limparCarrinho,
 }) => {
+  const [pagamentoAberto, setPagamentoAberto] = useState(false);
+  const [pixAberto, setPixAberto] = useState(false);
+  const [confirmacaoAberta, setConfirmacaoAberta] = useState(false);
+
   if (!aberto) return null;
+
+  const finalizarPagamento = async (metodo: 'pix' | 'cartao' | 'saldo') => {
+  const total = parseFloat(calcularTotal().replace(',', '.'));
+
+  if (metodo === 'cartao' && !usuario.numero_cartao) {
+    alert('Nenhum cartão cadastrado.');
+    return;
+  }
+
+  if (metodo === 'saldo' && (usuario.saldo || 0) < total) {
+    alert('Saldo insuficiente.');
+    return;
+  }
+
+  try {
+    const res = await fetch('http://localhost/UNIFOOD/database/finalizar_pedido.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        nome: usuario.nome,
+        email: usuario.email,
+        itens: itens,
+        valor_total: total,
+        tipo_pagamento: metodo,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      alert('Pedido finalizado com sucesso!');
+
+      // 🔥 Atualiza saldo no usuário
+      const usuarioAtualizado = { ...usuario, saldo: data.novo_saldo };
+      atualizarUsuario(usuarioAtualizado);
+      localStorage.setItem('dadosUsuario', JSON.stringify(usuarioAtualizado));
+
+      // 🔥 E aqui FECHA TUDO e LIMPA
+      setPagamentoAberto(false);
+      setPixAberto(false);
+      setConfirmacaoAberta(true);
+      onFechar(); // Fecha também o modal do carrinho
+      limparCarrinho();
+
+    } else {
+      alert('Erro ao finalizar pedido: ' + data.message);
+    }
+  } catch (error) {
+    console.error('Erro na conexão:', error);
+    alert('Erro na conexão com o servidor.');
+  }
+};
+
 
   return (
     <div
@@ -51,7 +122,6 @@ const ModalCarrinho: React.FC<ModalCarrinhoProps> = ({
         "
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Botão fechar */}
         <button
           onClick={onFechar}
           className="absolute top-6 right-6 text-gray-500 hover:text-red-500"
@@ -59,12 +129,10 @@ const ModalCarrinho: React.FC<ModalCarrinhoProps> = ({
           <X className="w-10 h-10 sm:w-12 sm:h-12" />
         </button>
 
-        {/* Título */}
         <h2 className="text-center font-extrabold text-gray-800 leading-tight">
           <span className="block text-[clamp(2.5rem,6vw,4rem)]">CARRINHO 🛒</span>
         </h2>
 
-        {/* Itens */}
         {itens.length === 0 ? (
           <p className="text-center text-gray-700">Seu carrinho está vazio.</p>
         ) : (
@@ -120,14 +188,13 @@ const ModalCarrinho: React.FC<ModalCarrinhoProps> = ({
           </div>
         )}
 
-        {/* Total e Finalizar */}
         {itens.length > 0 && (
           <div className="mt-10 pt-6 border-t border-gray-300 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-6">
             <p className="text-2xl font-bold text-gray-800">
               TOTAL: <span className="text-green-600">R$ {calcularTotal()}</span>
             </p>
             <button
-              onClick={onFinalizarCompra}
+              onClick={() => setPagamentoAberto(true)}
               className="
                 bg-green-600 hover:bg-green-700 
                 text-white font-bold text-2xl 
@@ -141,6 +208,29 @@ const ModalCarrinho: React.FC<ModalCarrinhoProps> = ({
           </div>
         )}
       </div>
+
+      <Pagamento
+        visivel={pagamentoAberto}
+        onFechar={() => setPagamentoAberto(false)}
+        onPix={() => {
+          setPagamentoAberto(false);
+          setPixAberto(true);
+        }}
+        onSaldo={() => finalizarPagamento('saldo')}
+        onCartao={() => finalizarPagamento('cartao')}
+      />
+
+      <Pix
+        visivel={pixAberto}
+        onFechar={() => setPixAberto(false)}
+        onConfirmar={() => finalizarPagamento('pix')}
+      />
+
+      <PagamentoConfirm
+        visivel={confirmacaoAberta}
+        onFechar={() => setConfirmacaoAberta(false)}
+      />
+
     </div>
   );
 };

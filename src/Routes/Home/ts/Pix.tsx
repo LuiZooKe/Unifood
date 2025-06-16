@@ -2,11 +2,11 @@ import React from 'react';
 
 interface PixProps {
   visivel: boolean;
-  onConfirmar: () => void;
   onFechar: () => void;
+  onConfirmar: () => void;
 }
 
-const Pix: React.FC<PixProps> = ({ visivel, onConfirmar, onFechar }) => {
+const Pix: React.FC<PixProps> = ({ visivel, onFechar, onConfirmar }) => {
   if (!visivel) return null;
 
   return (
@@ -15,25 +15,27 @@ const Pix: React.FC<PixProps> = ({ visivel, onConfirmar, onFechar }) => {
       onClick={onFechar}
     >
       <div
-        className="bg-white rounded-3xl shadow-xl p-8 w-[90%] max-w-[400px]"
+        className="bg-white rounded-3xl shadow-xl p-8 w-[90%] max-w-[400px] flex flex-col items-center"
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 className="text-4xl font-bold mb-6 text-center">Pagamento via Pix</h2>
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-48 h-48 bg-gray-200 rounded-lg flex items-center justify-center">
-            QR CODE AQUI
-          </div>
-          <p className="text-center text-gray-600">Escaneie o QR Code ou copie a chave abaixo:</p>
-          <div className="bg-gray-100 p-2 rounded-md text-center">
-            chavepix@unifood.com
-          </div>
-          <button
-            onClick={onConfirmar}
-            className="w-full py-3 rounded-xl bg-green-600 hover:bg-green-700 text-white font-semibold"
-          >
-            Confirmar Pagamento
-          </button>
-        </div>
+        <h2 className="text-4xl font-bold mb-6 text-center">
+          QR Code Gerado 🧾
+        </h2>
+        <p className="text-center text-lg mb-6">
+          Simule a leitura do QR Code e clique em "Confirmar Pagamento"
+        </p>
+        <button
+          onClick={onConfirmar}
+          className="w-full py-3 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-semibold mb-3"
+        >
+          Confirmar Pagamento
+        </button>
+        <button
+          onClick={onFechar}
+          className="w-full py-3 rounded-xl bg-gray-400 hover:bg-gray-500 text-white font-semibold"
+        >
+          Cancelar
+        </button>
       </div>
     </div>
   );

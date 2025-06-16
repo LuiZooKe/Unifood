@@ -6,7 +6,7 @@ header('Content-Type: application/json');
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
-    exit();
+    exit;
 }
 
 $data = json_decode(file_get_contents("php://input"), true);
@@ -31,16 +31,22 @@ $tipo_pagamento = $data['tipo_pagamento'];
 $conn = new mysqli("localhost", "root", "", "unifood_db");
 
 if ($conn->connect_error) {
-    echo json_encode(['success' => false, 'message' => 'Erro na conexão']);
+    echo json_encode(['success' => false, 'message' => 'Erro na conexão com o banco']);
     exit;
 }
 
-// Desconta saldo se for pagamento com saldo
-if ($tipo_pagamento === 'saldo') {
-    $result = $conn->query("SELECT saldo FROM clientes WHERE email = '$email'");
-    $cliente = $result->fetch_assoc();
+$result = $conn->query("SELECT saldo FROM clientes WHERE email = '$email'");
+$cliente = $result->fetch_assoc();
 
-    if (!$cliente || $cliente['saldo'] < $valor_total) {
+if (!$cliente) {
+    echo json_encode(['success' => false, 'message' => 'Cliente não encontrado']);
+    exit;
+}
+
+$novoSaldo = $cliente['saldo'];
+
+if ($tipo_pagamento === 'saldo') {
+    if ($cliente['saldo'] < $valor_total) {
         echo json_encode(['success' => false, 'message' => 'Saldo insuficiente']);
         exit;
     }
@@ -49,20 +55,25 @@ if ($tipo_pagamento === 'saldo') {
     $conn->query("UPDATE clientes SET saldo = $novoSaldo WHERE email = '$email'");
 }
 
-$insert = $conn->prepare(
-    "INSERT INTO pedidos (nome_cliente, email_cliente, itens, valor_total, tipo_pagamento) VALUES (?, ?, ?, ?, ?)"
-);
-$insert->bind_param("sssds", $nome, $email, $itens, $valor_total, $tipo_pagamento);
+$stmt = $conn->prepare("
+    INSERT INTO pedidos (nome_cliente, email_cliente, itens, valor_total, tipo_pagamento)
+    VALUES (?, ?, ?, ?, ?)
+");
+$stmt->bind_param("sssds", $nome, $email, $itens, $valor_total, $tipo_pagamento);
 
-if ($insert->execute()) {
+if ($stmt->execute()) {
     echo json_encode([
         'success' => true,
-        'message' => 'Pedido registrado com sucesso',
-        'novo_saldo' => isset($novoSaldo) ? $novoSaldo : null
+        'message' => 'Pedido finalizado com sucesso!',
+        'novo_saldo' => $novoSaldo
     ]);
+    $stmt->close();
+    $conn->close();
+    exit;
 } else {
-    echo json_encode(['success' => false, 'message' => 'Erro ao registrar pedido']);
+    echo json_encode(['success' => false, 'message' => 'Erro ao finalizar pedido']);
+    $stmt->close();
+    $conn->close();
+    exit;
 }
-
-$conn->close();
 ?>
