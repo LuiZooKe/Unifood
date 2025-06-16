@@ -60,27 +60,29 @@ const ModalPerfil: React.FC<ModalPerfilProps> = ({
     if (dadosUsuario.email) {
       setCarregandoUsuario(true);
 
-      fetch(`http://localhost/UNIFOOD/database/get_perfil.php?email=${dadosUsuario.email}`)
+      fetch('http://localhost/UNIFOOD/database/get_perfil.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: dadosUsuario.email }),
+      })
         .then(res => res.json())
         .then(data => {
           if (data.success) {
             const dadosRecebidos = {
-              ...data.dados,
-              celular: data.dados.telefone,
-              saldo: parseFloat(data.dados.saldo) || 0,
-              numero_cartao: data.dados.numero_cartao || '',
+              ...data.usuario,
+              saldo: parseFloat(data.usuario.saldo) || 0,
+              numero_cartao: data.usuario.numero_cartao || '',
             };
-            delete dadosRecebidos.telefone;
 
             setDados(dadosRecebidos);
             localStorage.setItem('dadosUsuario', JSON.stringify(dadosRecebidos));
 
-            if (data.dados.numero_cartao) {
+            if (data.usuario.numero_cartao) {
               setCartao({
-                numero: data.dados.numero_cartao,
-                nome: data.dados.nome_cartao,
-                validade: data.dados.validade_cartao,
-                cvv: data.dados.cvv_cartao,
+                numero: data.usuario.numero_cartao,
+                nome: data.usuario.nome_cartao,
+                validade: data.usuario.validade_cartao,
+                cvv: data.usuario.cvv_cartao,
               });
             } else {
               setCartao(null);
@@ -229,6 +231,12 @@ const ModalPerfil: React.FC<ModalPerfilProps> = ({
         <h2 className="text-center font-extrabold text-gray-800 leading-tight">
           <span className="block text-[clamp(2.5rem,6vw,4rem)]">MEU PERFIL 👤</span>
         </h2>
+
+        <div className="bg-gray-100 rounded-xl p-4 mb-4 text-center">
+          <p className="text-xl font-bold text-center text-gray-800">{dados.nome}</p>
+          <p className="text-md text-center text-gray-600">{dados.email}</p>
+        </div>
+
 
         <div className="flex gap-2 mb-6">
           <button

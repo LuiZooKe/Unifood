@@ -1,7 +1,7 @@
 <?php
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Headers: Content-Type");
-header("Access-Control-Allow-Methods: POST, OPTIONS");
+header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
 header('Content-Type: application/json');
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
@@ -16,8 +16,13 @@ if ($conn->connect_error) {
     exit;
 }
 
-$data = json_decode(file_get_contents("php://input"), true);
-$email = $data['email'] ?? '';
+// 🔥 Suporte tanto para GET quanto POST JSON
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $data = json_decode(file_get_contents("php://input"), true);
+    $email = $data['email'] ?? '';
+} else {
+    $email = $_GET['email'] ?? '';
+}
 
 if (empty($email)) {
     echo json_encode(['success' => false, 'message' => 'Email não enviado']);
@@ -45,7 +50,7 @@ if ($result->num_rows > 0) {
             'numero' => $row['numero'] ?? '',
             'bairro' => $row['bairro'] ?? '',
             'cidade' => $row['cidade'] ?? '',
-            'celular' => $row['celular'] ?? '',
+            'celular' => $row['telefone'] ?? '',
             'saldo' => $row['saldo'] ?? 0,
             'numero_cartao' => $row['numero_cartao'] ?? '',
             'nome_cartao' => $row['nome_cartao'] ?? '',

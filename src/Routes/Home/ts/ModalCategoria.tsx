@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Info, ShoppingCart } from 'lucide-react';
+import { Info, ShoppingCart, X } from 'lucide-react';
 
 interface Produto {
   nome: string;
@@ -9,118 +9,111 @@ interface Produto {
 }
 
 interface ModalCategoriaProps {
-  isOpen: boolean;
-  onClose: () => void;
-  categoria: string;
+  categoriaSelecionada: string | null;
   produtos: Produto[];
   onAddToCart: (produto: Produto) => void;
+  onClose: () => void;
 }
 
-function ModalCategoria({
-  isOpen,
-  onClose,
-  categoria,
+const ModalCategoria: React.FC<ModalCategoriaProps> = ({
+  categoriaSelecionada,
   produtos,
   onAddToCart,
-}: ModalCategoriaProps) {
-  const [indexVisivel, setIndexVisivel] = useState<number | null>(null);
+  onClose,
+}) => {
+  const [descricaoVisivel, setDescricaoVisivel] = useState<number | null>(null);
   const [animacaoCarrinho, setAnimacaoCarrinho] = useState<number | null>(null);
-
-  const toggleDescricao = (index: number) => {
-    setIndexVisivel((prev) => (prev === index ? null : index));
-  };
 
   const handleAddToCart = (produto: Produto, index: number) => {
     onAddToCart(produto);
     setAnimacaoCarrinho(index);
-    setTimeout(() => setAnimacaoCarrinho(null), 1750);
+    setTimeout(() => setAnimacaoCarrinho(null), 1500);
   };
 
-  if (!isOpen) return null;
+  if (!categoriaSelecionada) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[1000] px-4">
-      <div className="bg-white w-full max-w-6xl max-h-[90vh] overflow-y-auto rounded-2xl shadow-xl p-8 sm:p-12 relative">
-        {/* Botão de fechar */}
+    <div
+      className="w-full max-w-[99%] md:max-w-[70%] mx-auto bg-white rounded-3xl shadow-xl border p-10 mt-10"
+    >
+      <div className="flex justify-between items-center mb-8 relative">
+        <h3 className="text-5xl font-bold uppercase text-center w-full text-gray-900">
+          {categoriaSelecionada}
+        </h3>
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-gray-500 hover:text-red-500"
+          className="absolute right-0 text-gray-500 hover:text-red-600 transition"
+          title="Fechar"
         >
           <X className="w-12 h-12" />
         </button>
+      </div>
 
-        {/* Título */}
-        <h2 className="font-extrabold uppercase text-gray-900 mb-8 text-center leading-tight text-[clamp(1.5rem,6vw,2.5rem)]">
-          {categoria}
-        </h2>
+      <div className="flex gap-8 overflow-x-auto pb-3">
+        {produtos.map((produto, index) => (
+          <div
+            key={index}
+            className="min-w-[270px] max-w-[270px] bg-white border rounded-2xl shadow-md hover:shadow-xl transition flex-shrink-0 relative"
+          >
+            {/* Descrição flutuante */}
+            {descricaoVisivel === index && (
+              <div className="absolute inset-0 bg-white z-20 flex flex-col justify-center items-center p-6 border rounded-2xl">
+                <button
+                  onClick={() => setDescricaoVisivel(null)}
+                  className="absolute top-2 right-2 text-gray-500 hover:text-red-600"
+                >
+                  ✕
+                </button>
+                <p className="text-gray-800 text-base leading-relaxed text-center">
+                  {produto.descricao || 'Sem descrição.'}
+                </p>
+              </div>
+            )}
 
-        {/* Grid de produtos */}
-        <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-          {produtos.map((produto, index) => (
-            <div
-              key={index}
-              className="relative border rounded-xl p-4 shadow-md hover:shadow-lg transition flex flex-col justify-between items-center text-center h-full overflow-hidden"
-            >
-              {/* Modal de descrição flutuante */}
-              {indexVisivel === index && (
-                <div className="absolute inset-0 bg-white bg-opacity-95 z-20 flex flex-col justify-center items-center p-6">
-                  <button
-                    onClick={() => setIndexVisivel(null)}
-                    className="absolute top-2 right-2 text-gray-500 hover:text-red-600 transition"
-                    title="Fechar descrição"
-                  >
-                    <X className="w-12 h-12" />
-                  </button>
+            <img
+              src={produto.imagem}
+              alt={produto.nome}
+              className="w-full h-44 object-cover rounded-t-2xl"
+            />
 
-                  <p className="text-gray-800 text-base md:text-[20px] leading-relaxed break-words text-center max-h-full max-w-full overflow-y-auto">
-                    {produto.descricao || 'Sem descrição.'}
-                  </p>
-                </div>
-              )}
+            <div className="p-4 flex flex-col justify-between">
+              <h4 className="text-[2rem] font-bold mb-2 text-center">{produto.nome}</h4>
 
-              <img
-                src={produto.imagem}
-                alt={produto.nome}
-                className="w-full h-48 object-cover rounded mb-3"
-              />
+              <p className="text-red-600 text-[2rem] font-semibold text-xl mb-3 text-center">
+                {produto.preco}
+              </p>
 
-              <h3 className="text-lg font-bold leading-tight min-h-[3.5rem] z-10">
-                {produto.nome}
-              </h3>
+              <div className="flex justify-center gap-4">
+                <button
+                  onClick={() =>
+                    setDescricaoVisivel(descricaoVisivel === index ? null : index)
+                  }
+                  className="text-gray-600 hover:text-blue-600 p-2 rounded-full"
+                  title="Ver descrição"
+                >
+                  <Info className="w-12 h-12" />
+                </button>
 
-              <div className="flex items-center justify-between w-full mt-3 z-10">
-                <p className="text-red-600 font-semibold text-[2rem]">{produto.preco}</p>
+                <button
+                  onClick={() => handleAddToCart(produto, index)}
+                  className="relative text-white bg-red-600 hover:bg-red-700 p-2 rounded-full"
+                  title="Adicionar ao carrinho"
+                >
+                  <ShoppingCart className="w-12 h-10" />
 
-                <div className="flex items-center gap-3">
-                  <button
-                    className="text-gray-600 hover:text-blue-600 p-3 rounded-full transition"
-                    title="Ver descrição"
-                    onClick={() => toggleDescricao(index)}
-                  >
-                    <Info className="w-9 h-9 md:w-10 md:h-10" />
-                  </button>
-
-                  <button
-                    className="relative text-white bg-red-600 hover:bg-red-700 p-3 rounded-full transition"
-                    title="Adicionar ao carrinho"
-                    onClick={() => handleAddToCart(produto, index)}
-                  >
-                    <ShoppingCart className="w-10 h-10 md:w-12 md:h-12" />
-
-                    {animacaoCarrinho === index && (
-                      <span className="absolute -top-3 -right-3 bg-green-500 text-white rounded-full text-sm px-5 py-4 animate-bounce shadow-md pointer-events-none">
-                        +1
-                      </span>
-                    )}
-                  </button>
-                </div>
+                  {animacaoCarrinho === index && (
+                    <span className="absolute -top-2 -right-2 bg-green-500 text-white rounded-full text-xs px-3 py-2 animate-bounce shadow-md">
+                      +1
+                    </span>
+                  )}
+                </button>
               </div>
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
       </div>
     </div>
   );
-}
+};
 
 export default ModalCategoria;

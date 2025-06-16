@@ -30,7 +30,6 @@ const carouselSettings = {
 function Home() {
   const navigate = useNavigate();
 
-  const [modalAberto, setModalAberto] = useState(false);
   const [abaAberta, setAbaAberta] = useState('dados');
   const [usuario, setUsuario] = useState({
     nome: '',
@@ -53,7 +52,6 @@ function Home() {
     setMenuMobileAberto(false);
     setModalCarrinhoAberto(false);
     setPerfilAberto(false);
-    setModalAberto(false);
   };
 
   const abrirMenu = () => {
@@ -61,11 +59,23 @@ function Home() {
     setMenuMobileAberto(true);
   };
 
-  const abrirModal = (categoria) => {
-    fecharTudo();
+  const abrirCategoria = (categoria) => {
     setCategoriaSelecionada(categoria);
-    setModalAberto(true);
+
+    setTimeout(() => {
+      const elemento = document.getElementById('categorias-titulo');
+      if (elemento) {
+        const y = elemento.getBoundingClientRect().top + window.pageYOffset - 120; // 120 é a altura do menu
+        window.scrollTo({ top: y, behavior: 'smooth' });
+      }
+    }, 100);
   };
+
+
+  const fecharCategoria = () => {
+    setCategoriaSelecionada('');
+  };
+
 
   const abrirModalCarrinho = () => {
     fecharTudo();
@@ -96,11 +106,6 @@ function Home() {
       prevItens.filter((item) => item.nome !== nomeProduto)
     );
   };
-
-  const limparCarrinho = () => {
-    setItensCarrinho([]);
-  };
-
 
   const alterarQuantidadeProduto = (nomeProduto, novaQuantidade) => {
     if (novaQuantidade < 1) return;
@@ -368,66 +373,107 @@ function Home() {
         </div>
       </aside>
 
-      {/*  Carrossel */}
-
-      <section id="gallery" className="white-bg section relative z-10">
+      <section id="gallery" className="bg-white relative z-10 pt-[10rem] pb-8">
         <div
           className="absolute inset-0 bg-no-repeat bg-center bg-[length:100%] opacity-[5%] z-0"
           style={{ backgroundImage: `url(${fundocardapio})` }}
         />
-        <div className="main-content max-w-6xl mx-auto px-4 text-center relative z-20">
-          <h2 className="grid-main-heading">NOSSO CARDÁPIO</h2>
+        <div className="max-w-[90%] md:max-w-[70%] mx-auto px-4 text-center relative z-20">
+          <h2 className="text-5xl md:text-5xl font-extrabold mb-6 break-words">
+            NOSSO CARDÁPIO
+          </h2>
 
-          <div className="relative w-full h-[200px] md:h-[260px] lg:h-[300px] mx-auto rounded-2xl overflow-hidden shadow-xl mb-16 z-30">
+          <div className="relative w-full h-[180px] md:h-[240px] lg:h-[260px] mx-auto rounded-2xl overflow-hidden shadow-xl mb-6 z-30">
             <Slider {...carouselSettings}>
-              {imagensCarrossel.length > 0 ? (
-                imagensCarrossel.map((item, index) => (
-                  <div key={index} className="relative w-full h-full">
-                    <div className="relative w-full h-[200px] md:h-[260px] lg:h-[300px] overflow-hidden">
-                      <img
-                        src={item.img}
-                        alt={item.alt}
-                        className="w-full h-full object-cover object-center"
-                      />
-                      {item.caption && (
-                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black via-black/70 to-transparent text-white text-center px-4 py-6 text-xl md:text-2xl lg:text-3xl font-bold z-10">
-                          <p className="drop-shadow-lg">
-                            QUERIDINHOS DA GALERA: {item.caption}
-                          </p>
-                        </div>
-                      )}
+              {imagensCarrossel.map((item, index) => (
+                <div
+                  key={index}
+                  className="relative w-full h-[180px] md:h-[240px] lg:h-[260px] rounded-2xl overflow-hidden shadow-xl"
+                >
+                  <img
+                    src={item.img}
+                    alt={item.alt}
+                    className="w-full h-full object-cover object-center"
+                  />
+                  {item.caption && (
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black via-black/70 to-transparent text-white text-center px-4 py-4 md:py-6 text-lg md:text-2xl font-bold z-10">
+                      <p className="drop-shadow-lg">
+                        QUERIDINHOS DA GALERA: {item.caption}
+                      </p>
                     </div>
-                  </div>
-                ))
-              ) : (
-                <div className="flex items-center justify-center h-full">
-                  <p className="text-gray-600">Carregando imagens do carrossel...</p>
+                  )}
                 </div>
-              )}
+              ))}
             </Slider>
           </div>
+        </div>
+      </section>
 
-          <h3 className="text-4xl font-bold text-gray-800 mb-6">CATEGORIAS</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <section className="bg-white w-full py-8">
+        <div className="w-full max-w-[90%] md:max-w-[70%] mx-auto relative">
+          <h3
+            id="categorias-titulo"
+            className="text-3xl md:text-4xl font-bold text-gray-800 mb-6 text-center break-words"
+          >
+            CATEGORIAS
+          </h3>
+
+          {/* ⮜ Setinha esquerda */}
+          <button
+            className="hidden md:flex absolute left-[-1.5rem] top-1/2 -translate-y-1/2 z-10 bg-white shadow-md rounded-full p-1 hover:scale-110 transition"
+            onClick={() => {
+              const container = document.getElementById('container-categorias');
+              container.scrollBy({ left: -400, behavior: 'smooth' });
+            }}
+          >
+            <span className="text-xl">‹</span>
+          </button>
+
+          <div
+            id="container-categorias"
+            className="flex gap-6 overflow-x-auto scrollbar-hide px-2"
+            style={{ scrollBehavior: 'smooth' }}
+          >
             {Object.keys(produtosPorCategoria).map((categoria, i) => (
               <div
                 key={i}
-                className="relative group cursor-pointer overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all"
-                onClick={() => abrirModal(categoria)}
+                className="min-w-[200px] max-w-[200px] flex-shrink-0 relative group cursor-pointer overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all"
+                onClick={() => abrirCategoria(categoria)}
               >
                 <img
                   src={produtosPorCategoria[categoria][0]?.imagem || pratodecomida}
                   alt={categoria}
                   className="w-full h-56 object-cover transform group-hover:scale-105 transition duration-300"
                 />
-                <div className="absolute bottom-0 bg-black bg-opacity-50 w-full py-3 text-white text-xl font-bold">
+                <div className="absolute bottom-0 bg-black bg-opacity-50 w-full py-3 text-white text-xl font-bold text-center">
                   {categoria}
                 </div>
               </div>
             ))}
           </div>
+
+          {/* ⮞ Setinha direita */}
+          <button
+            className="hidden md:flex absolute right-[-1.5rem] top-1/2 -translate-y-1/2 z-10 bg-white shadow-md rounded-full p-1 hover:scale-110 transition"
+            onClick={() => {
+              const container = document.getElementById('container-categorias');
+              container.scrollBy({ left: 400, behavior: 'smooth' });
+            }}
+          >
+            <span className="text-xl">›</span>
+          </button>
         </div>
       </section>
+
+      {categoriaSelecionada && (
+        <ModalCategoria
+          categoriaSelecionada={categoriaSelecionada}
+          produtos={produtosPorCategoria[categoriaSelecionada] || []}
+          onAddToCart={adicionarAoCarrinho}
+          onClose={fecharCategoria}
+        />
+      )}
+
 
       <section id="contact" className="bg-red-700 py-32 px-8 text-white relative overflow-hidden">
         <div className="max-w-5xl mx-auto relative z-[1]">
@@ -514,14 +560,6 @@ function Home() {
         ➔
       </button>
 
-      <ModalCategoria
-        isOpen={modalAberto}
-        onClose={() => setModalAberto(false)}
-        categoria={categoriaSelecionada}
-        produtos={produtosPorCategoria[categoriaSelecionada] || []}
-        onAddToCart={adicionarAoCarrinho}
-      />
-
       <ModalCarrinho
         aberto={modalCarrinhoAberto}
         onFechar={fecharTudo}
@@ -534,9 +572,7 @@ function Home() {
           setUsuario(usuarioAtualizado);
           localStorage.setItem('dadosUsuario', JSON.stringify(usuarioAtualizado));
         }}
-        limparCarrinho={limparCarrinho} // 🔥 Se faltar isso, o erro acontece!
       />
-
 
 
 
