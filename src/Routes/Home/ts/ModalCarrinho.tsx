@@ -60,7 +60,7 @@ const ModalCarrinho: React.FC<ModalCarrinhoProps> = ({
         </button>
 
         {/* Título */}
-        <h2 className="text-center mb-8 mt-4 font-extrabold text-gray-800 leading-tight">
+        <h2 className="text-center font-extrabold text-gray-800 leading-tight">
           <span className="block text-[clamp(2.5rem,6vw,4rem)]">CARRINHO 🛒</span>
         </h2>
 

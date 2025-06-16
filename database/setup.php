@@ -93,6 +93,16 @@ $sql6 = "CREATE TABLE IF NOT EXISTS categorias (
     nome VARCHAR(100) NOT NULL UNIQUE
 )";
 
+$sql7 = "CREATE TABLE IF NOT EXISTS pedidos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome_cliente VARCHAR(100) NOT NULL,
+    email_cliente VARCHAR(100) NOT NULL,
+    itens TEXT NOT NULL,
+    valor_total DECIMAL(10,2) NOT NULL,
+    tipo_pagamento VARCHAR(20) NOT NULL,
+    data_pedido TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)";
+
 // Executar criação das tabelas
 $conn->query($sql1);
 $conn->query($sql2);
@@ -100,6 +110,7 @@ $conn->query($sql3);
 $conn->query($sql4);
 $conn->query($sql5);
 $conn->query($sql6);
+$conn->query($sql7);
 
 // Inserir categorias padrão
 $conn->query("INSERT IGNORE INTO categorias (nome) VALUES 

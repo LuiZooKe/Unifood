@@ -1,6 +1,6 @@
 <?php
 header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Headers: Content-Type");
+header("Access-Control-Allow-Headers: *");
 header("Access-Control-Allow-Methods: GET, OPTIONS");
 header('Content-Type: application/json');
 
@@ -23,15 +23,14 @@ if ($conn->connect_error) {
     exit;
 }
 
-$stmt = $conn->prepare("SELECT nome, email, logradouro, numero, bairro, cidade, telefone, saldo,
-    numero_cartao, nome_cartao, validade_cartao, cvv_cartao
-    FROM clientes WHERE email = ?");
+$stmt = $conn->prepare("SELECT nome, email, logradouro, numero, bairro, cidade, telefone, saldo, numero_cartao, nome_cartao, validade_cartao, cvv_cartao FROM clientes WHERE email = ?");
 $stmt->bind_param("s", $email);
 $stmt->execute();
 
 $result = $stmt->get_result();
 if ($result->num_rows > 0) {
     $dados = $result->fetch_assoc();
+    $dados['saldo'] = floatval($dados['saldo']) ?? 0;
     echo json_encode(['success' => true, 'dados' => $dados]);
 } else {
     echo json_encode(['success' => false, 'message' => 'Usuário não encontrado']);

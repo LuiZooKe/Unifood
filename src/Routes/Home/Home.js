@@ -32,7 +32,14 @@ function Home() {
 
   const [modalAberto, setModalAberto] = useState(false);
   const [abaAberta, setAbaAberta] = useState('dados');
-  const [usuario, setUsuario] = useState({ nome: '', email: '', tipo_usuario: '' });
+  const [usuario, setUsuario] = useState({
+    nome: '',
+    email: '',
+    tipo_usuario: '',
+    saldo: 0,
+    numero_cartao: '',
+  });
+  const [carregandoUsuario, setCarregandoUsuario] = useState(true);
   const [perfilAberto, setPerfilAberto] = useState(false);
   const [categoriaSelecionada, setCategoriaSelecionada] = useState('');
   const [produtosPorCategoria, setProdutosPorCategoria] = useState({});
@@ -114,23 +121,36 @@ function Home() {
     navigate('/login');
   };
 
-  // 🔥 Buscar dados do usuário
   useEffect(() => {
     const dadosUsuario = JSON.parse(localStorage.getItem('dadosUsuario') || '{}');
+
     if (dadosUsuario.email) {
+      setCarregandoUsuario(true);
+
       fetch(`http://localhost/UNIFOOD/database/get_perfil.php?email=${dadosUsuario.email}`)
         .then(res => res.json())
         .then(data => {
           if (data.success) {
-            setUsuario(data.dados);
-            localStorage.setItem('dadosUsuario', JSON.stringify(data.dados));
+            const dadosRecebidos = {
+              nome: data.dados.nome,
+              email: data.dados.email,
+              saldo: parseFloat(data.dados.saldo) || 0,
+              numero_cartao: data.dados.numero_cartao || '',
+            };
+
+            setUsuario(dadosRecebidos);
+            localStorage.setItem('dadosUsuario', JSON.stringify(dadosRecebidos));
+          } else {
+            console.error('Erro ao carregar perfil:', data.message);
           }
         })
-        .catch(err => console.error('Erro ao buscar perfil:', err));
+        .catch(err => {
+          console.error('Erro na requisição do perfil:', err);
+        })
+        .finally(() => setCarregandoUsuario(false));
     }
   }, []);
 
-  // 🔥 Buscar produtos
   useEffect(() => {
     const fetchProdutos = async () => {
       try {
@@ -499,12 +519,19 @@ function Home() {
 
       <ModalCarrinho
         aberto={modalCarrinhoAberto}
-        itens={itensCarrinho}
         onFechar={fecharTudo}
-        onRemover={removerDoCarrinho}
-        onAlterarQuantidade={alterarQuantidadeProduto}
+        itens={itensCarrinho}
         calcularTotal={calcularTotalCarrinho}
+        onAlterarQuantidade={alterarQuantidadeProduto}
+        onRemover={removerDoCarrinho}
+        usuario={usuario}
+        atualizarUsuario={(usuarioAtualizado) => {
+          setUsuario(usuarioAtualizado);
+          localStorage.setItem('dadosUsuario', JSON.stringify(usuarioAtualizado));
+        }}
       />
+
+
 
       <ModalPerfil
         aberto={perfilAberto}

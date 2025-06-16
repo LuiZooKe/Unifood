@@ -6,13 +6,14 @@ import AdicionarCartao from './AdicionarCartao.tsx';
 
 interface Usuario {
   nome?: string;
-  email?: string;
+  email: string;
+  saldo: number;
   logradouro?: string;
   numero?: string;
   bairro?: string;
   cidade?: string;
   celular?: string;
-  saldo?: number | string | null;
+  numero_cartao?: string;
 }
 
 interface Cartao {
@@ -43,16 +44,22 @@ const ModalPerfil: React.FC<ModalPerfilProps> = ({
   const [confirmarSenha, setConfirmarSenha] = useState('');
   const [mostrarSenha, setMostrarSenha] = useState(false);
   const [mostrarConfirmar, setMostrarConfirmar] = useState(false);
-
   const [saldoAberto, setSaldoAberto] = useState(false);
   const [cartaoAberto, setCartaoAberto] = useState(false);
+  const [carregandoUsuario, setCarregandoUsuario] = useState(true);
   const [cartao, setCartao] = useState<Cartao | null>(null);
 
   useEffect(() => {
     const dadosUsuario = JSON.parse(localStorage.getItem('dadosUsuario') || '{}');
-    setDados({ ...usuario, ...dadosUsuario });
+    setDados({
+      ...usuario,
+      ...dadosUsuario,
+      saldo: parseFloat(dadosUsuario.saldo) || 0,
+    });
 
     if (dadosUsuario.email) {
+      setCarregandoUsuario(true);
+
       fetch(`http://localhost/UNIFOOD/database/get_perfil.php?email=${dadosUsuario.email}`)
         .then(res => res.json())
         .then(data => {
@@ -60,11 +67,12 @@ const ModalPerfil: React.FC<ModalPerfilProps> = ({
             const dadosRecebidos = {
               ...data.dados,
               celular: data.dados.telefone,
-              saldo: Number(data.dados.saldo || 0),
+              saldo: parseFloat(data.dados.saldo) || 0,
+              numero_cartao: data.dados.numero_cartao || '',
             };
             delete dadosRecebidos.telefone;
 
-            setDados(prev => ({ ...prev, ...dadosRecebidos }));
+            setDados(dadosRecebidos);
             localStorage.setItem('dadosUsuario', JSON.stringify(dadosRecebidos));
 
             if (data.dados.numero_cartao) {
@@ -79,7 +87,8 @@ const ModalPerfil: React.FC<ModalPerfilProps> = ({
             }
           }
         })
-        .catch(err => console.error('Erro ao buscar perfil:', err));
+        .catch(err => console.error('Erro ao buscar perfil:', err))
+        .finally(() => setCarregandoUsuario(false));
     }
   }, [usuario]);
 
@@ -160,6 +169,34 @@ const ModalPerfil: React.FC<ModalPerfilProps> = ({
     }
   };
 
+  const handleRemoverCartao = async () => {
+    try {
+      const res = await fetch('http://localhost/UNIFOOD/database/update_cartao.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: dados.email,
+          numero_cartao: '',
+          nome_cartao: '',
+          validade_cartao: '',
+          cvv_cartao: '',
+        }),
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        setCartao(null);
+        alert('Cartão removido com sucesso!');
+      } else {
+        alert('Erro ao remover cartão: ' + data.message);
+      }
+    } catch (error) {
+      console.error('Erro na remoção do cartão:', error);
+      alert('Erro na conexão com o servidor');
+    }
+  };
+
   return (
     <div
       className={`
@@ -189,7 +226,7 @@ const ModalPerfil: React.FC<ModalPerfilProps> = ({
           <X className="w-10 h-10 sm:w-12 sm:h-12" />
         </button>
 
-        <h2 className="text-center mb-8 mt-4 font-extrabold text-gray-800 leading-tight">
+        <h2 className="text-center font-extrabold text-gray-800 leading-tight">
           <span className="block text-[clamp(2.5rem,6vw,4rem)]">MEU PERFIL 👤</span>
         </h2>
 
@@ -216,125 +253,92 @@ const ModalPerfil: React.FC<ModalPerfilProps> = ({
 
         {abaAberta === 'carteira' && (
           <>
-            <div className="flex justify-between items-center mb-4">
-              <div>
-                <p className="text-md text-gray-700">Saldo Atual:</p>
-                <p className="text-4xl font-bold text-green-600">
-                  R$ {Number(dados.saldo || 0).toFixed(2)}
-                </p>
-              </div>
-              <button
-                className="py-2 px-4 rounded-xl bg-green-600 hover:bg-green-700 text-white font-semibold shadow-md"
-                onClick={() => {
-                  setSaldoAberto(!saldoAberto);
-                  setCartaoAberto(false);
-                }}
-              >
-                {saldoAberto ? 'Fechar' : 'Adicionar Saldo'}
-              </button>
-            </div>
-
-            {cartao ? (
-              <div className="w-full bg-white/40 backdrop-blur-md rounded-xl p-4 shadow-md mb-4">
-                <p className="text-lg font-semibold text-gray-800 mb-2">Cartão Cadastrado:</p>
-                <p><strong>Número:</strong> **** **** **** {cartao.numero.slice(-4)}</p>
-                <p><strong>Nome:</strong> {cartao.nome}</p>
-                <p><strong>Validade:</strong> {cartao.validade}</p>
-                <button
-                  className="mt-3 w-full py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-semibold shadow-md"
-                  onClick={async () => {
-                    if (!dados.email) {
-                      alert('Email não encontrado');
-                      return;
-                    }
-
-                    const res = await fetch('http://localhost/UNIFOOD/database/update_cartao.php', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({
-                        email: dados.email,
-                        acao: 'remover'
-                      }),
-                    });
-
-                    const result = await res.json();
-                    if (result.success) {
-                      setCartao(null);
-                      alert('Cartão removido com sucesso!');
-                    } else {
-                      alert('Erro ao remover cartão: ' + result.message);
-                    }
-                  }}
-                >
-                  Remover Cartão
-                </button>
+            {carregandoUsuario ? (
+              <div className="bg-yellow-100 text-yellow-800 rounded-xl p-4 text-center mb-4">
+                Carregando dados do usuário...
               </div>
             ) : (
-              <button
-                className="w-full py-3 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-semibold shadow-md hover:scale-105 transition mb-4"
-                onClick={() => {
-                  setCartaoAberto(!cartaoAberto);
-                  setSaldoAberto(false);
-                }}
-              >
-                {cartaoAberto ? 'Fechar' : 'Adicionar Cartão de Crédito'}
-              </button>
+              <>
+                <div className="flex justify-between items-center mb-4">
+                  <div>
+                    <p className="text-md text-gray-700">Saldo Atual:</p>
+                    <p className="text-4xl font-bold text-green-600">
+                      R$ {(Number(dados.saldo) || 0).toFixed(2).replace('.', ',')}
+                    </p>
+                  </div>
+                  <button
+                    className="py-2 px-4 rounded-xl bg-green-600 hover:bg-green-700 text-white font-semibold shadow-md"
+                    onClick={() => {
+                      setSaldoAberto(!saldoAberto);
+                      setCartaoAberto(false);
+                    }}
+                  >
+                    {saldoAberto ? 'Fechar' : 'Adicionar Saldo'}
+                  </button>
+                </div>
+
+                {cartao ? (
+                  <div className="w-full bg-white/40 backdrop-blur-md rounded-xl p-4 shadow-md mb-4">
+                    <p className="text-lg font-semibold text-gray-800 mb-2">Cartão Cadastrado:</p>
+                    <p><strong>Número:</strong> **** **** **** {cartao.numero.slice(-4)}</p>
+                    <p><strong>Nome:</strong> {cartao.nome}</p>
+                    <p><strong>Validade:</strong> {cartao.validade}</p>
+                    <button
+                      className="mt-3 w-full py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-semibold shadow-md"
+                      onClick={handleRemoverCartao}
+                    >
+                      Remover Cartão
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    className="w-full py-3 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-semibold shadow-md hover:scale-105 transition mb-4"
+                    onClick={() => {
+                      setCartaoAberto(!cartaoAberto);
+                      setSaldoAberto(false);
+                    }}
+                  >
+                    {cartaoAberto ? 'Fechar' : 'Adicionar Cartão de Crédito'}
+                  </button>
+                )}
+
+                <div className="flex flex-col md:flex-row gap-4">
+                  <AdicionarSaldo
+                    visivel={saldoAberto}
+                    onAdicionar={(valorAdicionado) => {
+                      const novoSaldo = Number(dados.saldo || 0) + valorAdicionado;
+                      const dadosAtualizados = { ...dados, saldo: novoSaldo };
+                      setDados(dadosAtualizados);
+                      localStorage.setItem('dadosUsuario', JSON.stringify(dadosAtualizados));
+                    }}
+                    usuario={dados}
+                    atualizarUsuario={(usuarioAtualizado) => {
+                      setDados(usuarioAtualizado);
+                      localStorage.setItem('dadosUsuario', JSON.stringify(usuarioAtualizado));
+                    }}
+                  />
+                  <AdicionarCartao
+                    visivel={cartaoAberto}
+                    onAdicionar={(dadosCartao) => {
+                      setCartao(dadosCartao);
+                      alert('Cartão cadastrado com sucesso!');
+                      setCartaoAberto(false);
+                    }}
+                    usuario={dados}
+                  />
+                </div>
+              </>
             )}
-
-            <div className="flex flex-col md:flex-row gap-4">
-              <AdicionarSaldo
-                visivel={saldoAberto}
-                onAdicionar={(valor) => {
-                  const novoSaldo = Number(dados.saldo || 0) + valor;
-                  const dadosAtualizados = { ...dados, saldo: novoSaldo };
-                  setDados(dadosAtualizados);
-                  localStorage.setItem('dadosUsuario', JSON.stringify(dadosAtualizados));
-                  alert(`Saldo adicionado com sucesso! Novo saldo: R$ ${novoSaldo.toFixed(2)}`);
-                  setSaldoAberto(false);
-                }}
-              />
-              <AdicionarCartao
-                visivel={cartaoAberto}
-                onAdicionar={async (dadosCartao) => {
-                  if (!dados.email) {
-                    alert('Email não encontrado');
-                    return;
-                  }
-
-                  const res = await fetch('http://localhost/UNIFOOD/database/update_cartao.php', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                      email: dados.email,
-                      numero_cartao: dadosCartao.numero,
-                      nome_cartao: dadosCartao.nome,
-                      validade_cartao: dadosCartao.validade,
-                      cvv_cartao: dadosCartao.cvv,
-                    }),
-                  });
-
-                  const result = await res.json();
-                  if (result.success) {
-                    setCartao(dadosCartao);
-                    alert('Cartão cadastrado com sucesso!');
-                    setCartaoAberto(false);
-                  } else {
-                    alert('Erro ao cadastrar cartão: ' + result.message);
-                  }
-                }}
-              />
-            </div>
           </>
         )}
 
         {abaAberta === 'dados' && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-gray-700">
-            {[
-              { field: 'logradouro', label: 'Logradouro' },
-              { field: 'numero', label: 'Número' },
-              { field: 'bairro', label: 'Bairro' },
-              { field: 'cidade', label: 'Cidade' },
-              { field: 'celular', label: 'Celular' },
+            {[{ field: 'logradouro', label: 'Logradouro' },
+            { field: 'numero', label: 'Número' },
+            { field: 'bairro', label: 'Bairro' },
+            { field: 'cidade', label: 'Cidade' },
+            { field: 'celular', label: 'Celular' },
             ].map(({ field, label }) => (
               <div key={field} className={field === 'celular' ? 'md:col-span-2 space-y-1' : 'space-y-1'}>
                 <p className="text-lg font-semibold">{label}</p>

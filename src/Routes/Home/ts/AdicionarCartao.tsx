@@ -1,80 +1,136 @@
 import React, { useState } from 'react';
 import { IMaskInput } from 'react-imask';
 
+interface Cartao {
+  numero: string;
+  nome: string;
+  validade: string;
+  cvv: string;
+}
+
+interface Usuario {
+  email: string;
+}
+
 interface AdicionarCartaoProps {
   visivel: boolean;
-  onAdicionar: (dados: {
-    numero: string;
-    nome: string;
-    validade: string;
-    cvv: string;
-  }) => void;
+  onAdicionar: (cartao: Cartao) => void;
+  usuario: Usuario;
 }
 
 const AdicionarCartao: React.FC<AdicionarCartaoProps> = ({
   visivel,
   onAdicionar,
+  usuario,
 }) => {
   const [numero, setNumero] = useState('');
   const [nome, setNome] = useState('');
   const [validade, setValidade] = useState('');
   const [cvv, setCvv] = useState('');
 
-  const handleAdicionar = () => {
-    if (!numero || !nome || !validade || !cvv) {
-      alert('Preencha todos os campos!');
+  if (!visivel) return null;
+
+  const handleAdicionar = async () => {
+    if (!usuario.email) {
+      alert('Erro: Email do usuário não informado.');
       return;
     }
-    onAdicionar({ numero, nome, validade, cvv });
-    setNumero('');
-    setNome('');
-    setValidade('');
-    setCvv('');
-  };
 
-  if (!visivel) return null;
+    if (!numero || !nome || !validade || !cvv) {
+      alert('Preencha todos os campos do cartão.');
+      return;
+    }
+
+    const dadosCartao = {
+      numero,
+      nome,
+      validade,
+      cvv,
+    };
+
+    console.log('Enviando para o backend:', {
+      email: usuario.email,
+      numero_cartao: numero,
+      nome_cartao: nome,
+      validade_cartao: validade,
+      cvv_cartao: cvv,
+    });
+
+    try {
+      const res = await fetch('http://localhost/UNIFOOD/database/update_cartao.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: usuario.email,
+          numero_cartao: numero,
+          nome_cartao: nome,
+          validade_cartao: validade,
+          cvv_cartao: cvv,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        onAdicionar(dadosCartao);
+        alert('Cartão cadastrado com sucesso!');
+        setNumero('');
+        setNome('');
+        setValidade('');
+        setCvv('');
+      } else {
+        alert('Erro ao cadastrar cartão: ' + data.message);
+      }
+    } catch (error) {
+      console.error('Erro na requisição:', error);
+      alert('Erro na conexão com o servidor');
+    }
+  };
 
   return (
     <div className="w-full bg-white/40 backdrop-blur-md rounded-2xl shadow-md p-4">
       <h2 className="text-5xl font-bold mb-4 text-center">Adicionar Cartão</h2>
-      <div className="flex flex-col gap-2">
+
+      <div className="flex flex-col gap-3">
         <IMaskInput
           mask="0000 0000 0000 0000"
-          placeholder="Número do Cartão"
           value={numero}
-          onAccept={(value) => setNumero(value)}
-          className="w-full border border-gray-300 rounded-xl px-3 py-2"
+          onAccept={(value) => setNumero(value as string)}
+          placeholder="Número do Cartão"
+          className="w-full border border-gray-300 rounded-xl px-3 py-2 bg-gray-50 focus:ring-2 focus:ring-purple-600 text-black"
         />
 
         <input
           type="text"
-          placeholder="Nome no Cartão"
           value={nome}
           onChange={(e) => setNome(e.target.value)}
-          className="w-full border border-gray-300 rounded-xl px-3 py-2"
+          placeholder="Nome no Cartão"
+          className="w-full border border-gray-300 rounded-xl px-3 py-2 bg-gray-50 focus:ring-2 focus:ring-purple-600 text-black"
         />
 
-        <IMaskInput
-          mask="00/00"
-          placeholder="Validade (MM/AA)"
-          value={validade}
-          onAccept={(value) => setValidade(value)}
-          className="w-full border border-gray-300 rounded-xl px-3 py-2"
-        />
+        <div className="flex gap-3">
+          <IMaskInput
+            mask="00/00"
+            value={validade}
+            onAccept={(value) => setValidade(value as string)}
+            placeholder="Validade (MM/AA)"
+            className="w-full border border-gray-300 rounded-xl px-3 py-2 bg-gray-50 focus:ring-2 focus:ring-purple-600 text-black"
+          />
 
-        <IMaskInput
-          mask="0000"
-          placeholder="CVV"
-          value={cvv}
-          onAccept={(value) => setCvv(value)}
-          className="w-full border border-gray-300 rounded-xl px-3 py-2"
-        />
+          <IMaskInput
+            mask="000"
+            value={cvv}
+            onAccept={(value) => setCvv(value as string)}
+            placeholder="CVV"
+            className="w-full border border-gray-300 rounded-xl px-3 py-2 bg-gray-50 focus:ring-2 focus:ring-purple-600 text-black"
+          />
+        </div>
 
         <button
           onClick={handleAdicionar}
-          className="w-full py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-semibold"
+          className="w-full py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-semibold shadow-md"
         >
-          Adicionar
+          Adicionar Cartão
         </button>
       </div>
     </div>
