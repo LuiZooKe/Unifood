@@ -27,8 +27,9 @@ interface ModalCarrinhoProps {
   onRemover: (nome: string) => void;
   usuario: Usuario;
   atualizarUsuario: (usuarioAtualizado: Usuario) => void;
-  limparCarrinho: () => void;
+  limparCarrinho: () => void; // 🔥 Isso tem que existir
 }
+
 
 const ModalCarrinho: React.FC<ModalCarrinhoProps> = ({
   aberto,
@@ -39,7 +40,7 @@ const ModalCarrinho: React.FC<ModalCarrinhoProps> = ({
   onRemover,
   usuario,
   atualizarUsuario,
-  limparCarrinho,
+  limparCarrinho, // 🔥 Isso precisa estar aqui destruturado
 }) => {
   const [pagamentoAberto, setPagamentoAberto] = useState(false);
   const [pixAberto, setPixAberto] = useState(false);
@@ -48,57 +49,51 @@ const ModalCarrinho: React.FC<ModalCarrinhoProps> = ({
   if (!aberto) return null;
 
   const finalizarPagamento = async (metodo: 'pix' | 'cartao' | 'saldo') => {
-  const total = parseFloat(calcularTotal().replace(',', '.'));
+    const total = parseFloat(calcularTotal().replace(',', '.'));
 
-  if (metodo === 'cartao' && !usuario.numero_cartao) {
-    alert('Nenhum cartão cadastrado.');
-    return;
-  }
-
-  if (metodo === 'saldo' && (usuario.saldo || 0) < total) {
-    alert('Saldo insuficiente.');
-    return;
-  }
-
-  try {
-    const res = await fetch('http://localhost/UNIFOOD/database/finalizar_pedido.php', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        nome: usuario.nome,
-        email: usuario.email,
-        itens: itens,
-        valor_total: total,
-        tipo_pagamento: metodo,
-      }),
-    });
-
-    const data = await res.json();
-
-    if (data.success) {
-      alert('Pedido finalizado com sucesso!');
-
-      // 🔥 Atualiza saldo no usuário
-      const usuarioAtualizado = { ...usuario, saldo: data.novo_saldo };
-      atualizarUsuario(usuarioAtualizado);
-      localStorage.setItem('dadosUsuario', JSON.stringify(usuarioAtualizado));
-
-      // 🔥 E aqui FECHA TUDO e LIMPA
-      setPagamentoAberto(false);
-      setPixAberto(false);
-      setConfirmacaoAberta(true);
-      onFechar(); // Fecha também o modal do carrinho
-      limparCarrinho();
-
-    } else {
-      alert('Erro ao finalizar pedido: ' + data.message);
+    if (metodo === 'cartao' && !usuario.numero_cartao) {
+      alert('Nenhum cartão cadastrado.');
+      return;
     }
-  } catch (error) {
-    console.error('Erro na conexão:', error);
-    alert('Erro na conexão com o servidor.');
-  }
-};
 
+    if (metodo === 'saldo' && (usuario.saldo || 0) < total) {
+      alert('Saldo insuficiente.');
+      return;
+    }
+
+    try {
+      const res = await fetch('http://localhost/UNIFOOD/database/finalizar_pedido.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nome: usuario.nome,
+          email: usuario.email,
+          itens: itens,
+          valor_total: total,
+          tipo_pagamento: metodo,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        alert('Pedido finalizado com sucesso!');
+
+        const usuarioAtualizado = { ...usuario, saldo: data.novo_saldo };
+        atualizarUsuario(usuarioAtualizado);
+        localStorage.setItem('dadosUsuario', JSON.stringify(usuarioAtualizado));
+
+        setPagamentoAberto(false);
+        setPixAberto(false);
+        setConfirmacaoAberta(true);
+      } else {
+        alert('Erro ao finalizar pedido: ' + data.message);
+      }
+    } catch (error) {
+      console.error('Erro na conexão:', error);
+      alert('Erro na conexão com o servidor.');
+    }
+  };
 
   return (
     <div
@@ -112,14 +107,8 @@ const ModalCarrinho: React.FC<ModalCarrinhoProps> = ({
       onClick={onFechar}
     >
       <div
-        className="
-          bg-white/95 backdrop-blur-md
-          w-[90%] max-w-[500px] h-[90%]
-          md:w-[380px] md:h-auto 
-          rounded-3xl shadow-xl 
-          overflow-auto relative 
-          px-6 py-8
-        "
+        className="bg-white/95 backdrop-blur-md w-[90%] max-w-[500px] h-[90%]
+        md:w-[380px] md:h-auto rounded-3xl shadow-xl overflow-auto relative px-6 py-8"
         onClick={(e) => e.stopPropagation()}
       >
         <button
@@ -147,7 +136,6 @@ const ModalCarrinho: React.FC<ModalCarrinhoProps> = ({
                   alt={item.nome}
                   className="w-[80px] h-[80px] md:w-[100px] md:h-[100px] object-cover rounded-lg flex-shrink-0"
                 />
-
                 <div className="flex flex-col justify-between w-full">
                   <div className="flex flex-col justify-end flex-grow">
                     <h4 className="font-bold text-gray-800 leading-tight text-[clamp(1.5rem,3vw,2.5rem)] break-words">
@@ -157,7 +145,6 @@ const ModalCarrinho: React.FC<ModalCarrinhoProps> = ({
                       Preço: <span className="font-semibold">{item.preco}</span>
                     </p>
                   </div>
-
                   <div className="flex flex-col items-end mt-4 gap-2">
                     <div className="flex items-center gap-4">
                       <button
@@ -174,7 +161,6 @@ const ModalCarrinho: React.FC<ModalCarrinhoProps> = ({
                         +
                       </button>
                     </div>
-
                     <button
                       onClick={() => onRemover(item.nome)}
                       className="text-red-600 hover:text-red-800 text-lg font-medium"
@@ -229,8 +215,11 @@ const ModalCarrinho: React.FC<ModalCarrinhoProps> = ({
       <PagamentoConfirm
         visivel={confirmacaoAberta}
         onFechar={() => setConfirmacaoAberta(false)}
+        onConfirmar={() => {
+          limparCarrinho();
+          onFechar();
+        }}
       />
-
     </div>
   );
 };

@@ -97,6 +97,11 @@ function Home() {
     );
   };
 
+  const limparCarrinho = () => {
+    setItensCarrinho([]);
+  };
+
+
   const alterarQuantidadeProduto = (nomeProduto, novaQuantidade) => {
     if (novaQuantidade < 1) return;
     setItensCarrinho((prevItens) =>
@@ -529,7 +534,9 @@ function Home() {
           setUsuario(usuarioAtualizado);
           localStorage.setItem('dadosUsuario', JSON.stringify(usuarioAtualizado));
         }}
+        limparCarrinho={limparCarrinho} // 🔥 Se faltar isso, o erro acontece!
       />
+
 
 
 

@@ -9,53 +9,50 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit();
 }
 
-$data = json_decode(file_get_contents("php://input"), true);
-
-if (!isset($data['email'])) {
-    echo json_encode(['success' => false, 'message' => 'Dados incompletos']);
-    exit;
-}
-
-function tratarCampo($valor) {
-    return (isset($valor) && trim($valor) !== '') ? trim($valor) : null;
-}
-
-$logradouro = tratarCampo($data['logradouro'] ?? null);
-$numero     = tratarCampo($data['numero'] ?? null);
-$bairro     = tratarCampo($data['bairro'] ?? null);
-$cidade     = tratarCampo($data['cidade'] ?? null);
-$telefone   = tratarCampo($data['telefone'] ?? null);
-$email      = trim($data['email']);
-
 $conn = new mysqli("localhost", "root", "", "unifood_db");
 
 if ($conn->connect_error) {
-    echo json_encode(['success' => false, 'message' => 'Erro na conexão: ' . $conn->connect_error]);
+    echo json_encode(['success' => false, 'message' => 'Erro na conexão com o banco']);
     exit;
 }
 
-$stmt = $conn->prepare("
-    UPDATE clientes 
-    SET logradouro = ?, numero = ?, bairro = ?, cidade = ?, telefone = ? 
-    WHERE email = ?
-");
+$data = json_decode(file_get_contents("php://input"), true);
+$email = $data['email'] ?? '';
 
-$stmt->bind_param(
-    "ssssss",
-    $logradouro,
-    $numero,
-    $bairro,
-    $cidade,
-    $telefone,
-    $email
-);
-
-if ($stmt->execute()) {
-    echo json_encode(['success' => true, 'message' => 'Dados atualizados com sucesso']);
-} else {
-    echo json_encode(['success' => false, 'message' => 'Erro ao atualizar dados']);
+if (empty($email)) {
+    echo json_encode(['success' => false, 'message' => 'Email não enviado']);
+    exit;
 }
 
-$stmt->close();
+$logradouro = $data['logradouro'] ?? '';
+$numero = $data['numero'] ?? '';
+$bairro = $data['bairro'] ?? '';
+$cidade = $data['cidade'] ?? '';
+$celular = $data['celular'] ?? '';
+
+$numero_cartao = $data['numero_cartao'] ?? '';
+$nome_cartao = $data['nome_cartao'] ?? '';
+$validade_cartao = $data['validade_cartao'] ?? '';
+$cvv_cartao = $data['cvv_cartao'] ?? '';
+
+// Atualiza os dados na tabela clientes
+$sql = "UPDATE clientes SET 
+    logradouro = '$logradouro',
+    numero = '$numero',
+    bairro = '$bairro',
+    cidade = '$cidade',
+    celular = '$celular',
+    numero_cartao = '$numero_cartao',
+    nome_cartao = '$nome_cartao',
+    validade_cartao = '$validade_cartao',
+    cvv_cartao = '$cvv_cartao'
+WHERE email = '$email'";
+
+if ($conn->query($sql) === TRUE) {
+    echo json_encode(['success' => true, 'message' => 'Dados atualizados com sucesso']);
+} else {
+    echo json_encode(['success' => false, 'message' => 'Erro ao atualizar os dados']);
+}
+
 $conn->close();
 ?>

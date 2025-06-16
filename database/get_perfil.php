@@ -1,7 +1,7 @@
 <?php
 header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Headers: *");
-header("Access-Control-Allow-Methods: GET, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type");
+header("Access-Control-Allow-Methods: POST, OPTIONS");
 header('Content-Type: application/json');
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
@@ -9,33 +9,53 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit();
 }
 
-if (!isset($_GET['email'])) {
-    echo json_encode(['success' => false, 'message' => 'Email não informado']);
-    exit;
-}
-
-$email = $_GET['email'];
-
 $conn = new mysqli("localhost", "root", "", "unifood_db");
 
 if ($conn->connect_error) {
-    echo json_encode(['success' => false, 'message' => 'Erro na conexão: ' . $conn->connect_error]);
+    echo json_encode(['success' => false, 'message' => 'Erro na conexão com o banco']);
     exit;
 }
 
-$stmt = $conn->prepare("SELECT nome, email, logradouro, numero, bairro, cidade, telefone, saldo, numero_cartao, nome_cartao, validade_cartao, cvv_cartao FROM clientes WHERE email = ?");
-$stmt->bind_param("s", $email);
-$stmt->execute();
+$data = json_decode(file_get_contents("php://input"), true);
+$email = $data['email'] ?? '';
 
-$result = $stmt->get_result();
-if ($result->num_rows > 0) {
-    $dados = $result->fetch_assoc();
-    $dados['saldo'] = floatval($dados['saldo']) ?? 0;
-    echo json_encode(['success' => true, 'dados' => $dados]);
-} else {
-    echo json_encode(['success' => false, 'message' => 'Usuário não encontrado']);
+if (empty($email)) {
+    echo json_encode(['success' => false, 'message' => 'Email não enviado']);
+    exit;
 }
 
-$stmt->close();
+// Valida se o email existe na tabela users
+$check = $conn->query("SELECT * FROM users WHERE email = '$email'");
+if ($check->num_rows == 0) {
+    echo json_encode(['success' => false, 'message' => 'Usuário não encontrado']);
+    exit;
+}
+
+// Busca os dados pessoais na tabela clientes
+$result = $conn->query("SELECT * FROM clientes WHERE email = '$email'");
+
+if ($result->num_rows > 0) {
+    $row = $result->fetch_assoc();
+    echo json_encode([
+        'success' => true,
+        'usuario' => [
+            'nome' => $row['nome'] ?? '',
+            'email' => $email,
+            'logradouro' => $row['logradouro'] ?? '',
+            'numero' => $row['numero'] ?? '',
+            'bairro' => $row['bairro'] ?? '',
+            'cidade' => $row['cidade'] ?? '',
+            'celular' => $row['celular'] ?? '',
+            'saldo' => $row['saldo'] ?? 0,
+            'numero_cartao' => $row['numero_cartao'] ?? '',
+            'nome_cartao' => $row['nome_cartao'] ?? '',
+            'validade_cartao' => $row['validade_cartao'] ?? '',
+            'cvv_cartao' => $row['cvv_cartao'] ?? ''
+        ]
+    ]);
+} else {
+    echo json_encode(['success' => false, 'message' => 'Dados do cliente não encontrados']);
+}
+
 $conn->close();
 ?>
