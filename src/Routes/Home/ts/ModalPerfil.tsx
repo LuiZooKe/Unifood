@@ -12,7 +12,7 @@ interface Usuario {
   numero?: string;
   bairro?: string;
   cidade?: string;
-  celular?: string;
+  telefone?: string;
   numero_cartao?: string;
 }
 
@@ -102,7 +102,7 @@ const ModalPerfil: React.FC<ModalPerfilProps> = ({
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    if (name === 'celular') {
+    if (name === 'telefone') {
       const masked = IMask.createMask({ mask: '(00) 00000-0000' });
       masked.resolve(value);
       setDados((prev) => ({ ...prev, [name]: masked.value }));
@@ -127,7 +127,7 @@ const ModalPerfil: React.FC<ModalPerfilProps> = ({
           numero: dados.numero,
           bairro: dados.bairro,
           cidade: dados.cidade,
-          telefone: dados.celular,
+          telefone: dados.telefone,
         }),
       });
 
@@ -206,211 +206,213 @@ const ModalPerfil: React.FC<ModalPerfilProps> = ({
   return (
     <div
       className={`
-        fixed inset-0 z-[9999]
-        flex items-center justify-center
-        md:inset-auto md:top-28 md:right-[3.5rem] md:items-start md:justify-end
-        bg-black/70 backdrop-blur-xl md:bg-transparent
-        md:rounded-3xl shadow-2xl
-      `}
+    fixed inset-0 z-[9999]
+    flex items-center justify-center
+    md:inset-auto md:top-28 md:right-[3.5rem] md:items-start md:justify-end
+    bg-black/70 backdrop-blur-xl md:bg-transparent
+    md:rounded-3xl shadow-2xl
+  `}
       onClick={onFechar}
     >
       <div
-        className="
-          bg-white/95 backdrop-blur-md
-          w-[90%] max-w-[500px] h-[90%]
-          md:w-[380px] md:h-auto 
-          rounded-3xl shadow-xl 
-          overflow-auto relative 
-          px-6 py-8
-        "
+        className="bg-white/95 backdrop-blur-md w-[90%] max-w-[500px] max-h-[90vh] md:max-h-[90vh]
+    md:w-[380px] rounded-3xl shadow-xl overflow-hidden flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
-        <button
-          onClick={onFechar}
-          className="absolute top-6 right-6 text-gray-500 hover:text-red-500"
-        >
-          <X className="w-10 h-10 sm:w-12 sm:h-12" />
-        </button>
 
-        <h2 className="text-center font-extrabold text-gray-800 leading-tight">
-          <span className="block text-[clamp(2.5rem,6vw,4rem)]">MEU PERFIL 👤</span>
-        </h2>
-
-        <div className="bg-gray-100 rounded-xl p-4 mb-4 text-center">
-          <p className="text-xl font-bold text-center text-gray-800">{dados.nome}</p>
-          <p className="text-md text-center text-gray-600">{dados.email}</p>
-        </div>
-
-
-        <div className="flex gap-2 mb-6">
+        {/* 🔥 Cabeçalho igual ao carrinho */}
+        <div className="flex justify-center items-center relative py-4 border-b border-gray-300">
+          <h2 className="text-center font-extrabold text-gray-800 leading-tight">
+            <span className="block text-[clamp(2.5rem,6vw,4rem)]">MEU PERFIL 👤</span>
+          </h2>
           <button
-            onClick={() => setAbaAberta('carteira')}
-            className={`flex-1 py-2 rounded-xl font-semibold ${abaAberta === 'carteira'
-              ? 'bg-green-600 text-white shadow-lg'
-              : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
-              }`}
+            onClick={onFechar}
+            className="absolute right-6 top-1/2 -translate-y-1/2 text-gray-500 hover:text-red-500"
           >
-            Carteira
-          </button>
-          <button
-            onClick={() => setAbaAberta('dados')}
-            className={`flex-1 py-2 rounded-xl font-semibold ${abaAberta === 'dados'
-              ? 'bg-red-600 text-white shadow-lg'
-              : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
-              }`}
-          >
-            Dados
+            <X className="w-8 h-8 sm:w-10 sm:h-10" />
           </button>
         </div>
 
-        {abaAberta === 'carteira' && (
-          <>
-            {carregandoUsuario ? (
-              <div className="bg-yellow-100 text-yellow-800 rounded-xl p-4 text-center mb-4">
-                Carregando dados do usuário...
-              </div>
-            ) : (
-              <>
-                <div className="flex justify-between items-center mb-4">
-                  <div>
-                    <p className="text-md text-gray-700">Saldo Atual:</p>
-                    <p className="text-4xl font-bold text-green-600">
-                      R$ {(Number(dados.saldo) || 0).toFixed(2).replace('.', ',')}
-                    </p>
-                  </div>
-                  <button
-                    className="py-2 px-4 rounded-xl bg-green-600 hover:bg-green-700 text-white font-semibold shadow-md"
-                    onClick={() => {
-                      setSaldoAberto(!saldoAberto);
-                      setCartaoAberto(false);
-                    }}
-                  >
-                    {saldoAberto ? 'Fechar' : 'Adicionar Saldo'}
-                  </button>
+        {/* 🔥 Conteúdo rolável */}
+        <div className="flex-1 overflow-y-auto px-6 py-4">
+          {/* 🔥 Botões Carteira e Dados */}
+          <div className="flex gap-2 mb-4">
+            <button
+              onClick={() => setAbaAberta('carteira')}
+              className={`flex-1 py-2 rounded-xl font-semibold ${abaAberta === 'carteira'
+                ? 'bg-green-600 text-white shadow-lg'
+                : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+                }`}
+            >
+              Carteira 💰
+            </button>
+            <button
+              onClick={() => setAbaAberta('dados')}
+              className={`flex-1 py-2 rounded-xl font-semibold ${abaAberta === 'dados'
+                ? 'bg-red-600 text-white shadow-lg'
+                : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+                }`}
+            >
+              Dados 🪪
+            </button>
+          </div>
+
+          {/* 🔥 Info do usuário — aparece apenas na aba Dados */}
+          {abaAberta === 'dados' && (
+            <div className="bg-gray-100 rounded-xl p-4 mb-4 text-center">
+              <p className="text-xl font-bold text-gray-800">{dados.nome}</p>
+              <p className="text-md text-gray-600">{dados.email}</p>
+            </div>
+          )}
+
+          {/* 🔥 Conteúdo das abas */}
+          {abaAberta === 'carteira' ? (
+            <>
+              {carregandoUsuario ? (
+                <div className="bg-yellow-100 text-yellow-800 rounded-xl p-4 text-center mb-4">
+                  Carregando dados do usuário...
                 </div>
-
-                {cartao ? (
-                  <div className="w-full bg-white/40 backdrop-blur-md rounded-xl p-4 shadow-md mb-4">
-                    <p className="text-lg font-semibold text-gray-800 mb-2">Cartão Cadastrado:</p>
-                    <p><strong>Número:</strong> **** **** **** {cartao.numero.slice(-4)}</p>
-                    <p><strong>Nome:</strong> {cartao.nome}</p>
-                    <p><strong>Validade:</strong> {cartao.validade}</p>
+              ) : (
+                <>
+                  <div className="flex justify-between items-center mb-4">
+                    <div>
+                      <p className="text-md text-gray-700">Saldo Atual:</p>
+                      <p className="text-4xl font-bold text-green-600">
+                        R$ {(Number(dados.saldo) || 0).toFixed(2).replace('.', ',')}
+                      </p>
+                    </div>
                     <button
-                      className="mt-3 w-full py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-semibold shadow-md"
-                      onClick={handleRemoverCartao}
+                      className="py-2 px-4 rounded-xl bg-green-600 hover:bg-green-700 text-white font-semibold shadow-md"
+                      onClick={() => {
+                        setSaldoAberto(!saldoAberto);
+                        setCartaoAberto(false);
+                      }}
                     >
-                      Remover Cartão
+                      {saldoAberto ? 'Fechar' : 'Adicionar Saldo'}
                     </button>
                   </div>
-                ) : (
-                  <button
-                    className="w-full py-3 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-semibold shadow-md hover:scale-105 transition mb-4"
-                    onClick={() => {
-                      setCartaoAberto(!cartaoAberto);
-                      setSaldoAberto(false);
-                    }}
-                  >
-                    {cartaoAberto ? 'Fechar' : 'Adicionar Cartão de Crédito'}
-                  </button>
-                )}
 
-                <div className="flex flex-col md:flex-row gap-4">
-                  <AdicionarSaldo
-                    visivel={saldoAberto}
-                    onAdicionar={(valorAdicionado) => {
-                      const novoSaldo = Number(dados.saldo || 0) + valorAdicionado;
-                      const dadosAtualizados = { ...dados, saldo: novoSaldo };
-                      setDados(dadosAtualizados);
-                      localStorage.setItem('dadosUsuario', JSON.stringify(dadosAtualizados));
-                    }}
-                    usuario={dados}
-                    atualizarUsuario={(usuarioAtualizado) => {
-                      setDados(usuarioAtualizado);
-                      localStorage.setItem('dadosUsuario', JSON.stringify(usuarioAtualizado));
-                    }}
-                  />
-                  <AdicionarCartao
-                    visivel={cartaoAberto}
-                    onAdicionar={(dadosCartao) => {
-                      setCartao(dadosCartao);
-                      alert('Cartão cadastrado com sucesso!');
-                      setCartaoAberto(false);
-                    }}
-                    usuario={dados}
+                  {cartao ? (
+                    <div className="w-full bg-white/40 backdrop-blur-md rounded-xl p-4 shadow-md mb-4">
+                      <p className="text-lg font-semibold text-gray-800 mb-2">Cartão Cadastrado:</p>
+                      <p><strong>Número:</strong> **** **** **** {cartao.numero.slice(-4)}</p>
+                      <p><strong>Nome:</strong> {cartao.nome}</p>
+                      <p><strong>Validade:</strong> {cartao.validade}</p>
+                      <button
+                        className="mt-3 w-full py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-semibold shadow-md"
+                        onClick={handleRemoverCartao}
+                      >
+                        Remover Cartão
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      className="w-full py-3 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-semibold shadow-md hover:scale-105 transition mb-4"
+                      onClick={() => {
+                        setCartaoAberto(!cartaoAberto);
+                        setSaldoAberto(false);
+                      }}
+                    >
+                      {cartaoAberto ? 'Fechar' : 'Adicionar Cartão de Crédito'}
+                    </button>
+                  )}
+
+                  <div className="flex flex-col md:flex-row gap-4">
+                    <AdicionarSaldo
+                      visivel={saldoAberto}
+                      onAdicionar={(valorAdicionado) => {
+                        const novoSaldo = Number(dados.saldo || 0) + valorAdicionado;
+                        const dadosAtualizados = { ...dados, saldo: novoSaldo };
+                        setDados(dadosAtualizados);
+                        localStorage.setItem('dadosUsuario', JSON.stringify(dadosAtualizados));
+                      }}
+                      usuario={dados}
+                      atualizarUsuario={(usuarioAtualizado) => {
+                        setDados(usuarioAtualizado);
+                        localStorage.setItem('dadosUsuario', JSON.stringify(usuarioAtualizado));
+                      }}
+                    />
+                    <AdicionarCartao
+                      visivel={cartaoAberto}
+                      onAdicionar={(dadosCartao) => {
+                        setCartao(dadosCartao);
+                        alert('Cartão cadastrado com sucesso!');
+                        setCartaoAberto(false);
+                      }}
+                      usuario={dados}
+                    />
+                  </div>
+                </>
+              )}
+            </>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-gray-700">
+              {[{ field: 'logradouro', label: 'Logradouro' },
+              { field: 'numero', label: 'Número' },
+              { field: 'bairro', label: 'Bairro' },
+              { field: 'cidade', label: 'Cidade' },
+              { field: 'telefone', label: 'Telefone' },
+              ].map(({ field, label }) => (
+                <div key={field} className={field === 'telefone' ? 'md:col-span-2 space-y-1' : 'space-y-1'}>
+                  <p className="text-lg font-semibold">{label}</p>
+                  <input
+                    type="text"
+                    name={field}
+                    value={(dados as any)[field] || ''}
+                    onChange={handleChange}
+                    placeholder={`Digite ${label}`}
+                    className="w-full border border-gray-300 rounded-xl px-3 py-2 bg-gray-50 focus:ring-2 focus:ring-red-600 text-black"
                   />
                 </div>
-              </>
-            )}
-          </>
-        )}
+              ))}
 
+              {[{
+                label: 'Nova Senha', value: novaSenha, setValue: setNovaSenha,
+                mostrar: mostrarSenha, setMostrar: setMostrarSenha,
+              },
+              {
+                label: 'Confirmar Nova Senha', value: confirmarSenha, setValue: setConfirmarSenha,
+                mostrar: mostrarConfirmar, setMostrar: setMostrarConfirmar,
+              }
+              ].map(({ label, value, setValue, mostrar, setMostrar }, idx) => (
+                <div key={idx} className="md:col-span-2 space-y-1 relative">
+                  <p className="text-lg font-semibold">{label}</p>
+                  <input
+                    type={mostrar ? 'text' : 'password'}
+                    name={label.toLowerCase().replace(/ /g, '')}
+                    value={value}
+                    onChange={(e) => setValue(e.target.value)}
+                    placeholder={label}
+                    className="w-full border border-gray-300 rounded-xl px-3 py-2 bg-gray-50 focus:ring-2 focus:ring-red-600 text-black pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setMostrar(!mostrar)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600"
+                  >
+                    {mostrar ? <EyeOff size={20} /> : <Eye size={20} />}
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* 🔥 Rodapé — aparece apenas na aba Dados */}
         {abaAberta === 'dados' && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-gray-700">
-            {[{ field: 'logradouro', label: 'Logradouro' },
-            { field: 'numero', label: 'Número' },
-            { field: 'bairro', label: 'Bairro' },
-            { field: 'cidade', label: 'Cidade' },
-            { field: 'celular', label: 'Celular' },
-            ].map(({ field, label }) => (
-              <div key={field} className={field === 'celular' ? 'md:col-span-2 space-y-1' : 'space-y-1'}>
-                <p className="text-lg font-semibold">{label}</p>
-                <input
-                  type="text"
-                  name={field}
-                  value={(dados as any)[field] || ''}
-                  onChange={handleChange}
-                  placeholder={`Digite ${label}`}
-                  className="w-full border border-gray-300 rounded-xl px-3 py-2 bg-gray-50 focus:ring-2 focus:ring-red-600 text-black"
-                />
-              </div>
-            ))}
-
-            {[{
-              label: 'Nova Senha', value: novaSenha, setValue: setNovaSenha,
-              mostrar: mostrarSenha, setMostrar: setMostrarSenha,
-            },
-            {
-              label: 'Confirmar Nova Senha', value: confirmarSenha, setValue: setConfirmarSenha,
-              mostrar: mostrarConfirmar, setMostrar: setMostrarConfirmar,
-            }
-            ].map(({ label, value, setValue, mostrar, setMostrar }, idx) => (
-              <div key={idx} className="md:col-span-2 space-y-1 relative">
-                <p className="text-lg font-semibold">{label}</p>
-                <input
-                  type={mostrar ? 'text' : 'password'}
-                  name={label.toLowerCase().replace(/ /g, '')}
-                  value={value}
-                  onChange={(e) => setValue(e.target.value)}
-                  placeholder={label}
-                  className="w-full border border-gray-300 rounded-xl px-3 py-2 bg-gray-50 focus:ring-2 focus:ring-red-600 text-black pr-10"
-                />
-                <button
-                  type="button"
-                  onClick={() => setMostrar(!mostrar)}
-                  className="absolute right-3 top-1/2 text-gray-600"
-                >
-                  {mostrar ? <EyeOff size={20} /> : <Eye size={20} />}
-                </button>
-              </div>
-            ))}
-
-            <div className="md:col-span-2">
-              <button
-                onClick={handleSubmit}
-                className="w-full py-3 rounded-xl bg-green-600 hover:bg-green-700 text-white font-semibold shadow-md hover:scale-105 transition"
-              >
-                Atualizar Dados
-              </button>
-            </div>
-
-            <div className="md:col-span-2">
-              <button
-                onClick={onLogout}
-                className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-xl shadow-md hover:scale-105 transition"
-              >
-                Desconectar
-              </button>
-            </div>
+          <div className="flex flex-col gap-3 px-6 pb-6 pt-4 border-t border-gray-300">
+            <button
+              onClick={handleSubmit}
+              className="w-full py-3 rounded-xl bg-green-600 hover:bg-green-700 text-white font-semibold shadow-md hover:scale-105 transition"
+            >
+              Atualizar Dados
+            </button>
+            <button
+              onClick={onLogout}
+              className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-xl shadow-md hover:scale-105 transition"
+            >
+              Desconectar
+            </button>
           </div>
         )}
       </div>

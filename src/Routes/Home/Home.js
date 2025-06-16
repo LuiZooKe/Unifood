@@ -352,7 +352,7 @@ function Home() {
                 }}
                 className="w-[90%] bg-gradient-to-r from-green-300 to-green-500 text-white font-bold text-2xl py-4 rounded-2xl shadow-xl hover:scale-105 transition"
               >
-                🛒 Carrinho
+                🛍️ Pedidos 
               </button>
 
               <button
@@ -399,7 +399,7 @@ function Home() {
                   }}
                   className="block w-full text-left"
                 >
-                  Carrinho 🛒
+                  Pedidos 🛍️
                 </a>
               </li>
 

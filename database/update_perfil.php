@@ -1,6 +1,6 @@
 <?php
 header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Headers: Content-Type");
+header("Access-Control-Allow-Headers: *");
 header("Access-Control-Allow-Methods: POST, OPTIONS");
 header('Content-Type: application/json');
 
@@ -17,6 +17,12 @@ if ($conn->connect_error) {
 }
 
 $data = json_decode(file_get_contents("php://input"), true);
+
+if (!$data) {
+    echo json_encode(['success' => false, 'message' => 'Dados não recebidos']);
+    exit;
+}
+
 $email = $data['email'] ?? '';
 
 if (empty($email)) {
@@ -28,31 +34,49 @@ $logradouro = $data['logradouro'] ?? '';
 $numero = $data['numero'] ?? '';
 $bairro = $data['bairro'] ?? '';
 $cidade = $data['cidade'] ?? '';
-$celular = $data['celular'] ?? '';
-
+$telefone = $data['telefone'] ?? '';
 $numero_cartao = $data['numero_cartao'] ?? '';
 $nome_cartao = $data['nome_cartao'] ?? '';
 $validade_cartao = $data['validade_cartao'] ?? '';
 $cvv_cartao = $data['cvv_cartao'] ?? '';
 
-// Atualiza os dados na tabela clientes
-$sql = "UPDATE clientes SET 
-    logradouro = '$logradouro',
-    numero = '$numero',
-    bairro = '$bairro',
-    cidade = '$cidade',
-    celular = '$celular',
-    numero_cartao = '$numero_cartao',
-    nome_cartao = '$nome_cartao',
-    validade_cartao = '$validade_cartao',
-    cvv_cartao = '$cvv_cartao'
-WHERE email = '$email'";
+$stmt = $conn->prepare("UPDATE clientes SET 
+    logradouro = ?, 
+    numero = ?, 
+    bairro = ?, 
+    cidade = ?, 
+    telefone = ?, 
+    numero_cartao = ?, 
+    nome_cartao = ?, 
+    validade_cartao = ?, 
+    cvv_cartao = ? 
+WHERE email = ?");
 
-if ($conn->query($sql) === TRUE) {
+if (!$stmt) {
+    echo json_encode(['success' => false, 'message' => 'Erro na preparação da query']);
+    exit;
+}
+
+$stmt->bind_param(
+    "ssssssssss", 
+    $logradouro, 
+    $numero, 
+    $bairro, 
+    $cidade, 
+    $telefone, 
+    $numero_cartao, 
+    $nome_cartao, 
+    $validade_cartao, 
+    $cvv_cartao, 
+    $email
+);
+
+if ($stmt->execute()) {
     echo json_encode(['success' => true, 'message' => 'Dados atualizados com sucesso']);
 } else {
     echo json_encode(['success' => false, 'message' => 'Erro ao atualizar os dados']);
 }
 
+$stmt->close();
 $conn->close();
 ?>
