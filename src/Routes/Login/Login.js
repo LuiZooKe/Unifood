@@ -1,5 +1,5 @@
-import React, { useState} from 'react';
-import { Eye, EyeOff, X } from 'lucide-react';
+import React, { useState } from 'react';
+import { Eye, EyeOff } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import fundoLogin from './img/fundo-logcad.jpg';
 import logoUnifood from './img/logounifood.png';
@@ -27,9 +27,11 @@ function Login() {
       if (data.success) {
         localStorage.setItem('usuarioLogado', 'true');
         localStorage.setItem('tipo_usuario', data.tipo_usuario);
+        localStorage.setItem('dadosUsuario', JSON.stringify({ email: data.email }));
+
         setErro('');
 
-        if (parseInt(data.tipo_usuario, 10) === 0 || parseInt(data.tipo_usuario, 10) === 3) {
+        if (parseInt(data.tipo_usuario) === 0 || parseInt(data.tipo_usuario) === 3) {
           navigate('/funcionario');
         } else {
           navigate('/');
@@ -45,34 +47,40 @@ function Login() {
 
   return (
     <div className="flex min-h-screen">
-      {/* Lado esquerdo com imagem de fundo */}
+      {/* 🔥 Lado Esquerdo */}
       <div
         className="w-1/2 hidden lg:flex items-center justify-center bg-cover bg-center rounded-r-3xl"
         style={{ backgroundImage: `url(${fundoLogin})` }}
       >
         <div className="bg-black bg-opacity-60 px-10 pt-14 pb-14 rounded-lg text-white flex flex-col items-center text-center">
           <h2 className="text-5xl font-bold mb-4 leading-snug">
-            Bateu aquela fome?<br />
+            Bateu aquela fome?
           </h2>
-          <h3 className="text-4xl font-bold mb-4 leading-snug">Faça login e resolva isso rapidinho.</h3>
+          <h3 className="text-4xl font-bold mb-4 leading-snug">
+            Faça login e resolva isso rapidinho.
+          </h3>
           <div className="flex justify-center items-center gap-6 mt-6">
             <img src={logoUnifood} alt="unifood" className="h-80" />
             <a href="https://www.unifucamp.edu.br/">
               <img src={logoUniFUCAMP} alt="unifucamp" className="h-22" />
             </a>
           </div>
-
         </div>
       </div>
 
-      {/* Lado direito com formulário */}
+      {/* 🔥 Lado Direito - Formulário */}
       <form
         onSubmit={handleLogin}
-        className="w-full lg:w-1/2 flex items-center justify-center bg-white p-10 rounded-r-1x3">
+        className="w-full lg:w-1/2 flex items-center justify-center bg-white p-10"
+      >
         <div className="w-full max-w-md">
-          <h1 className="text-gray-800 text-3xl font-bold mb-6 text-center">LOGIN</h1>
+          <h1 className="text-gray-800 text-3xl font-bold mb-6 text-center">
+            LOGIN
+          </h1>
 
-          <label className="block text-gray-700 mb-2" htmlFor="email">Email</label>
+          <label className="block text-gray-700 mb-2" htmlFor="email">
+            Email
+          </label>
           <input
             id="email"
             type="email"
@@ -83,7 +91,9 @@ function Login() {
             required
           />
 
-          <label className="block text-gray-700 mb-2" htmlFor="password">Senha</label>
+          <label className="block text-gray-700 mb-2" htmlFor="password">
+            Senha
+          </label>
           <div className="relative">
             <input
               id="password"

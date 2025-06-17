@@ -9,7 +9,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit();
 }
 
-// Conexão com o banco
+// 🔗 Conexão
 $conn = new mysqli("localhost", "root", "", "unifood_db");
 
 if ($conn->connect_error) {
@@ -17,12 +17,10 @@ if ($conn->connect_error) {
     exit;
 }
 
-// Receber o filtro (via GET)
+// 🔍 Filtro (dia, semana ou mes)
 $filtro = isset($_GET['filtro']) ? $_GET['filtro'] : '';
 
-// Montar a condição de filtro
 $condicao = "";
-
 if ($filtro === 'dia') {
     $condicao = "WHERE DATE(data_pedido) = CURDATE()";
 } elseif ($filtro === 'semana') {
@@ -31,7 +29,7 @@ if ($filtro === 'dia') {
     $condicao = "WHERE MONTH(data_pedido) = MONTH(CURDATE()) AND YEAR(data_pedido) = YEAR(CURDATE())";
 }
 
-// Query SQL
+// 🔥 Query
 $sql = "SELECT * FROM pedidos $condicao ORDER BY data_pedido DESC";
 
 $result = $conn->query($sql);
@@ -41,15 +39,15 @@ $pedidos = [];
 if ($result && $result->num_rows > 0) {
     while ($row = $result->fetch_assoc()) {
         $pedidos[] = [
-            'id' => $row['id'],
+            'id' => intval($row['id']),
             'nome' => $row['nome_cliente'],
             'email' => $row['email_cliente'],
-            'telefone' => $row['telefone_cliente'],
+            'telefone' => $row['telefone_cliente'] ?? 'Não informado',
             'data' => date('d/m/Y', strtotime($row['data_pedido'])),
             'hora' => date('H:i', strtotime($row['data_pedido'])),
-            'valor' => $row['valor_total'],
+            'valor' => floatval($row['valor_total']),
             'tipo_pagamento' => $row['tipo_pagamento'],
-            'status' => $row['status'], // 🔥 Status adicionado aqui
+            'status' => $row['status'],
             'itens' => json_decode($row['itens'], true),
             'observacoes' => $row['observacoes'] ?? '',
         ];

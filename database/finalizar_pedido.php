@@ -1,86 +1,75 @@
 <?php
-// Configurações de cabeçalho para permitir acesso externo (CORS)
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Headers: *");
 header("Access-Control-Allow-Methods: POST, OPTIONS");
 header('Content-Type: application/json');
 
-// Tratamento para requisição OPTIONS (pré-flight CORS)
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
     exit();
 }
 
-// Conectar ao banco de dados
+// 🔗 Conexão
 $conn = new mysqli("localhost", "root", "", "unifood_db");
 
-// Verificar conexão
 if ($conn->connect_error) {
-    echo json_encode([
-        'success' => false,
-        'message' => 'Erro na conexão com o banco de dados: ' . $conn->connect_error
-    ]);
+    echo json_encode(['success' => false, 'message' => 'Erro na conexão com o banco de dados']);
     exit;
 }
 
-// Ler os dados recebidos via JSON
 $data = json_decode(file_get_contents("php://input"), true);
 
-// Validar dados recebidos
-if (
-    !isset($data['nome']) ||
-    !isset($data['email']) ||
-    !isset($data['itens']) ||
-    !isset($data['valor_total']) ||
-    !isset($data['tipo_pagamento'])
-) {
-    echo json_encode([
-        'success' => false,
-        'message' => 'Dados incompletos. Verifique se nome, email, itens, valor_total e tipo_pagamento foram enviados corretamente.'
-    ]);
+if (!$data) {
+    echo json_encode(['success' => false, 'message' => 'Dados não recebidos']);
     exit;
 }
 
-// Atribuir os dados recebidos às variáveis
-$nome = $data['nome'];
-$email = $data['email'];
-$itens = json_encode($data['itens'], JSON_UNESCAPED_UNICODE); // Salvar itens como JSON
-$valor_total = $data['valor_total'];
-$tipo_pagamento = $data['tipo_pagamento'];
+$nome = $data['nome'] ?? '';
+$email = $data['email'] ?? '';
+$itens = $data['itens'] ?? [];
+$valor_total = $data['valor_total'] ?? 0;
+$tipo_pagamento = $data['tipo_pagamento'] ?? '';
+$status = 'PENDENTE';
+$observacoes = $data['observacoes'] ?? '';
 
-// Preparar a query SQL para inserir o pedido
-$sql = "INSERT INTO pedidos (nome_cliente, email_cliente, itens, valor_total, tipo_pagamento) 
-        VALUES (?, ?, ?, ?, ?)";
+// 🔍 Buscar o telefone do cliente na tabela 'clientes'
+$telefone = '';
+$buscaTelefone = $conn->prepare("SELECT telefone FROM clientes WHERE email = ?");
+$buscaTelefone->bind_param("s", $email);
+$buscaTelefone->execute();
+$resTelefone = $buscaTelefone->get_result();
 
-$stmt = $conn->prepare($sql);
-
-// Verificar se a preparação da query foi bem-sucedida
-if (!$stmt) {
-    echo json_encode([
-        'success' => false,
-        'message' => 'Erro na preparação da query: ' . $conn->error
-    ]);
-    exit;
+if ($resTelefone && $resTelefone->num_rows > 0) {
+    $row = $resTelefone->fetch_assoc();
+    $telefone = $row['telefone'] ?? '';
 }
+$buscaTelefone->close();
 
-// Associar os parâmetros
-$stmt->bind_param("sssds", $nome, $email, $itens, $valor_total, $tipo_pagamento);
+// 🔥 Inserir o pedido
+$stmt = $conn->prepare("INSERT INTO pedidos (
+    nome_cliente, email_cliente, telefone_cliente, itens, valor_total, tipo_pagamento, status, observacoes, data_pedido
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())");
 
-// Executar a query
+$jsonItens = json_encode($itens);
+
+$stmt->bind_param(
+    "ssssdsss",
+    $nome,
+    $email,
+    $telefone,
+    $jsonItens,
+    $valor_total,
+    $tipo_pagamento,
+    $status,
+    $observacoes
+);
+
 if ($stmt->execute()) {
-    echo json_encode([
-        'success' => true,
-        'message' => 'Pedido finalizado e salvo com sucesso.',
-        'id_pedido' => $stmt->insert_id // Retorna o ID do pedido criado
-    ]);
+    echo json_encode(['success' => true, 'message' => 'Pedido finalizado com sucesso']);
 } else {
-    echo json_encode([
-        'success' => false,
-        'message' => 'Erro ao salvar o pedido: ' . $stmt->error
-    ]);
+    echo json_encode(['success' => false, 'message' => 'Erro ao finalizar pedido']);
 }
 
-// Fechar a conexão
 $stmt->close();
 $conn->close();
 ?>

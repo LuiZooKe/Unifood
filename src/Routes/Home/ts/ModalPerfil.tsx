@@ -223,8 +223,8 @@ const ModalPerfil: React.FC<ModalPerfilProps> = ({
         <div className="flex-1 overflow-y-auto px-6 py-4">
           {abaAberta === 'dados' && (
             <div className="bg-gray-100 rounded-xl p-4 mb-4 text-center">
-              <p className="text-xl font-bold text-gray-800">{dados.nome}</p>
-              <p className="text-md text-gray-600">{dados.email}</p>
+              <p className="text-xl text-center font-bold text-gray-800">{dados.nome}</p>
+              <p className="text-md text-center text-gray-600">{dados.email}</p>
             </div>
           )}
 
