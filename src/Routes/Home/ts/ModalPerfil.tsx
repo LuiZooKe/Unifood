@@ -13,6 +13,9 @@ interface Usuario {
   cidade?: string;
   telefone?: string;
   numero_cartao?: string;
+  nome_cartao?: string;
+  validade_cartao?: string;
+  cvv_cartao?: string;
 }
 
 interface Cartao {
@@ -43,58 +46,25 @@ const ModalPerfil: React.FC<ModalPerfilProps> = ({
   const [confirmarSenha, setConfirmarSenha] = useState('');
   const [mostrarSenha, setMostrarSenha] = useState(false);
   const [mostrarConfirmar, setMostrarConfirmar] = useState(false);
-  const [cartaoAberto, setCartaoAberto] = useState(false);
-  const [carregandoUsuario, setCarregandoUsuario] = useState(true);
   const [cartao, setCartao] = useState<Cartao | null>(null);
+  const [cartaoAberto, setCartaoAberto] = useState(false);
 
   useEffect(() => {
-    const dadosUsuario = JSON.parse(localStorage.getItem('dadosUsuario') || '{}');
+    if (aberto) {
+      setDados(usuario);
 
-    setDados({
-      ...usuario,
-      ...dadosUsuario,
-      saldo: parseFloat(dadosUsuario.saldo) || 0,
-    });
-
-    if (dadosUsuario.email) {
-      setCarregandoUsuario(true);
-
-      fetch('http://localhost/UNIFOOD/database/get_perfil.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: dadosUsuario.email }),
-      })
-        .then(res => res.json())
-        .then(data => {
-          if (data.success && data.dados) {
-            const dadosRecebidos = {
-              ...data.dados,
-              saldo: parseFloat(data.dados.saldo) || 0,
-              numero_cartao: data.dados.numero_cartao || '',
-            };
-
-            setDados(dadosRecebidos);
-            localStorage.setItem('dadosUsuario', JSON.stringify(dadosRecebidos));
-
-            if (data.dados.numero_cartao) {
-              setCartao({
-                numero: data.dados.numero_cartao,
-                nome: data.dados.nome_cartao,
-                validade: data.dados.validade_cartao,
-                cvv: data.dados.cvv_cartao,
-              });
-            } else {
-              setCartao(null);
-            }
-          } else {
-            console.error('Erro ao buscar perfil:', data?.message || 'Dados não encontrados');
-          }
-        })
-        .catch(err => console.error('Erro na requisição do perfil:', err))
-        .finally(() => setCarregandoUsuario(false));
+      if (usuario.numero_cartao) {
+        setCartao({
+          numero: usuario.numero_cartao,
+          nome: usuario.nome_cartao || '',
+          validade: usuario.validade_cartao || '',
+          cvv: usuario.cvv_cartao || '',
+        });
+      } else {
+        setCartao(null);
+      }
     }
-  }, [usuario]);
-
+  }, [aberto, usuario]);
 
   if (!aberto) return null;
 
@@ -203,22 +173,18 @@ const ModalPerfil: React.FC<ModalPerfilProps> = ({
 
   return (
     <div
-      className={`
-    fixed inset-0 z-[9999]
-    flex items-center justify-center
-    md:inset-auto md:top-28 md:right-[3.5rem] md:items-start md:justify-end
-    bg-black/70 backdrop-blur-xl md:bg-transparent
-    md:rounded-3xl shadow-2xl
-  `}
+      className="fixed inset-0 z-[9999] flex items-center justify-center
+      md:inset-auto md:top-28 md:right-[3.5rem] md:items-start md:justify-end
+      bg-black/70 backdrop-blur-xl md:bg-transparent md:rounded-3xl shadow-2xl"
       onClick={onFechar}
     >
       <div
         className="bg-white/95 backdrop-blur-md w-[90%] max-w-[500px] max-h-[90vh] md:max-h-[90vh]
-    md:w-[380px] rounded-3xl shadow-xl overflow-hidden flex flex-col"
+        md:w-[380px] rounded-3xl shadow-xl overflow-hidden flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
 
-        {/* 🔥 Cabeçalho igual ao carrinho */}
+        {/* 🔥 Cabeçalho */}
         <div className="flex justify-center items-center relative py-4 border-b border-gray-300">
           <h2 className="text-center font-extrabold text-gray-800 leading-tight">
             <span className="block text-[clamp(2.5rem,6vw,4rem)]">MEU PERFIL 👤</span>
@@ -231,31 +197,30 @@ const ModalPerfil: React.FC<ModalPerfilProps> = ({
           </button>
         </div>
 
+        {/* 🔥 Aba Carteira / Dados */}
+        <div className="flex gap-2 px-6 pt-4 pb-2 border-b border-gray-300">
+          <button
+            onClick={() => setAbaAberta('carteira')}
+            className={`flex-1 py-2 rounded-xl font-semibold ${abaAberta === 'carteira'
+              ? 'bg-green-600 text-white shadow-lg'
+              : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+              }`}
+          >
+            Carteira 💰
+          </button>
+          <button
+            onClick={() => setAbaAberta('dados')}
+            className={`flex-1 py-2 rounded-xl font-semibold ${abaAberta === 'dados'
+              ? 'bg-red-600 text-white shadow-lg'
+              : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+              }`}
+          >
+            Dados 🪪
+          </button>
+        </div>
+
         {/* 🔥 Conteúdo rolável */}
         <div className="flex-1 overflow-y-auto px-6 py-4">
-          {/* 🔥 Botões Carteira e Dados */}
-          <div className="flex gap-2 mb-4">
-            <button
-              onClick={() => setAbaAberta('carteira')}
-              className={`flex-1 py-2 rounded-xl font-semibold ${abaAberta === 'carteira'
-                ? 'bg-green-600 text-white shadow-lg'
-                : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
-                }`}
-            >
-              Carteira 💰
-            </button>
-            <button
-              onClick={() => setAbaAberta('dados')}
-              className={`flex-1 py-2 rounded-xl font-semibold ${abaAberta === 'dados'
-                ? 'bg-red-600 text-white shadow-lg'
-                : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
-                }`}
-            >
-              Dados 🪪
-            </button>
-          </div>
-
-          {/* 🔥 Info do usuário — aparece apenas na aba Dados */}
           {abaAberta === 'dados' && (
             <div className="bg-gray-100 rounded-xl p-4 mb-4 text-center">
               <p className="text-xl font-bold text-gray-800">{dados.nome}</p>
@@ -263,62 +228,52 @@ const ModalPerfil: React.FC<ModalPerfilProps> = ({
             </div>
           )}
 
-          {/* 🔥 Conteúdo das abas */}
           {abaAberta === 'carteira' ? (
-            <>
-              {carregandoUsuario ? (
-                <div className="bg-yellow-100 text-yellow-800 rounded-xl p-4 text-center mb-4">
-                  Carregando dados do usuário...
+            <div>
+              <div className="flex justify-between items-center mb-4 gap-4">
+                <div>
+                  <p className="text-md text-gray-700">Saldo Atual:</p>
+                  <p className="text-4xl font-bold text-green-600">
+                    R$ {(Number(dados.saldo) || 0).toFixed(2).replace('.', ',')}
+                  </p>
                 </div>
-              ) : (
-                <>
-                  <div className="flex justify-between items-center mb-4 gap-4">
-                    <div>
-                      <p className="text-md text-gray-700">Saldo Atual:</p>
-                      <p className="text-4xl font-bold text-green-600">
-                        R$ {(Number(dados.saldo) || 0).toFixed(2).replace('.', ',')}
-                      </p>
-                    </div>
 
-                    {cartao ? (
-                      <button
-                        className="py-2 px-4 rounded-xl bg-red-600 hover:bg-red-700 text-white font-semibold shadow-md"
-                        onClick={handleRemoverCartao}
-                      >
-                        Remover Cartão
-                      </button>
-                    ) : (
-                      <button
-                        className="py-2 px-4 rounded-xl bg-red-600 hover:bg-red-700 text-white font-semibold shadow-md"
-                        onClick={() => setCartaoAberto(!cartaoAberto)}
-                      >
-                        {cartaoAberto ? 'Fechar' : 'Adicionar Cartão'}
-                      </button>
-                    )}
-                  </div>
+                {cartao ? (
+                  <button
+                    className="py-2 px-4 rounded-xl bg-red-600 hover:bg-red-700 text-white font-semibold shadow-md"
+                    onClick={handleRemoverCartao}
+                  >
+                    Remover Cartão
+                  </button>
+                ) : (
+                  <button
+                    className="py-2 px-4 rounded-xl bg-red-600 hover:bg-red-700 text-white font-semibold shadow-md"
+                    onClick={() => setCartaoAberto(!cartaoAberto)}
+                  >
+                    {cartaoAberto ? 'Fechar' : 'Adicionar Cartão'}
+                  </button>
+                )}
+              </div>
 
-                  {cartao && (
-                    <div className="w-full bg-white/40 backdrop-blur-md rounded-xl p-4 shadow-md">
-                      <p className="text-lg font-semibold text-gray-800 mb-2">Cartão Cadastrado:</p>
-                      <p><strong>Número:</strong> **** **** **** {cartao.numero.slice(-4)}</p>
-                      <p><strong>Nome:</strong> {cartao.nome}</p>
-                      <p><strong>Validade:</strong> {cartao.validade}</p>
-                    </div>
-                  )}
-
-                  {/* 🔥 Modal de cadastro de cartão */}
-                  <AdicionarCartao
-                    visivel={cartaoAberto}
-                    onAdicionar={(dadosCartao) => {
-                      setCartao(dadosCartao);
-                      alert('Cartão cadastrado com sucesso!');
-                      setCartaoAberto(false);
-                    }}
-                    usuario={dados}
-                  />
-                </>
+              {cartao && (
+                <div className="w-full bg-white/40 backdrop-blur-md rounded-xl p-4 shadow-md">
+                  <p className="text-lg font-semibold text-gray-800 mb-2">Cartão Cadastrado:</p>
+                  <p><strong>Número:</strong> **** **** **** {cartao.numero.slice(-4)}</p>
+                  <p><strong>Nome:</strong> {cartao.nome}</p>
+                  <p><strong>Validade:</strong> {cartao.validade}</p>
+                </div>
               )}
-            </>
+
+              <AdicionarCartao
+                visivel={cartaoAberto}
+                onAdicionar={(dadosCartao) => {
+                  setCartao(dadosCartao);
+                  alert('Cartão cadastrado com sucesso!');
+                  setCartaoAberto(false);
+                }}
+                usuario={dados}
+              />
+            </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-gray-700">
               {[{ field: 'logradouro', label: 'Logradouro' },
@@ -372,7 +327,7 @@ const ModalPerfil: React.FC<ModalPerfilProps> = ({
           )}
         </div>
 
-        {/* 🔥 Rodapé — aparece apenas na aba Dados */}
+        {/* 🔥 Rodapé Fixo */}
         {abaAberta === 'dados' && (
           <div className="flex flex-col gap-3 px-6 pb-6 pt-4 border-t border-gray-300">
             <button

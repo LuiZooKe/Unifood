@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Slider from 'react-slick';
-import { X, Info, ShoppingCart } from 'lucide-react';
+import { X } from 'lucide-react';
 
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
@@ -32,14 +32,19 @@ const carouselSettings = {
 function Home() {
   const navigate = useNavigate();
 
-  const [abaAberta, setAbaAberta] = useState('dados');
   const [usuario, setUsuario] = useState({
     nome: '',
     email: '',
     tipo_usuario: '',
     saldo: 0,
     numero_cartao: '',
+    logradouro: '',
+    numero: '',
+    bairro: '',
+    cidade: '',
+    telefone: '',
   });
+
   const [carregandoUsuario, setCarregandoUsuario] = useState(true);
   const [perfilAberto, setPerfilAberto] = useState(false);
   const [categoriaSelecionada, setCategoriaSelecionada] = useState('');
@@ -51,7 +56,6 @@ function Home() {
   const [pagamentoAberto, setPagamentoAberto] = useState(false);
   const [confirmacaoAberta, setConfirmacaoAberta] = useState(false);
 
-  // 🔥 Fechar tudo
   const fecharTudo = () => {
     setMenuMobileAberto(false);
     setModalCarrinhoAberto(false);
@@ -60,13 +64,11 @@ function Home() {
     setConfirmacaoAberta(false);
   };
 
-  // 🔥 Abrir menu
   const abrirMenu = () => {
     fecharTudo();
     setMenuMobileAberto(true);
   };
 
-  // 🔥 Abrir categoria
   const abrirCategoria = (categoria) => {
     setCategoriaSelecionada(categoria);
     setTimeout(() => {
@@ -78,24 +80,20 @@ function Home() {
     }, 100);
   };
 
-  // 🔥 Fechar categoria
   const fecharCategoria = () => {
     setCategoriaSelecionada('');
   };
 
-  // 🔥 Abrir carrinho
   const abrirModalCarrinho = () => {
     fecharTudo();
     setModalCarrinhoAberto(true);
   };
 
-  // 🔥 Abrir perfil
   const abrirPerfil = () => {
     fecharTudo();
     setPerfilAberto(true);
   };
 
-  // 🔥 Carrinho
   const adicionarAoCarrinho = (produto) => {
     setItensCarrinho((prevItens) => {
       const existente = prevItens.find((item) => item.nome === produto.nome);
@@ -137,7 +135,6 @@ function Home() {
       .toFixed(2);
   };
 
-  // 🔥 Função de pagamento
   const finalizarPagamento = async (metodo) => {
     const total = parseFloat(calcularTotalCarrinho().replace(',', '.'));
 
@@ -182,35 +179,46 @@ function Home() {
       alert('Erro na conexão com o servidor.');
     }
   };
+
   const handleLogout = () => {
     localStorage.removeItem('usuarioLogado');
     navigate('/login');
   };
 
-  useEffect(() => {
+  const carregarPerfil = () => {
     const dadosUsuario = JSON.parse(localStorage.getItem('dadosUsuario') || '{}');
 
     if (dadosUsuario.email) {
       setCarregandoUsuario(true);
 
-      fetch(`http://localhost/UNIFOOD/database/get_perfil.php?email=${dadosUsuario.email}`)
+      fetch('http://localhost/UNIFOOD/database/get_perfil.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: dadosUsuario.email }),
+      })
         .then(res => res.json())
         .then(data => {
           if (data.success && data.dados) {
             const dadosRecebidos = {
               nome: data.dados.nome || '',
               email: data.dados.email || '',
+              tipo_usuario: data.dados.tipo_usuario || '',
               saldo: parseFloat(data.dados.saldo) || 0,
+              logradouro: data.dados.logradouro || '',
+              numero: data.dados.numero || '',
+              bairro: data.dados.bairro || '',
+              cidade: data.dados.cidade || '',
+              telefone: data.dados.telefone || '',
               numero_cartao: data.dados.numero_cartao || '',
+              nome_cartao: data.dados.nome_cartao || '',
+              validade_cartao: data.dados.validade_cartao || '',
+              cvv_cartao: data.dados.cvv_cartao || '',
             };
 
             setUsuario(dadosRecebidos);
             localStorage.setItem('dadosUsuario', JSON.stringify(dadosRecebidos));
           } else {
-            console.error(
-              'Erro ao carregar perfil:',
-              data?.message || 'Dados não encontrados ou erro inesperado'
-            );
+            console.error('Erro ao carregar perfil:', data?.message || 'Dados não encontrados');
           }
         })
         .catch(err => {
@@ -218,8 +226,11 @@ function Home() {
         })
         .finally(() => setCarregandoUsuario(false));
     }
+  };
+  
+  useEffect(() => {
+    carregarPerfil();
   }, []);
-
 
   useEffect(() => {
     const fetchProdutos = async () => {
@@ -270,13 +281,6 @@ function Home() {
     fetchProdutos();
   }, []);
 
-  // 🔥 Sincronizar dados do usuário local
-  useEffect(() => {
-    const dadosUsuario = JSON.parse(localStorage.getItem('dadosUsuario') || '{}');
-    setUsuario(dadosUsuario);
-  }, []);
-
-  // 🔥 Inicio do return
   return (
     <div>
       {/* ✅ Topo do menu mobile */}
@@ -352,7 +356,7 @@ function Home() {
                 }}
                 className="w-[90%] bg-gradient-to-r from-green-300 to-green-500 text-white font-bold text-2xl py-4 rounded-2xl shadow-xl hover:scale-105 transition"
               >
-                🛍️ Pedidos 
+                🛍️ Pedidos
               </button>
 
               <button
