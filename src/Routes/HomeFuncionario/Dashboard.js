@@ -58,9 +58,8 @@ function Dashboard({ children }) {
                 <span>Funcionários</span>
                 <ChevronDown
                   size={20}
-                  className={`transform transition-transform duration-300 ${
-                    funcionariosAberto ? 'rotate-180' : ''
-                  }`}
+                  className={`transform transition-transform duration-300 ${funcionariosAberto ? 'rotate-180' : ''
+                    }`}
                 />
               </button>
               {funcionariosAberto && (
@@ -84,9 +83,8 @@ function Dashboard({ children }) {
               <span>Produtos</span>
               <ChevronDown
                 size={20}
-                className={`transform transition-transform duration-300 ${
-                  produtosAberto ? 'rotate-180' : ''
-                }`}
+                className={`transform transition-transform duration-300 ${produtosAberto ? 'rotate-180' : ''
+                  }`}
               />
             </button>
             {produtosAberto && (
@@ -110,9 +108,8 @@ function Dashboard({ children }) {
               <span>Fornecedores</span>
               <ChevronDown
                 size={20}
-                className={`transform transition-transform duration-300 ${
-                  fornecedoresAberto ? 'rotate-180' : ''
-                }`}
+                className={`transform transition-transform duration-300 ${fornecedoresAberto ? 'rotate-180' : ''
+                  }`}
               />
             </button>
             {fornecedoresAberto && (
@@ -126,6 +123,10 @@ function Dashboard({ children }) {
               </div>
             )}
           </div>
+
+          <a href="/caixa" className="hover:bg-gray-700 p-2 rounded">
+            Caixa
+          </a>
 
           <a href="#" className="hover:bg-gray-700 p-2 rounded">
             Relatórios

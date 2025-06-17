@@ -1,69 +1,86 @@
 <?php
-ob_clean();
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
-
+// Configurações de cabeçalho para permitir acesso externo (CORS)
 header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Headers: Content-Type");
+header("Access-Control-Allow-Headers: *");
 header("Access-Control-Allow-Methods: POST, OPTIONS");
 header('Content-Type: application/json');
 
+// Tratamento para requisição OPTIONS (pré-flight CORS)
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
     exit();
 }
 
+// Conectar ao banco de dados
 $conn = new mysqli("localhost", "root", "", "unifood_db");
 
+// Verificar conexão
 if ($conn->connect_error) {
-    echo json_encode(['success' => false, 'message' => 'Erro na conexão com o banco']);
+    echo json_encode([
+        'success' => false,
+        'message' => 'Erro na conexão com o banco de dados: ' . $conn->connect_error
+    ]);
     exit;
 }
 
+// Ler os dados recebidos via JSON
 $data = json_decode(file_get_contents("php://input"), true);
 
-$email = $data['email'] ?? '';
-$itens = $data['itens'] ?? [];
-$valor_total = floatval($data['valor_total'] ?? 0);
-$tipo_pagamento = $data['tipo_pagamento'] ?? '';
-
-if (empty($email) || empty($itens) || $valor_total <= 0 || empty($tipo_pagamento)) {
-    echo json_encode(['success' => false, 'message' => 'Dados incompletos']);
+// Validar dados recebidos
+if (
+    !isset($data['nome']) ||
+    !isset($data['email']) ||
+    !isset($data['itens']) ||
+    !isset($data['valor_total']) ||
+    !isset($data['tipo_pagamento'])
+) {
+    echo json_encode([
+        'success' => false,
+        'message' => 'Dados incompletos. Verifique se nome, email, itens, valor_total e tipo_pagamento foram enviados corretamente.'
+    ]);
     exit;
 }
 
-$checkUser = $conn->query("SELECT * FROM users WHERE email = '$email'");
-if ($checkUser->num_rows == 0) {
-    echo json_encode(['success' => false, 'message' => 'Usuário não encontrado']);
+// Atribuir os dados recebidos às variáveis
+$nome = $data['nome'];
+$email = $data['email'];
+$itens = json_encode($data['itens'], JSON_UNESCAPED_UNICODE); // Salvar itens como JSON
+$valor_total = $data['valor_total'];
+$tipo_pagamento = $data['tipo_pagamento'];
+
+// Preparar a query SQL para inserir o pedido
+$sql = "INSERT INTO pedidos (nome_cliente, email_cliente, itens, valor_total, tipo_pagamento) 
+        VALUES (?, ?, ?, ?, ?)";
+
+$stmt = $conn->prepare($sql);
+
+// Verificar se a preparação da query foi bem-sucedida
+if (!$stmt) {
+    echo json_encode([
+        'success' => false,
+        'message' => 'Erro na preparação da query: ' . $conn->error
+    ]);
     exit;
 }
 
-$resCliente = $conn->query("SELECT * FROM clientes WHERE email = '$email'");
-if ($resCliente->num_rows == 0) {
-    echo json_encode(['success' => false, 'message' => 'Dados do cliente não encontrados']);
-    exit;
-}
-$cliente = $resCliente->fetch_assoc();
-$nome = $cliente['nome'] ?? '';
+// Associar os parâmetros
+$stmt->bind_param("sssds", $nome, $email, $itens, $valor_total, $tipo_pagamento);
 
-if ($tipo_pagamento === 'saldo') {
-    $saldoAtual = floatval($cliente['saldo'] ?? 0);
-    if ($saldoAtual < $valor_total) {
-        echo json_encode(['success' => false, 'message' => 'Saldo insuficiente']);
-        exit;
-    }
-    $novoSaldo = $saldoAtual - $valor_total;
-    $conn->query("UPDATE clientes SET saldo = $novoSaldo WHERE email = '$email'");
+// Executar a query
+if ($stmt->execute()) {
+    echo json_encode([
+        'success' => true,
+        'message' => 'Pedido finalizado e salvo com sucesso.',
+        'id_pedido' => $stmt->insert_id // Retorna o ID do pedido criado
+    ]);
 } else {
-    $novoSaldo = floatval($cliente['saldo'] ?? 0);
+    echo json_encode([
+        'success' => false,
+        'message' => 'Erro ao salvar o pedido: ' . $stmt->error
+    ]);
 }
 
-echo json_encode([
-    'success' => true,
-    'message' => 'Pedido finalizado com sucesso',
-    'novo_saldo' => $novoSaldo
-]);
-
+// Fechar a conexão
+$stmt->close();
 $conn->close();
-flush();
-exit;
+?>
