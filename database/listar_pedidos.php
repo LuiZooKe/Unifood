@@ -17,22 +17,46 @@ if ($conn->connect_error) {
     exit;
 }
 
-// 🔍 Filtro (dia, semana ou mes)
-$filtro = isset($_GET['filtro']) ? $_GET['filtro'] : '';
+// 🔍 Filtros
+$email = $_GET['email'] ?? null;
+$filtro = $_GET['filtro'] ?? null;
 
-$condicao = "";
-if ($filtro === 'dia') {
-    $condicao = "WHERE DATE(data_pedido) = CURDATE()";
-} elseif ($filtro === 'semana') {
-    $condicao = "WHERE YEARWEEK(data_pedido, 1) = YEARWEEK(CURDATE(), 1)";
-} elseif ($filtro === 'mes') {
-    $condicao = "WHERE MONTH(data_pedido) = MONTH(CURDATE()) AND YEAR(data_pedido) = YEAR(CURDATE())";
+$condicoes = [];
+$params = [];
+$tipos = "";
+
+// 🔥 Filtro por email (se houver)
+if ($email) {
+    $condicoes[] = "email_cliente = ?";
+    $params[] = $email;
+    $tipos .= "s";
 }
 
-// 🔥 Query
-$sql = "SELECT * FROM pedidos $condicao ORDER BY data_pedido DESC";
+// 🔥 Filtro por data
+if ($filtro === 'dia') {
+    $condicoes[] = "DATE(data_pedido) = CURDATE()";
+}
+if ($filtro === 'semana') {
+    $condicoes[] = "YEARWEEK(data_pedido, 1) = YEARWEEK(CURDATE(), 1)";
+}
+if ($filtro === 'mes') {
+    $condicoes[] = "MONTH(data_pedido) = MONTH(CURDATE()) AND YEAR(data_pedido) = YEAR(CURDATE())";
+}
 
-$result = $conn->query($sql);
+// 🔥 Monta a query
+$sql = "SELECT * FROM pedidos";
+if (count($condicoes) > 0) {
+    $sql .= " WHERE " . implode(" AND ", $condicoes);
+}
+$sql .= " ORDER BY data_pedido DESC";
+
+$stmt = $conn->prepare($sql);
+if ($tipos !== "") {
+    $stmt->bind_param($tipos, ...$params);
+}
+
+$stmt->execute();
+$result = $stmt->get_result();
 
 $pedidos = [];
 
