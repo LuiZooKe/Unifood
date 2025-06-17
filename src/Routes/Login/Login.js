@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState} from 'react';
+import { Eye, EyeOff, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import fundoLogin from './img/fundo-logcad.jpg';
 import logoUnifood from './img/logounifood.png';
@@ -8,6 +9,7 @@ function Login() {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
+  const [mostrarSenha, setMostrarSenha] = useState(false);
   const [erro, setErro] = useState('');
 
   const handleLogin = async (e) => {
@@ -54,7 +56,7 @@ function Login() {
           </h2>
           <h3 className="text-4xl font-bold mb-4 leading-snug">Faça login e resolva isso rapidinho.</h3>
           <div className="flex justify-center items-center gap-6 mt-6">
-              <img src={logoUnifood} alt="unifood" className="h-80" />
+            <img src={logoUnifood} alt="unifood" className="h-80" />
             <a href="https://www.unifucamp.edu.br/">
               <img src={logoUniFUCAMP} alt="unifucamp" className="h-22" />
             </a>
@@ -82,15 +84,24 @@ function Login() {
           />
 
           <label className="block text-gray-700 mb-2" htmlFor="password">Senha</label>
-          <input
-            id="password"
-            type="password"
-            placeholder="Digite sua senha"
-            value={senha}
-            onChange={(e) => setSenha(e.target.value)}
-            className="w-full p-3 mb-2 rounded border border-gray-500 focus:outline-none focus:border-red-500"
-            required
-          />
+          <div className="relative">
+            <input
+              id="password"
+              type={mostrarSenha ? 'text' : 'password'}
+              placeholder="Digite sua senha"
+              value={senha}
+              onChange={(e) => setSenha(e.target.value)}
+              className="w-full p-3 mb-2 rounded border border-gray-500 focus:outline-none focus:border-red-500 pr-10"
+              required
+            />
+            <button
+              type="button"
+              onClick={() => setMostrarSenha(!mostrarSenha)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600"
+            >
+              {mostrarSenha ? <EyeOff size={20} /> : <Eye size={20} />}
+            </button>
+          </div>
 
           <div className="mb-4 text-right">
             <button

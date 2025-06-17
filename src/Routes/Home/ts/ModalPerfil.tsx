@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Eye, EyeOff, X } from 'lucide-react';
 import IMask from 'imask';
-import AdicionarSaldo from './AdicionarSaldo.tsx';
 import AdicionarCartao from './AdicionarCartao.tsx';
 
 interface Usuario {
@@ -44,7 +43,6 @@ const ModalPerfil: React.FC<ModalPerfilProps> = ({
   const [confirmarSenha, setConfirmarSenha] = useState('');
   const [mostrarSenha, setMostrarSenha] = useState(false);
   const [mostrarConfirmar, setMostrarConfirmar] = useState(false);
-  const [saldoAberto, setSaldoAberto] = useState(false);
   const [cartaoAberto, setCartaoAberto] = useState(false);
   const [carregandoUsuario, setCarregandoUsuario] = useState(true);
   const [cartao, setCartao] = useState<Cartao | null>(null);
@@ -274,74 +272,50 @@ const ModalPerfil: React.FC<ModalPerfilProps> = ({
                 </div>
               ) : (
                 <>
-                  <div className="flex justify-between items-center mb-4">
+                  <div className="flex justify-between items-center mb-4 gap-4">
                     <div>
                       <p className="text-md text-gray-700">Saldo Atual:</p>
                       <p className="text-4xl font-bold text-green-600">
                         R$ {(Number(dados.saldo) || 0).toFixed(2).replace('.', ',')}
                       </p>
                     </div>
-                    <button
-                      className="py-2 px-4 rounded-xl bg-green-600 hover:bg-green-700 text-white font-semibold shadow-md"
-                      onClick={() => {
-                        setSaldoAberto(!saldoAberto);
-                        setCartaoAberto(false);
-                      }}
-                    >
-                      {saldoAberto ? 'Fechar' : 'Adicionar Saldo'}
-                    </button>
-                  </div>
 
-                  {cartao ? (
-                    <div className="w-full bg-white/40 backdrop-blur-md rounded-xl p-4 shadow-md mb-4">
-                      <p className="text-lg font-semibold text-gray-800 mb-2">Cartão Cadastrado:</p>
-                      <p><strong>Número:</strong> **** **** **** {cartao.numero.slice(-4)}</p>
-                      <p><strong>Nome:</strong> {cartao.nome}</p>
-                      <p><strong>Validade:</strong> {cartao.validade}</p>
+                    {cartao ? (
                       <button
-                        className="mt-3 w-full py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-semibold shadow-md"
+                        className="py-2 px-4 rounded-xl bg-red-600 hover:bg-red-700 text-white font-semibold shadow-md"
                         onClick={handleRemoverCartao}
                       >
                         Remover Cartão
                       </button>
+                    ) : (
+                      <button
+                        className="py-2 px-4 rounded-xl bg-red-600 hover:bg-red-700 text-white font-semibold shadow-md"
+                        onClick={() => setCartaoAberto(!cartaoAberto)}
+                      >
+                        {cartaoAberto ? 'Fechar' : 'Adicionar Cartão'}
+                      </button>
+                    )}
+                  </div>
+
+                  {cartao && (
+                    <div className="w-full bg-white/40 backdrop-blur-md rounded-xl p-4 shadow-md">
+                      <p className="text-lg font-semibold text-gray-800 mb-2">Cartão Cadastrado:</p>
+                      <p><strong>Número:</strong> **** **** **** {cartao.numero.slice(-4)}</p>
+                      <p><strong>Nome:</strong> {cartao.nome}</p>
+                      <p><strong>Validade:</strong> {cartao.validade}</p>
                     </div>
-                  ) : (
-                    <button
-                      className="w-full py-3 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-semibold shadow-md hover:scale-105 transition mb-4"
-                      onClick={() => {
-                        setCartaoAberto(!cartaoAberto);
-                        setSaldoAberto(false);
-                      }}
-                    >
-                      {cartaoAberto ? 'Fechar' : 'Adicionar Cartão de Crédito'}
-                    </button>
                   )}
 
-                  <div className="flex flex-col md:flex-row gap-4">
-                    <AdicionarSaldo
-                      visivel={saldoAberto}
-                      onAdicionar={(valorAdicionado) => {
-                        const novoSaldo = Number(dados.saldo || 0) + valorAdicionado;
-                        const dadosAtualizados = { ...dados, saldo: novoSaldo };
-                        setDados(dadosAtualizados);
-                        localStorage.setItem('dadosUsuario', JSON.stringify(dadosAtualizados));
-                      }}
-                      usuario={dados}
-                      atualizarUsuario={(usuarioAtualizado) => {
-                        setDados(usuarioAtualizado);
-                        localStorage.setItem('dadosUsuario', JSON.stringify(usuarioAtualizado));
-                      }}
-                    />
-                    <AdicionarCartao
-                      visivel={cartaoAberto}
-                      onAdicionar={(dadosCartao) => {
-                        setCartao(dadosCartao);
-                        alert('Cartão cadastrado com sucesso!');
-                        setCartaoAberto(false);
-                      }}
-                      usuario={dados}
-                    />
-                  </div>
+                  {/* 🔥 Modal de cadastro de cartão */}
+                  <AdicionarCartao
+                    visivel={cartaoAberto}
+                    onAdicionar={(dadosCartao) => {
+                      setCartao(dadosCartao);
+                      alert('Cartão cadastrado com sucesso!');
+                      setCartaoAberto(false);
+                    }}
+                    usuario={dados}
+                  />
                 </>
               )}
             </>
@@ -388,7 +362,7 @@ const ModalPerfil: React.FC<ModalPerfilProps> = ({
                   <button
                     type="button"
                     onClick={() => setMostrar(!mostrar)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600"
+                    className="absolute right-3 top-1/2 text-gray-600"
                   >
                     {mostrar ? <EyeOff size={20} /> : <Eye size={20} />}
                   </button>

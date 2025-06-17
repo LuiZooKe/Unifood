@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Eye, EyeOff } from 'lucide-react';
 import fundoLogin from './img/fundo-logcad.jpg';
 import logoUnifood from './img/logounifood.png';
 import logoUniFUCAMP from './img/logoUNIFUCAMP.png';
@@ -8,6 +9,8 @@ function RedefinirSenha() {
   const [searchParams] = useSearchParams();
   const [senha, setSenha] = useState('');
   const [confirmarSenha, setConfirmarSenha] = useState('');
+  const [mostrarSenha, setMostrarSenha] = useState(false);
+  const [mostrarConfirmarSenha, setMostrarConfirmarSenha] = useState(false);
   const [mensagem, setMensagem] = useState('');
   const [erro, setErro] = useState('');
   const [tokenValido, setTokenValido] = useState(false);
@@ -46,8 +49,9 @@ function RedefinirSenha() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (senha.length < 6) {
-      setErro('A senha deve ter pelo menos 6 caracteres.');
+    // Validação
+    if (senha.length < 8) {
+      setErro('A senha deve ter pelo menos 8 caracteres.');
       setMensagem('');
       return;
     }
@@ -94,29 +98,52 @@ function RedefinirSenha() {
           ) : (
             <>
               <label className="block text-gray-800 mb-2" htmlFor="senha">Nova Senha</label>
-              <input
-                id="senha"
-                type="password"
-                placeholder="Digite a nova senha"
-                value={senha}
-                onChange={(e) => setSenha(e.target.value)}
-                className="w-full p-3 mb-4 rounded border border-gray-500 focus:outline-none focus:border-red-500"
-                required
-              />
+              <div className="relative">
+                <input
+                  id="senha"
+                  type={mostrarSenha ? 'text' : 'password'}
+                  placeholder="Digite a nova senha"
+                  value={senha}
+                  onChange={(e) => setSenha(e.target.value)}
+                  className="w-full p-3 mb-4 rounded border border-gray-500 focus:outline-none focus:border-red-500 pr-10"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setMostrarSenha(!mostrarSenha)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600"
+                >
+                  {mostrarSenha ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
 
               <label className="block text-gray-800 mb-2" htmlFor="confirmarSenha">Confirmar Senha</label>
-              <input
-                id="confirmarSenha"
-                type="password"
-                placeholder="Confirme a nova senha"
-                value={confirmarSenha}
-                onChange={(e) => setConfirmarSenha(e.target.value)}
-                className="w-full p-3 mb-4 rounded border border-gray-500 focus:outline-none focus:border-red-500"
-                required
-              />
+              <div className="relative">
+                <input
+                  id="confirmarSenha"
+                  type={mostrarConfirmarSenha ? 'text' : 'password'}
+                  placeholder="Confirme a nova senha"
+                  value={confirmarSenha}
+                  onChange={(e) => setConfirmarSenha(e.target.value)}
+                  className="w-full p-3 mb-4 rounded border border-gray-500 focus:outline-none focus:border-red-500 pr-10"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setMostrarConfirmarSenha(!mostrarConfirmarSenha)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600"
+                >
+                  {mostrarConfirmarSenha ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
 
-              {mensagem && <p className="text-green-500 mb-4">{mensagem}</p>}
-              {erro && <p className="text-red-500 mb-4">{erro}</p>}
+              {/* 🔥 Mensagens agrupadas abaixo dos campos */}
+              {(erro || mensagem) && (
+                <div className={`mb-4 text-center ${erro ? 'text-red-500' : 'text-green-500'}`}>
+                  {erro && <p>{erro}</p>}
+                  {mensagem && <p>{mensagem}</p>}
+                </div>
+              )}
 
               <button
                 type="submit"
@@ -129,7 +156,7 @@ function RedefinirSenha() {
         </div>
       </form>
 
-      {/* Lado direito com imagem de fundo */}
+      {/* 🔥 Lado direito com imagem de fundo */}
       <div
         className="w-1/2 hidden lg:flex items-center justify-center bg-cover bg-center rounded-l-3xl"
         style={{ backgroundImage: `url(${fundoLogin})` }}
@@ -145,7 +172,6 @@ function RedefinirSenha() {
               <img src={logoUniFUCAMP} alt="unifucamp" className="h-22" />
             </a>
           </div>
-
         </div>
       </div>
     </div>

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Eye, EyeOff, X } from 'lucide-react';
 import './login-cadastro.css';
 import { useNavigate } from 'react-router-dom';
 import fundoLogin from './img/fundo-logcad.jpg';
@@ -7,11 +8,13 @@ import logoUniFUCAMP from './img/logoUNIFUCAMP.png';
 
 function Cadastro() {
   const navigate = useNavigate();
-  const [tipoUsuario, setTipoUsuario] = useState('1'); // padrão: Aluno/Professor
+  const [tipoUsuario, setTipoUsuario] = useState('1');
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
+  const [mostrarSenha, setMostrarSenha] = useState(false);
   const [confirmarSenha, setConfirmarSenha] = useState('');
+  const [mostrarConfirmarSenha, setMostrarConfirmarSenha] = useState(false);
   const [erros, setErros] = useState([]);
 
   const handleSubmit = async (e) => {
@@ -50,15 +53,12 @@ function Cadastro() {
       return;
     }
 
-    // Se chegou aqui, não tem erros na validação frontend
-    setErros([]); // limpa erros anteriores
+    setErros([]);
 
     try {
       const response = await fetch('http://localhost/UNIFOOD/database/register_cliente.php', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ nome, email, senha, tipo_usuario: parseInt(tipoUsuario) })
       });
 
@@ -78,7 +78,7 @@ function Cadastro() {
 
   return (
     <div className="flex min-h-screen">
-      {/* Lado esquerdo com imagem de fundo */}
+      {/* 🔥 Lado esquerdo */}
       <div
         className="w-1/2 hidden lg:flex items-center justify-center bg-cover bg-center rounded-r-3xl"
         style={{ backgroundImage: `url(${fundoLogin})` }}
@@ -96,14 +96,14 @@ function Cadastro() {
               <img src={logoUniFUCAMP} alt="unifucamp" className="h-22" />
             </a>
           </div>
-
         </div>
       </div>
 
-      <form onSubmit={handleSubmit}
-        className="w-full lg:w-1/2 flex items-center justify-center bg-white p-10 rounded-r-1x3">
+      {/* 🔥 Formulário */}
+      <form onSubmit={handleSubmit} className="w-full lg:w-1/2 flex items-center justify-center bg-white p-10 rounded-r-1x3">
         <div className="max-w-md w-full">
           <h1 className="text-gray-800 text-3xl font-bold mb-6 text-center">CADASTRO</h1>
+
           <label className="block text-gray-700 mb-2" htmlFor="tipoUsuario">Tipo de Usuário</label>
           <select
             id="tipoUsuario"
@@ -116,7 +116,7 @@ function Cadastro() {
             <option value="2">Responsável</option>
           </select>
 
-          <label className="block text-gray-300 mb-2" htmlFor="nome">Nome</label>
+          <label className="block text-gray-700 mb-2" htmlFor="nome">Nome</label>
           <input
             id="nome"
             type="text"
@@ -127,7 +127,7 @@ function Cadastro() {
             required
           />
 
-          <label className="block text-gray-300 mb-2" htmlFor="email">Email</label>
+          <label className="block text-gray-700 mb-2" htmlFor="email">Email</label>
           <input
             id="email"
             type="email"
@@ -138,27 +138,47 @@ function Cadastro() {
             required
           />
 
-          <label className="block text-gray-300 mb-2" htmlFor="senha">Senha</label>
-          <input
-            id="senha"
-            type="password"
-            placeholder="Digite sua senha"
-            value={senha}
-            onChange={(e) => setSenha(e.target.value)}
-            className="w-full p-3 mb-6 rounded border border-gray-500 focus:outline-none focus:border-red-500"
-            required
-          />
+          {/* 🔐 Senha */}
+          <label className="block text-gray-700 mb-2" htmlFor="senha">Senha</label>
+          <div className="relative">
+            <input
+              id="senha"
+              type={mostrarSenha ? 'text' : 'password'}
+              placeholder="Digite sua senha"
+              value={senha}
+              onChange={(e) => setSenha(e.target.value)}
+              className="w-full p-3 mb-2 rounded border border-gray-500 focus:outline-none focus:border-red-500 pr-10"
+              required
+            />
+            <button
+              type="button"
+              onClick={() => setMostrarSenha(!mostrarSenha)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600"
+            >
+              {mostrarSenha ? <EyeOff size={20} /> : <Eye size={20} />}
+            </button>
+          </div>
 
-          <label className="block text-gray-300 mb-2" htmlFor="confirmarSenha">Confirmar Senha</label>
-          <input
-            id="confirmarSenha"
-            type="password"
-            placeholder="Confirme sua senha"
-            value={confirmarSenha}
-            onChange={(e) => setConfirmarSenha(e.target.value)}
-            className="w-full p-3 mb-6 rounded border border-gray-500 focus:outline-none focus:border-red-500"
-            required
-          />
+          {/* 🔐 Confirmar Senha */}
+          <label className="block text-gray-700 mb-2" htmlFor="confirmarSenha">Confirmar Senha</label>
+          <div className="relative">
+            <input
+              id="confirmarSenha"
+              type={mostrarConfirmarSenha ? 'text' : 'password'}
+              placeholder="Confirme sua senha"
+              value={confirmarSenha}
+              onChange={(e) => setConfirmarSenha(e.target.value)}
+              className="w-full p-3 mb-4 rounded border border-gray-500 focus:outline-none focus:border-red-500 pr-10"
+              required
+            />
+            <button
+              type="button"
+              onClick={() => setMostrarConfirmarSenha(!mostrarConfirmarSenha)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600"
+            >
+              {mostrarConfirmarSenha ? <EyeOff size={20} /> : <Eye size={20} />}
+            </button>
+          </div>
 
           {erros.length > 0 && (
             <ul className="text-red-500 mb-4 list-disc pl-5">
