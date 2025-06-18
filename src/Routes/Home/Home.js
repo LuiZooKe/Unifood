@@ -507,8 +507,14 @@ function Home() {
         </div>
       </section>
 
-      <section className="bg-white w-full py-8">
-        <div className="w-full max-w-[90%] md:max-w-[70%] mx-auto relative">
+      <section className="bg-white relative w-full py-8">
+        {/* 🔥 Fundo do cardápio */}
+        <div
+          className="absolute inset-0 bg-no-repeat bg-center bg-[length:100%] opacity-[5%] z-0"
+          style={{ backgroundImage: `url(${fundocardapio})` }}
+        />
+
+        <div className="relative z-10 w-full max-w-[90%] md:max-w-[70%] mx-auto">
           <h3
             id="categorias-titulo"
             className="text-3xl md:text-4xl font-bold text-gray-800 mb-6 text-center break-words"
@@ -564,13 +570,24 @@ function Home() {
       </section>
 
       {categoriaSelecionada && (
-        <ModalCategoria
-          categoriaSelecionada={categoriaSelecionada}
-          produtos={produtosPorCategoria[categoriaSelecionada] || []}
-          onAddToCart={adicionarAoCarrinho}
-          onClose={fecharCategoria}
-          estaLogado={estaLogado} // 👉 adiciona isso
-        />
+        <div className="relative w-full">
+          {/* 🔥 Fundo suave */}
+          <div
+            className="absolute inset-0 bg-no-repeat bg-center bg-[length:100%] opacity-[5%] z-0"
+            style={{ backgroundImage: `url(${fundocardapio})` }}
+          />
+
+          {/* 🔥 Conteúdo da categoria */}
+          <div className="relative z-10">
+            <ModalCategoria
+              categoriaSelecionada={categoriaSelecionada}
+              produtos={produtosPorCategoria[categoriaSelecionada] || []}
+              onAddToCart={adicionarAoCarrinho}
+              onClose={fecharCategoria}
+              estaLogado={estaLogado}
+            />
+          </div>
+        </div>
       )}
 
       <section id="contact" className="bg-red-700 py-32 px-8 text-white relative overflow-hidden">
