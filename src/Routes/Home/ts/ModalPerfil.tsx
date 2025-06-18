@@ -175,8 +175,8 @@ const ModalPerfil: React.FC<ModalPerfilProps> = ({
   return (
     <div
       className="fixed inset-0 z-[9999] flex items-center justify-center
-      md:inset-auto md:top-28 md:right-[3.5rem] md:items-start md:justify-end
-      bg-black/70 backdrop-blur-xl md:bg-transparent md:rounded-3xl shadow-2xl"
+      md:top-28 md:right-[3.5rem] md:items-start md:justify-end
+      bg-black/70 md:bg-transparent md:rounded-3xl shadow-2xl"
       onClick={onFechar}
     >
       <div

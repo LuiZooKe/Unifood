@@ -28,14 +28,14 @@ const PagamentoConfirm: React.FC<PagamentoConfirmProps> = ({
         onClick={(e) => e.stopPropagation()}
       >
         {/* 🔥 Título */}
-        <h2 className="text-5x1 font-extrabold mb-4 text-center text-green-600">
+        <h3 className="text-[4rem] leading-none font-extrabold mb-2 text-center text-green-600">
           PAGAMENTO APROVADO
-        </h2>
+        </h3>
         {/* 🔥 Instruções */}
-        <p className="text-center text-lg text-gray-800 mb-2">
+        <p className="text-center leading-none text-[1.5rem] text-gray-800 mb-2">
           Para retirar, vá na aba <strong>Pedidos 🍔</strong>
         </p>
-        <p className="text-center text-lg text-gray-800 mb-2">
+        <p className="text-center leading-none text-[1.5rem] text-gray-800 mb-2">
           e use o <strong>QR-Code</strong> para mostrar no balcão.
         </p>
         {/* 🔥 Vídeo explicativo */}
@@ -44,9 +44,9 @@ const PagamentoConfirm: React.FC<PagamentoConfirmProps> = ({
           loop
           muted
           playsInline
-          className="h-[36rem] rounded-xl mb-[-4rem] object-cover"
+          className="h-[42rem] rounded-xl object-cover"
         >
-          <source src="/videos/pedido.webm" type="video/webm" />
+          <source src="/videos/PedidoConfirmado.webm" type="video/webm" />
           Seu navegador não suporta vídeos.
         </video>
 

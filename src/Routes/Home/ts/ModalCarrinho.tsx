@@ -86,8 +86,8 @@ const ModalCarrinho: React.FC<ModalCarrinhoProps> = ({
     <>
       <div
         className="fixed inset-0 z-[9999] flex items-center justify-center 
-        md:inset-auto md:top-28 md:right-[3.5rem] md:items-start md:justify-end 
-        bg-black/70 backdrop-blur-xl md:bg-transparent md:rounded-3xl shadow-2xl"
+        md:top-28 md:right-[3.5rem] md:items-start md:justify-end 
+        bg-black/70 md:bg-transparent md:rounded-3xl shadow-2xl"
         onClick={onFechar}
       >
         <div
@@ -232,22 +232,42 @@ const ModalCarrinho: React.FC<ModalCarrinhoProps> = ({
             <div className="w-full mb-4">
               <div className="bg-gray-100 rounded-xl px-4 py-3">
                 <p className="text-xl text-gray-700"><strong>Data:</strong> {pedidoSelecionado.data} - {pedidoSelecionado.hora}</p>
-                <p className="text-xl text-gray-700"><strong>Status:</strong> {pedidoSelecionado.status}</p>
                 <p className="text-xl text-gray-700"><strong>Forma de Pagamento:</strong> {pedidoSelecionado.tipo_pagamento.toUpperCase()}</p>
-                <p className="text-xl font-extrabold text-gray-900">
-                  Total: <span className="text-blue-700">R$ {Number(pedidoSelecionado.valor).toFixed(2).replace('.', ',')}</span>
+                <p className="text-xl text-gray-700">
+                  <strong>Valor Total:</strong> <span className="font-extrabold text-red-600">R$ {Number(pedidoSelecionado.valor).toFixed(2).replace('.', ',')}</span>
+                </p>
+                <p className="text-xl text-gray-700">
+                  <strong>Status:</strong>{' '}
+                  <span className={`font-extrabold ${pedidoSelecionado.status === 'FINALIZADO'
+                    ? 'text-green-600'
+                    : pedidoSelecionado.status === 'PENDENTE'
+                      ? 'text-red-600'
+                      : 'text-gray-900'}`}>
+                    {pedidoSelecionado.status}
+                  </span>
                 </p>
               </div>
             </div>
 
-            <div className="flex justify-center mb-4">
+            <div className="flex justify-center mb-4 relative">
               <img
                 src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(
                   JSON.stringify({ pedido_id: pedidoSelecionado.id })
                 )}`}
                 alt="QR Code do Pedido"
-                className="rounded-xl border border-gray-300"
+                className={`rounded-xl border border-gray-300 transition 
+      ${pedidoSelecionado.status === 'FINALIZADO' ? 'blur-sm opacity-50' : ''}`}
               />
+              {pedidoSelecionado.status === 'FINALIZADO' && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
+                  <p className="bg-white/90 text-green-700 font-bold text-xl px-4 py-2 rounded-xl shadow">
+                    Pedido Finalizado ✔️
+                  </p>
+                  <p className="bg-white/90 text-red-600 font-bold text-lg px-4 py-2 rounded-xl shadow flex items-center gap-2">
+                    <span className="text-2xl">❌</span> QR-CODE INDISPONÍVEL
+                  </p>
+                </div>
+              )}
             </div>
 
             <div className="flex flex-col flex-1 overflow-y-auto">
