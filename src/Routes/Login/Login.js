@@ -32,7 +32,7 @@ function Login() {
         setErro('');
 
         if (parseInt(data.tipo_usuario) === 0 || parseInt(data.tipo_usuario) === 3) {
-          navigate('/funcionario');
+          navigate('/caixa');
         } else {
           navigate('/');
         }

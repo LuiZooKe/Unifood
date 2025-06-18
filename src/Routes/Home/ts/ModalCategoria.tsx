@@ -9,10 +9,11 @@ interface Produto {
 }
 
 interface ModalCategoriaProps {
-  categoriaSelecionada: string | null;
+  categoriaSelecionada: string;
   produtos: Produto[];
   onAddToCart: (produto: Produto) => void;
   onClose: () => void;
+  estaLogado: boolean; // 👈 adiciona isso
 }
 
 const ModalCategoria: React.FC<ModalCategoriaProps> = ({
@@ -20,6 +21,7 @@ const ModalCategoria: React.FC<ModalCategoriaProps> = ({
   produtos,
   onAddToCart,
   onClose,
+  estaLogado,
 }) => {
   const [descricaoVisivel, setDescricaoVisivel] = useState<number | null>(null);
   const [animacaoCarrinho, setAnimacaoCarrinho] = useState<number | null>(null);
@@ -95,9 +97,17 @@ const ModalCategoria: React.FC<ModalCategoriaProps> = ({
                 </button>
 
                 <button
-                  onClick={() => handleAddToCart(produto, index)}
-                  className="relative text-white bg-red-600 hover:bg-red-700 p-2 rounded-full"
-                  title="Adicionar ao carrinho"
+                  onClick={() => {
+                    if (estaLogado) {
+                      handleAddToCart(produto, index);
+                    } else {
+                      alert('Faça login para adicionar itens ao carrinho!');
+                    }
+                  }}
+                  className={`relative text-white ${estaLogado ? 'bg-red-600 hover:bg-red-700' : 'bg-gray-400 cursor-not-allowed'
+                    } p-2 rounded-full`}
+                  title={estaLogado ? "Adicionar ao carrinho" : "Faça login para adicionar"}
+                  disabled={!estaLogado} // 🔒 Segurança visual e física
                 >
                   <ShoppingCart className="w-12 h-10" />
 
@@ -107,6 +117,7 @@ const ModalCategoria: React.FC<ModalCategoriaProps> = ({
                     </span>
                   )}
                 </button>
+
               </div>
             </div>
           </div>

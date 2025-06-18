@@ -30,6 +30,7 @@ const carouselSettings = {
 };
 
 function Home() {
+  const estaLogado = localStorage.getItem('usuarioLogado') === 'true';
   const navigate = useNavigate();
 
   const [usuario, setUsuario] = useState({
@@ -95,6 +96,12 @@ function Home() {
   };
 
   const adicionarAoCarrinho = (produto) => {
+    if (!estaLogado) {
+      alert('Você precisa estar logado para adicionar itens ao carrinho.');
+      navigate('/login');
+      return;
+    }
+
     setItensCarrinho((prevItens) => {
       const existente = prevItens.find((item) => item.nome === produto.nome);
       if (existente) {
@@ -227,7 +234,7 @@ function Home() {
         .finally(() => setCarregandoUsuario(false));
     }
   };
-  
+
   useEffect(() => {
     carregarPerfil();
   }, []);
@@ -349,25 +356,40 @@ function Home() {
                 ℹ️ Saiba Mais
               </a>
 
-              <button
-                onClick={() => {
-                  fecharTudo();
-                  abrirModalCarrinho();
-                }}
-                className="w-[90%] bg-gradient-to-r from-green-300 to-green-500 text-white font-bold text-2xl py-4 rounded-2xl shadow-xl hover:scale-105 transition"
-              >
-                🛍️ Pedidos
-              </button>
+              {estaLogado ? (
+                <>
+                  <button
+                    onClick={() => {
+                      fecharTudo();
+                      abrirModalCarrinho();
+                    }}
+                    className="w-[90%] bg-gradient-to-r from-green-300 to-green-500 text-white font-bold text-2xl py-4 rounded-2xl shadow-xl hover:scale-105 transition"
+                  >
+                    🛍️ Pedidos
+                  </button>
 
-              <button
-                onClick={() => {
-                  fecharTudo();
-                  abrirPerfil();
-                }}
-                className="w-[90%] bg-gradient-to-r from-gray-600 to-gray-900 text-white font-bold text-2xl py-4 rounded-2xl shadow-xl hover:scale-105 transition"
-              >
-                👤 Perfil
-              </button>
+                  <button
+                    onClick={() => {
+                      fecharTudo();
+                      abrirPerfil();
+                    }}
+                    className="w-[90%] bg-gradient-to-r from-gray-600 to-gray-900 text-white font-bold text-2xl py-4 rounded-2xl shadow-xl hover:scale-105 transition"
+                  >
+                    👤 Perfil
+                  </button>
+                </>
+              ) : (
+                <button
+                  onClick={() => {
+                    fecharTudo();
+                    navigate('/login');
+                  }}
+                  className="w-[90%] bg-gradient-to-r from-gray-600 to-gray-900 text-white font-bold text-2xl py-4 rounded-2xl shadow-xl hover:scale-105 transition"
+                >
+                  🔑 Fazer Login
+                </button>
+              )}
+
             </nav>
           </div>
         </div>
@@ -394,29 +416,46 @@ function Home() {
               <li><a href="#contact">Contato 📞</a></li>
               <li><a href="/saibamais">Saiba Mais ℹ️</a></li>
 
-              <li>
-                <a
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    abrirModalCarrinho();
-                  }}
-                  className="block w-full text-left"
-                >
-                  Pedidos 🛍️
-                </a>
-              </li>
+              {estaLogado ? (
+                <>
+                  <li>
+                    <a
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        abrirModalCarrinho();
+                      }}
+                    >
+                      Pedidos 🛍️
+                    </a>
+                  </li>
 
-              <li>
-                <a>
-                  <button
-                    onClick={abrirPerfil}
-                    className="block w-full text-left"
+                  <li>
+                    <a
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        abrirPerfil();
+                      }}
+                    >
+                      <button className="w-full text-left">Perfil 👤</button>
+                    </a>
+                  </li>
+                </>
+              ) : (
+                <li>
+                  <a
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      navigate('/login');
+                    }}
                   >
-                    Perfil 👤
-                  </button>
-                </a>
-              </li>
+                    <button className="w-full text-left">Fazer Login 🔑</button>
+                  </a>
+                </li>
+              )}
+
             </ul>
           </nav>
         </div>
@@ -520,9 +559,9 @@ function Home() {
           produtos={produtosPorCategoria[categoriaSelecionada] || []}
           onAddToCart={adicionarAoCarrinho}
           onClose={fecharCategoria}
+          estaLogado={estaLogado} // 👉 adiciona isso
         />
       )}
-
 
       <section id="contact" className="bg-red-700 py-32 px-8 text-white relative overflow-hidden">
         <div className="max-w-5xl mx-auto relative z-[1]">
@@ -591,9 +630,13 @@ function Home() {
             <div className="text-center pt-6">
               <button
                 type="submit"
-                className="bg-white text-red-700 font-bold text-3xl py-6 px-16 rounded-xl hover:bg-gray-100 transition"
+                disabled={!estaLogado}
+                className={`${estaLogado
+                  ? 'bg-white hover:bg-gray-100 cursor-pointer'
+                  : 'bg-gray-400 cursor-not-allowed'
+                  } text-red-700 font-bold text-3xl py-6 px-16 rounded-xl transition`}
               >
-                ENVIAR MENSAGEM
+                {estaLogado ? 'ENVIAR MENSAGEM' : 'FAÇA LOGIN PARA ENVIAR'}
               </button>
             </div>
           </form>

@@ -25,14 +25,10 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" element={
-          <PrivateRoute>
             <Home />
-          </PrivateRoute>
         } />
         <Route path="/saibamais" element={
-          <PrivateRoute>
             <SaibaMais />
-          </PrivateRoute>
         } />
         <Route path="/login" element={<Login />} />
         <Route path="/esqueci-senha" element={<EsqueciSenha />} />
