@@ -212,7 +212,7 @@ const ModalCarrinho: React.FC<ModalCarrinhoProps> = ({
           <div
             className="bg-white rounded-3xl shadow-xl p-8 
             w-[90%] max-w-[500px] md:w-[380px] 
-            min-h-[580px] md:min-h-[500px] 
+            min-h-[90vh] md:min-h-[80vh] 
             max-h-[90vh] md:max-h-[80vh] 
             flex flex-col"
             onClick={(e) => e.stopPropagation()}
@@ -258,28 +258,34 @@ const ModalCarrinho: React.FC<ModalCarrinhoProps> = ({
                 {pedidoSelecionado.itens.length === 0 ? (
                   <p className="text-center text-2xl text-gray-500">Nenhum item encontrado.</p>
                 ) : (
-                  pedidoSelecionado.itens.map((item, idx) => (
-                    <div
-                      key={idx}
-                      className="flex gap-4 items-center border border-gray-100 rounded-xl p-2"
-                    >
-                      <img
-                        src={item.imagem}
-                        alt={item.nome}
-                        className="w-20 h-20 rounded-xl object-cover border border-gray-200"
-                      />
-                      <div className="flex-1">
-                        <p className="font-semibold text-2xl text-gray-800">{item.nome}</p>
-                        <p className="text-lg text-gray-500">{item.quantidade}x {item.preco}</p>
+                  pedidoSelecionado.itens.map((item, idx) => {
+                    const precoUnitario =
+                      typeof item.preco === 'string'
+                        ? parseFloat(item.preco.replace('R$', '').replace(',', '.'))
+                        : item.preco;
+
+                    return (
+                      <div
+                        key={idx}
+                        className="flex gap-4 items-center border border-gray-100 rounded-xl p-2"
+                      >
+                        <img
+                          src={item.imagem}
+                          alt={item.nome}
+                          className="w-20 h-20 rounded-xl object-cover border border-gray-200"
+                        />
+                        <div className="flex-1">
+                          <p className="font-semibold text-2xl text-gray-800">{item.nome}</p>
+                          <p className="text-lg text-gray-500">
+                            {item.quantidade}x R$ {precoUnitario.toFixed(2).replace('.', ',')}
+                          </p>
+                        </div>
+                        <p className="font-bold text-xl">
+                          R$ {(precoUnitario * item.quantidade).toFixed(2).replace('.', ',')}
+                        </p>
                       </div>
-                      <p className="font-bold text-xl">
-                        R${' '}
-                        {(
-                          parseFloat(item.preco.replace('R$', '').replace(',', '.')) * item.quantidade
-                        ).toFixed(2)}
-                      </p>
-                    </div>
-                  ))
+                    );
+                  })
                 )}
               </div>
             </div>

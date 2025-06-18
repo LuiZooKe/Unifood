@@ -74,7 +74,6 @@ const AdicionarCartao: React.FC<AdicionarCartaoProps> = ({
 
       if (data.success) {
         onAdicionar(dadosCartao);
-        notify.success('Cartão cadastrado com sucesso!');
         setNumero('');
         setNome('');
         setValidade('');

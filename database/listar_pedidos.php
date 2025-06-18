@@ -13,67 +13,125 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 $conn = new mysqli("localhost", "root", "", "unifood_db");
 
 if ($conn->connect_error) {
-    echo json_encode(['success' => false, 'message' => 'Erro na conexão com o banco de dados.']);
+    echo json_encode(['success' => false, 'message' => 'Erro na conexão com o banco.']);
     exit;
 }
 
-// 🔍 Filtros
-$email = $_GET['email'] ?? null;
-$filtro = $_GET['filtro'] ?? null;
+date_default_timezone_set('America/Sao_Paulo');
 
-$condicoes = [];
-$params = [];
-$tipos = "";
+// 🔧 Função para processar itens
+function processarItens($pedido) {
+    $itens = json_decode($pedido['itens'], true);
+    $pedido['itens'] = $itens ?? [];
 
-// 🔥 Filtro por email (se houver)
-if ($email) {
-    $condicoes[] = "email_cliente = ?";
-    $params[] = $email;
-    $tipos .= "s";
+    $total = 0;
+
+    foreach ($pedido['itens'] as &$item) {
+        if (isset($item['preco'])) {
+            $precoLimpo = str_replace(['R$', ' ', ','], ['', '', '.'], $item['preco']);
+            $item['preco'] = floatval($precoLimpo);
+        } else {
+            $item['preco'] = 0;
+        }
+
+        if (!isset($item['quantidade'])) {
+            $item['quantidade'] = 1;
+        }
+
+        $total += $item['preco'] * $item['quantidade'];
+    }
+
+    $pedido['valor_total'] = number_format($total, 2, '.', '');
+
+    return $pedido;
 }
 
-// 🔥 Filtro por data
+// 🔍 Se houver ID → Busca individual (QR Code)
+if (isset($_GET['id'])) {
+    $id = intval($_GET['id']);
+
+    $sql = "
+        SELECT 
+            p.*, 
+            COALESCE(u.nome, 'Sem nome') AS nome_cliente, 
+            COALESCE(u.email, p.email_cliente) AS email_cliente, 
+            COALESCE(c.telefone, 'Não informado') AS telefone_cliente
+        FROM pedidos p
+        LEFT JOIN users u ON u.email = p.email_cliente
+        LEFT JOIN clientes c ON c.email = p.email_cliente
+        WHERE p.id = $id
+    ";
+
+    $result = $conn->query($sql);
+
+    if ($result && $result->num_rows > 0) {
+        $pedido = $result->fetch_assoc();
+        $pedido = processarItens($pedido);
+
+        $pedido['data'] = date('d/m/Y', strtotime($pedido['data_pedido']));
+        $pedido['hora'] = $pedido['hora_pedido'];
+
+        echo json_encode(['success' => true, 'pedido' => $pedido]);
+    } else {
+        echo json_encode(['success' => false, 'message' => 'Pedido não encontrado']);
+    }
+
+    $conn->close();
+    exit();
+}
+
+// 🔍 Se não houver ID → Listagem por filtro (dia, semana, mês)
+$filtro = $_GET['filtro'] ?? 'dia';
+
+$data_inicio = '';
+$data_fim = date('Y-m-d');
+
 if ($filtro === 'dia') {
-    $condicoes[] = "DATE(data_pedido) = CURDATE()";
-}
-if ($filtro === 'semana') {
-    $condicoes[] = "YEARWEEK(data_pedido, 1) = YEARWEEK(CURDATE(), 1)";
-}
-if ($filtro === 'mes') {
-    $condicoes[] = "MONTH(data_pedido) = MONTH(CURDATE()) AND YEAR(data_pedido) = YEAR(CURDATE())";
-}
-
-// 🔥 Monta a query
-$sql = "SELECT * FROM pedidos";
-if (count($condicoes) > 0) {
-    $sql .= " WHERE " . implode(" AND ", $condicoes);
-}
-$sql .= " ORDER BY data_pedido DESC";
-
-$stmt = $conn->prepare($sql);
-if ($tipos !== "") {
-    $stmt->bind_param($tipos, ...$params);
+    $data_inicio = date('Y-m-d');
+} elseif ($filtro === 'semana') {
+    $data_inicio = date('Y-m-d', strtotime('-6 days'));
+} elseif ($filtro === 'mes') {
+    $data_inicio = date('Y-m-01');
+} else {
+    $data_inicio = date('Y-m-d');
 }
 
-$stmt->execute();
-$result = $stmt->get_result();
+$sql = "
+    SELECT 
+        p.*, 
+        COALESCE(u.nome, 'Sem nome') AS nome_cliente, 
+        COALESCE(u.email, p.email_cliente) AS email_cliente, 
+        COALESCE(c.telefone, 'Não informado') AS telefone_cliente
+    FROM pedidos p
+    LEFT JOIN users u ON u.email = p.email_cliente
+    LEFT JOIN clientes c ON c.email = p.email_cliente
+    WHERE DATE(p.data_pedido) BETWEEN '$data_inicio' AND '$data_fim'
+    ORDER BY p.data_pedido DESC, p.hora_pedido DESC
+";
+
+$result = $conn->query($sql);
 
 $pedidos = [];
 
 if ($result && $result->num_rows > 0) {
-    while ($row = $result->fetch_assoc()) {
+    while ($pedido = $result->fetch_assoc()) {
+        $pedido = processarItens($pedido);
+
+        $pedido['data'] = date('d/m/Y', strtotime($pedido['data_pedido']));
+        $pedido['hora'] = $pedido['hora_pedido'];
+
         $pedidos[] = [
-            'id' => intval($row['id']),
-            'nome' => $row['nome_cliente'],
-            'email' => $row['email_cliente'],
-            'telefone' => $row['telefone_cliente'] ?? 'Não informado',
-            'data' => date('d/m/Y', strtotime($row['data_pedido'])),
-            'hora' => date('H:i', strtotime($row['data_pedido'])),
-            'valor' => floatval($row['valor_total']),
-            'tipo_pagamento' => $row['tipo_pagamento'],
-            'status' => $row['status'],
-            'itens' => json_decode($row['itens'], true),
-            'observacoes' => $row['observacoes'] ?? '',
+            'id' => intval($pedido['id']),
+            'nome' => $pedido['nome_cliente'],
+            'email' => $pedido['email_cliente'],
+            'telefone' => $pedido['telefone_cliente'] ?? 'Não informado',
+            'data' => $pedido['data'],
+            'hora' => $pedido['hora'],
+            'valor' => floatval($pedido['valor_total']),
+            'tipo_pagamento' => $pedido['tipo_pagamento'],
+            'status' => $pedido['status'],
+            'itens' => $pedido['itens'],
+            'observacoes' => $pedido['observacoes'] ?? '',
         ];
     }
 }
