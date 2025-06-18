@@ -62,12 +62,12 @@ const AdicionarSaldo: React.FC<AdicionarSaldoProps> = ({
     const valorNumerico = parseFloat(numeros) / 100;
 
     if (isNaN(valorNumerico) || valorNumerico <= 0) {
-      alert('Informe um valor válido!');
+      notify.error('Informe um valor válido!');
       return;
     }
 
     if (valorNumerico > 9999) {
-      alert('O valor máximo permitido é R$ 9.999,00');
+      notify.error('O valor máximo permitido é R$ 9.999,00');
       return;
     }
 
@@ -100,11 +100,11 @@ const AdicionarSaldo: React.FC<AdicionarSaldoProps> = ({
         );
         setValor('');
       } else {
-        alert('Erro ao atualizar saldo: ' + data.message);
+        notify.error('Erro ao atualizar saldo: ' + data.message);
       }
     } catch (error) {
       console.error('Erro ao atualizar saldo:', error);
-      alert('Erro na conexão com o servidor');
+      notify.error('Erro na conexão com o servidor');
     }
   };
 

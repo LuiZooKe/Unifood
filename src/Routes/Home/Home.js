@@ -97,8 +97,7 @@ function Home() {
 
   const adicionarAoCarrinho = (produto) => {
     if (!estaLogado) {
-      alert('Você precisa estar logado para adicionar itens ao carrinho.');
-      navigate('/login');
+      notify.error('Você precisa estar logado para adicionar itens ao carrinho.');
       return;
     }
 
@@ -146,12 +145,12 @@ function Home() {
     const total = parseFloat(calcularTotalCarrinho().replace(',', '.'));
 
     if (metodo === 'cartao' && !usuario.numero_cartao) {
-      alert('Nenhum cartão cadastrado.');
+      notify.error('Nenhum cartão cadastrado.');
       return;
     }
 
     if (metodo === 'saldo' && (usuario.saldo || 0) < total) {
-      alert('Saldo insuficiente.');
+      notify.error('Saldo insuficiente.');
       return;
     }
 
@@ -179,11 +178,11 @@ function Home() {
         setPagamentoAberto(false);
         setConfirmacaoAberta(true);
       } else {
-        alert('Erro ao finalizar pedido: ' + data.message);
+        notify.error('Erro ao finalizar pedido: ' + data.message);
       }
     } catch (error) {
       console.error('Erro na conexão:', error);
-      alert('Erro na conexão com o servidor.');
+      notify.error('Erro na conexão com o servidor.');
     }
   };
 

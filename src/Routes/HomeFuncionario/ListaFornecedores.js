@@ -30,9 +30,9 @@ function ListaFornecedores() {
       });
       const data = await res.json();
       if (data.success) fetchFornecedores();
-      else alert(data.message);
+      else notify.error(data.message);
     } catch {
-      alert('Erro ao deletar fornecedor.');
+      notify.error('Erro ao deletar fornecedor.');
     }
   };
 
@@ -62,10 +62,10 @@ function ListaFornecedores() {
         setModalEditar(false);
         fetchFornecedores();
       } else {
-        alert(data.message);
+        notify.error(data.message);
       }
     } catch {
-      alert('Erro ao atualizar fornecedor.');
+      notify.error('Erro ao atualizar fornecedor.');
     }
   };
 

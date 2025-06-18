@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { IMaskInput } from 'react-imask';
+import { notify } from '../../../utils/notify';
 
 interface Cartao {
   numero: string;
@@ -32,12 +33,12 @@ const AdicionarCartao: React.FC<AdicionarCartaoProps> = ({
 
   const handleAdicionar = async () => {
     if (!usuario.email) {
-      alert('Erro: Email do usuário não informado.');
+      notify.error('Erro: Email do usuário não informado.');
       return;
     }
 
     if (!numero || !nome || !validade || !cvv) {
-      alert('Preencha todos os campos do cartão.');
+      notify.error('Preencha todos os campos do cartão.');
       return;
     }
 
@@ -73,17 +74,17 @@ const AdicionarCartao: React.FC<AdicionarCartaoProps> = ({
 
       if (data.success) {
         onAdicionar(dadosCartao);
-        alert('Cartão cadastrado com sucesso!');
+        notify.success('Cartão cadastrado com sucesso!');
         setNumero('');
         setNome('');
         setValidade('');
         setCvv('');
       } else {
-        alert('Erro ao cadastrar cartão: ' + data.message);
+        notify.error('Erro ao cadastrar cartão: ' + data.message);
       }
     } catch (error) {
       console.error('Erro na requisição:', error);
-      alert('Erro na conexão com o servidor');
+      notify.error('Erro na conexão com o servidor');
     }
   };
 

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Eye, EyeOff, X } from 'lucide-react';
 import IMask from 'imask';
+import { notify } from '../../../utils/notify';
 import AdicionarCartao from './AdicionarCartao.tsx';
 
 interface Usuario {
@@ -81,7 +82,7 @@ const ModalPerfil: React.FC<ModalPerfilProps> = ({
 
   const handleSubmit = async () => {
     if (novaSenha !== confirmarSenha) {
-      alert('As senhas não coincidem!');
+      notify.error('As senhas não coincidem!');
       return;
     }
 
@@ -102,7 +103,7 @@ const ModalPerfil: React.FC<ModalPerfilProps> = ({
       const result = await response.json();
 
       if (!result.success) {
-        alert('Erro ao atualizar dados: ' + result.message);
+        notify.error('Erro ao atualizar dados: ' + result.message);
         return;
       }
 
@@ -119,12 +120,12 @@ const ModalPerfil: React.FC<ModalPerfilProps> = ({
         const senhaResult = await senhaRes.json();
 
         if (!senhaResult.success) {
-          alert('Dados atualizados, mas erro ao atualizar senha: ' + senhaResult.message);
+          notify.error('Dados atualizados, mas erro ao atualizar senha: ' + senhaResult.message);
         } else {
-          alert('Dados e senha atualizados com sucesso!');
+          notify.success('Dados e senha atualizados com sucesso!');
         }
       } else {
-        alert('Dados atualizados com sucesso!');
+        notify.success('Dados atualizados com sucesso!');
       }
 
       const dadosAtualizados = {
@@ -139,7 +140,7 @@ const ModalPerfil: React.FC<ModalPerfilProps> = ({
       onFechar();
     } catch (error) {
       console.error('Erro na atualização:', error);
-      alert('Erro na conexão com o servidor.');
+      notify.error('Erro na conexão com o servidor.');
     }
   };
 
@@ -161,13 +162,13 @@ const ModalPerfil: React.FC<ModalPerfilProps> = ({
 
       if (data.success) {
         setCartao(null);
-        alert('Cartão removido com sucesso!');
+        notify.success('Cartão removido com sucesso!');
       } else {
-        alert('Erro ao remover cartão: ' + data.message);
+        notify.error('Erro ao remover cartão: ' + data.message);
       }
     } catch (error) {
       console.error('Erro na remoção do cartão:', error);
-      alert('Erro na conexão com o servidor');
+      notify.error('Erro na conexão com o servidor');
     }
   };
 
@@ -268,7 +269,7 @@ const ModalPerfil: React.FC<ModalPerfilProps> = ({
                 visivel={cartaoAberto}
                 onAdicionar={(dadosCartao) => {
                   setCartao(dadosCartao);
-                  alert('Cartão cadastrado com sucesso!');
+                  notify.success('Cartão cadastrado com sucesso!');
                   setCartaoAberto(false);
                 }}
                 usuario={dados}

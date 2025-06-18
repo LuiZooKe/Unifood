@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Info, ShoppingCart, X } from 'lucide-react';
+import { notify } from '../../../utils/notify';
 
 interface Produto {
   nome: string;
@@ -101,7 +102,7 @@ const ModalCategoria: React.FC<ModalCategoriaProps> = ({
                     if (estaLogado) {
                       handleAddToCart(produto, index);
                     } else {
-                      alert('Faça login para adicionar itens ao carrinho!');
+                      notify.error('Faça login para adicionar itens ao carrinho!');
                     }
                   }}
                   className={`relative text-white ${estaLogado ? 'bg-red-600 hover:bg-red-700' : 'bg-gray-400 cursor-not-allowed'

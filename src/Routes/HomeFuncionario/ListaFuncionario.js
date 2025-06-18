@@ -30,9 +30,9 @@ function ListaFuncionarios() {
       });
       const data = await res.json();
       if (data.success) fetchFuncionarios();
-      else alert(data.message);
+      else notify.error(data.message);
     } catch {
-      alert('Erro ao deletar funcionário.');
+      notify.error('Erro ao deletar funcionário.');
     }
   };
 
@@ -45,7 +45,7 @@ function ListaFuncionarios() {
       };
 
       if (editedFuncionario.cpf && !validarCPF(editedFuncionario.cpf)) {
-        alert("CPF inválido.");
+        notify.error("CPF inválido.");
         return;
       }
 
@@ -60,10 +60,10 @@ function ListaFuncionarios() {
         setModalEditar(false);
         fetchFuncionarios();
       } else {
-        alert(data.message);
+        notify.error(data.message);
       }
     } catch {
-      alert('Erro ao atualizar funcionário.');
+      notify.error('Erro ao atualizar funcionário.');
     }
   };
 

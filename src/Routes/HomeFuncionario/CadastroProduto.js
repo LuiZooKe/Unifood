@@ -129,10 +129,10 @@ function CadastroProduto() {
         setNovaCategoria('');
         setShowModalCategoria(false);
       } else {
-        alert(data.message || 'Erro ao cadastrar categoria');
+        notify.error(data.message || 'Erro ao cadastrar categoria');
       }
     } catch {
-      alert('Erro na conexão');
+      notify.error('Erro na conexão');
     }
   };
 

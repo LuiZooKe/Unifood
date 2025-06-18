@@ -61,9 +61,9 @@ function ListaProdutos() {
       });
       const data = await res.json();
       if (data.success) fetchProdutos();
-      else alert(data.message);
+      else notify.error(data.message);
     } catch {
-      alert('Erro ao deletar produto.');
+      notify.error('Erro ao deletar produto.');
     }
   };
 
@@ -94,10 +94,10 @@ function ListaProdutos() {
         setModalEditar(false);
         fetchProdutos();
       } else {
-        alert(data.message);
+        notify.error(data.message);
       }
     } catch {
-      alert('Erro ao atualizar produto.');
+      notify.error('Erro ao atualizar produto.');
     }
   };
 

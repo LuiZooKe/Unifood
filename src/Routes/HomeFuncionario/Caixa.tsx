@@ -97,10 +97,10 @@ const Caixa: React.FC = () => {
         buscarPedidos(); // Atualiza a lista após mudar o status
         fecharModal();
       } else {
-        alert('Erro ao atualizar status');
+        notify.error('Erro ao atualizar status');
       }
     } catch {
-      alert('Erro na conexão com o servidor');
+      notify.error('Erro na conexão com o servidor');
     }
   };
 

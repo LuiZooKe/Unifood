@@ -29,7 +29,7 @@ const MeusPedidos: React.FC<MeusPedidosProps> = ({ usuario }) => {
           if (data.success) {
             setPedidos(data.pedidos);
           } else {
-            alert(data.message);
+            notify.error(data.message);
           }
         });
     }
