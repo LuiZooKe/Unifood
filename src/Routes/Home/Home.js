@@ -16,6 +16,8 @@ import Pagamento from './ts/Pagamento.tsx';
 import PagamentoConfirm from './ts/PagamentoConfirm.tsx';
 import ModalPerfil from './ts/ModalPerfil.tsx';
 
+import useLockBodyScroll from './ts/hooks/useLockBodyScroll.ts';
+
 import './css/elements.css';
 
 const carouselSettings = {
@@ -56,6 +58,15 @@ function Home() {
   const [itensCarrinho, setItensCarrinho] = useState([]);
   const [pagamentoAberto, setPagamentoAberto] = useState(false);
   const [confirmacaoAberta, setConfirmacaoAberta] = useState(false);
+
+  const scrollTravado =
+    modalCarrinhoAberto ||
+    pagamentoAberto ||
+    confirmacaoAberta ||
+    perfilAberto ||
+    menuMobileAberto;
+
+  useLockBodyScroll(scrollTravado);
 
   const fecharTudo = () => {
     setMenuMobileAberto(false);
