@@ -179,7 +179,7 @@ const ModalPerfil: React.FC<ModalPerfilProps> = ({
       onClick={onFechar}
     >
       <div
-        className="bg-white/95 backdrop-blur-md w-[90%] max-w-[500px] max-h-[90vh] md:max-h-[90vh]
+        className="bg-white/95 backdrop-blur-md w-[90%] max-w-[500px] max-h-[90vh] md:max-h-[80vh]
         md:w-[380px] rounded-3xl shadow-xl overflow-hidden flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { X } from 'lucide-react';
+import { X, ChevronDown, ChevronUp } from 'lucide-react';
 
 interface Produto {
   nome: string;
@@ -51,11 +51,11 @@ const ModalCarrinho: React.FC<ModalCarrinhoProps> = ({
   onRemover,
   limparCarrinho,
   usuario,
-  atualizarUsuario,
 }) => {
   const [abaAberta, setAbaAberta] = useState<'carrinho' | 'pedidos'>('carrinho');
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
   const [pedidoSelecionado, setPedidoSelecionado] = useState<Pedido | null>(null);
+  const [mostrarItens, setMostrarItens] = useState<boolean>(false);
 
   const buscarPedidos = async () => {
     try {
@@ -84,17 +84,11 @@ const ModalCarrinho: React.FC<ModalCarrinhoProps> = ({
 
   return (
     <div
-      className="
-        fixed inset-0 z-[9999]
-        flex items-center justify-center
-        md:inset-auto md:top-28 md:right-[3.5rem] md:items-start md:justify-end
-        bg-black/70 backdrop-blur-xl md:bg-transparent
-        md:rounded-3xl shadow-2xl
-      "
+      className="fixed inset-0 z-[9999] flex items-center justify-center md:inset-auto md:top-28 md:right-[3.5rem] md:items-start md:justify-end bg-black/70 backdrop-blur-xl md:bg-transparent md:rounded-3xl shadow-2xl"
       onClick={onFechar}
     >
       <div
-        className="bg-white/95 backdrop-blur-md w-[90%] max-w-[500px] max-h-[90vh] md:w-[380px] rounded-3xl shadow-xl overflow-hidden flex flex-col"
+        className="bg-white/95 backdrop-blur-md w-[90%] max-w-[500px] max-h-[90vh] md:max-h-[80vh] md:w-[380px] rounded-3xl shadow-xl overflow-hidden flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         {/* 🔥 Cabeçalho */}
@@ -114,18 +108,14 @@ const ModalCarrinho: React.FC<ModalCarrinhoProps> = ({
         <div className="flex gap-2 px-6 pt-4 pb-2 border-b border-gray-300">
           <button
             onClick={() => setAbaAberta('carrinho')}
-            className={`flex-1 py-2 rounded-xl font-semibold ${abaAberta === 'carrinho'
-              ? 'bg-green-600 text-white shadow-lg'
-              : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+            className={`flex-1 py-2 rounded-xl font-semibold ${abaAberta === 'carrinho' ? 'bg-green-600 text-white shadow-lg' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
               }`}
           >
             Carrinho 🛒
           </button>
           <button
             onClick={() => setAbaAberta('pedidos')}
-            className={`flex-1 py-2 rounded-xl font-semibold ${abaAberta === 'pedidos'
-              ? 'bg-red-600 text-white shadow-lg'
-              : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+            className={`flex-1 py-2 rounded-xl font-semibold ${abaAberta === 'pedidos' ? 'bg-red-600 text-white shadow-lg' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
               }`}
           >
             Pedidos 🍔
@@ -143,7 +133,7 @@ const ModalCarrinho: React.FC<ModalCarrinhoProps> = ({
                   <div key={item.nome} className="flex gap-4 bg-white rounded-xl p-4 shadow">
                     <img src={item.imagem} alt={item.nome} className="w-[80px] h-[80px] md:w-[100px] md:h-[100px] object-cover rounded-lg" />
                     <div className="flex flex-col justify-between w-full">
-                      <div className="flex flex-col">
+                      <div>
                         <h4 className="font-bold text-gray-800 text-[clamp(1.5rem,3vw,2.5rem)]">{item.nome}</h4>
                         <p className="text-gray-600">Preço: <span className="font-semibold">{item.preco}</span></p>
                       </div>
@@ -171,13 +161,16 @@ const ModalCarrinho: React.FC<ModalCarrinhoProps> = ({
                   <div
                     key={pedido.id}
                     className="bg-white rounded-xl p-4 shadow cursor-pointer hover:bg-gray-50"
-                    onClick={() => setPedidoSelecionado(pedido)}
+                    onClick={() => {
+                      setPedidoSelecionado(pedido);
+                      setMostrarItens(false);
+                    }}
                   >
                     <div className="flex justify-between items-center">
                       <div>
-                        <h4 className="font-bold text-gray-800 text-x1">Pedido #{pedido.id}</h4>
+                        <h4 className="font-bold text-gray-800 text-xl">Pedido #{pedido.id}</h4>
                         <p className="text-gray-600">Data: {pedido.data} - {pedido.hora}</p>
-                        <p className="text-green-600 font-bold text-x2">
+                        <p className="text-green-600 font-bold">
                           Valor: R$ {Number(pedido.valor).toFixed(2).replace('.', ',')}
                         </p>
                       </div>
@@ -211,14 +204,14 @@ const ModalCarrinho: React.FC<ModalCarrinhoProps> = ({
             onClick={() => setPedidoSelecionado(null)}
           >
             <div
-              className="bg-white rounded-3xl shadow-xl p-8 w-[92%] max-w-[500px] flex flex-col max-h-[90vh]"
+              className="bg-white rounded-3xl shadow-xl p-8 w-[100%] max-w-[500px] flex flex-col max-h-[90vh] md:max-h-[80vh]"
               onClick={(e) => e.stopPropagation()}
             >
-              {/* 🔥 Botão de Fechar */}
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-5xl font-extrabold text-gray-900">
+              {/* 🔥 Header */}
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-5xl font-extrabold text-gray-900">
                   Pedido #{pedidoSelecionado.id}
-                </h2>
+                </h3>
                 <button
                   onClick={() => setPedidoSelecionado(null)}
                   className="text-gray-500 hover:text-red-500"
@@ -230,23 +223,50 @@ const ModalCarrinho: React.FC<ModalCarrinhoProps> = ({
               {/* 🔥 Dados do Pedido */}
               <div className="w-full mb-4">
                 <div className="bg-gray-100 rounded-xl px-4 py-3">
-                  <p className="text-xl text-gray-700"><strong>Data:</strong> {pedidoSelecionado.data} - {pedidoSelecionado.hora}</p>
-                  <p className="text-xl text-gray-700"><strong>Status:</strong> {pedidoSelecionado.status}</p>
-                  <p className="text-xl text-gray-700"><strong>Forma de Pagamento:</strong> {pedidoSelecionado.tipo_pagamento.toUpperCase()}</p>
+                  <p className="text-xl text-gray-700">
+                    <strong>Data:</strong> {pedidoSelecionado.data} - {pedidoSelecionado.hora}
+                  </p>
+                  <p className="text-xl text-gray-700">
+                    <strong>Status:</strong> {pedidoSelecionado.status}
+                  </p>
+                  <p className="text-xl text-gray-700">
+                    <strong>Forma de Pagamento:</strong> {pedidoSelecionado.tipo_pagamento.toUpperCase()}
+                  </p>
+                  <p className="text-xl font-extrabold text-gray-900">
+                    Total:{' '}
+                    <span className="text-blue-700">
+                      R$ {Number(pedidoSelecionado.valor).toFixed(2).replace('.', ',')}
+                    </span>
+                  </p>
                 </div>
               </div>
 
+              {/* 🔥 QR Code */}
+              <div className="flex justify-center mb-4">
+                <img
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(
+                    JSON.stringify({ pedido_id: pedidoSelecionado.id })
+                  )}`}
+                  alt="QR Code do Pedido"
+                  className="rounded-xl border border-gray-300"
+                />
+              </div>
+
               {/* 🔥 Itens do Pedido */}
-              <div className="flex-1 overflow-y-auto w-full mb-4">
-                <h3 className="text-2xl font-bold mb-3 text-gray-700">Itens do Pedido</h3>
-                {pedidoSelecionado.itens.length === 0 ? (
-                  <p className="text-center text-2xl text-gray-500">
-                    Nenhum item encontrado.
-                  </p>
-                ) : (
-                  <div className="space-y-4">
-                    {pedidoSelecionado.itens.map((item, idx) => (
-                      <div key={idx} className="flex gap-4 items-center">
+              <div className="w-full flex flex-col overflow-y-auto">
+                <div className="bg-gray-100 rounded-xl px-4 py-3 mb-3">
+                  <h3 className="text-2xl font-bold text-gray-700">Itens do Pedido</h3>
+                </div>
+
+                <div className="flex-1 overflow-y-auto space-y-4 px-2">
+                  {pedidoSelecionado.itens.length === 0 ? (
+                    <p className="text-center text-2xl text-gray-500">Nenhum item encontrado.</p>
+                  ) : (
+                    pedidoSelecionado.itens.map((item, idx) => (
+                      <div
+                        key={idx}
+                        className="flex gap-4 items-center border border-gray-100 rounded-xl p-2"
+                      >
                         <img
                           src={item.imagem}
                           alt={item.nome}
@@ -261,21 +281,13 @@ const ModalCarrinho: React.FC<ModalCarrinhoProps> = ({
                         <p className="font-bold text-xl">
                           R${' '}
                           {(
-                            parseFloat(item.preco.replace('R$', '').replace(',', '.')) *
-                            item.quantidade
+                            parseFloat(item.preco.replace('R$', '').replace(',', '.')) * item.quantidade
                           ).toFixed(2)}
                         </p>
                       </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* 🔥 Total */}
-              <div className="w-full border-t border-gray-200 pt-4">
-                <p className="text-3xl font-extrabold text-center text-gray-900">
-                  Total: <span className="text-green-600">R$ {Number(pedidoSelecionado.valor).toFixed(2).replace('.', ',')}</span>
-                </p>
+                    ))
+                  )}
+                </div>
               </div>
             </div>
           </div>
