@@ -195,7 +195,7 @@ function ListaProdutos() {
 
         {modalDescricao && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 overflow-auto">
-            <div className="bg-white text-black p-6 rounded shadow w-full max-w-md mx-4">
+            <div className="bg-white text-black break-words p-6 rounded shadow md:max-w-[40vw] mx-4 md:ml-[20%]">
               <h3 className="text-3xl font-bold mb-4">{modalDescricao.nome}</h3>
               {modalDescricao.imagem && (
                 <img

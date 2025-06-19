@@ -101,7 +101,7 @@ function ListaFornecedores() {
 
         {modalDetalhes && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 overflow-auto">
-            <div className="bg-white text-black p-6 rounded shadow w-full max-w-[700px] mx-4 ml-[20%]">
+            <div className="bg-white text-black p-6 rounded shadow w-full max-w-[700px] md:max-w-[40vw] mx-4 md:ml-[20%]">
               <h3 className="text-3xl font-bold mb-4">{modalDetalhes.nome}</h3>
               <p><strong>Email:</strong> {modalDetalhes.email}</p>
               <p><strong>CPF:</strong> {modalDetalhes.cpf}</p>
