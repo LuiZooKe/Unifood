@@ -110,6 +110,48 @@ const Caixa: React.FC = () => {
     }
   };
 
+  const finalizarPedido = async (pedido: Pedido) => {
+    try {
+      // 🔥 Atualizar status
+      const responseStatus = await fetch('http://localhost/Unifood/database/update_status.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: pedido.id, status: 'FINALIZADO' }),
+      });
+
+      const dataStatus = await responseStatus.json();
+
+      if (dataStatus.success) {
+        // 🔥 Atualizar estoque
+        const responseEstoque = await fetch('http://localhost/Unifood/database/update_estoque.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            itens: pedido.itens.map(item => ({
+              nome: item.nome,
+              quantidade: item.quantidade
+            }))
+          }),
+        });
+
+        const dataEstoque = await responseEstoque.json();
+
+        if (dataEstoque.success) {
+          alert('Pedido finalizado e estoque atualizado com sucesso!');
+        } else {
+          alert('Status atualizado, mas houve problema ao atualizar o estoque:\n' + dataEstoque.messages.join('\n'));
+        }
+
+        buscarPedidos();
+        fecharModal();
+      } else {
+        alert('Erro ao atualizar status do pedido.');
+      }
+    } catch (error) {
+      alert('Erro na conexão com o servidor.');
+    }
+  };
+
   const handleAdicionarSaldo = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -281,8 +323,8 @@ const Caixa: React.FC = () => {
                 <div
                   key={pedido.id}
                   className={`p-4 rounded-xl cursor-pointer transition ${pedido.status === 'PENDENTE'
-                      ? 'bg-[#9e1414]/70 hover:bg-[#6e0000]/90'
-                      : 'bg-black/50 hover:bg-black/70'
+                    ? 'bg-[#9e1414]/70 hover:bg-[#6e0000]/90'
+                    : 'bg-black/50 hover:bg-black/70'
                     }`}
                   onClick={() => setPedidoSelecionado(pedido)}
                 >
@@ -292,8 +334,8 @@ const Caixa: React.FC = () => {
                     </p>
                     <span
                       className={`text-x1 font-bold px-3 py-[4px] rounded-lg ${pedido.status === 'PENDENTE'
-                          ? 'bg-red-500/20 text-red-400'
-                          : 'bg-green-500/20 text-green-400'
+                        ? 'bg-red-500/20 text-red-400'
+                        : 'bg-green-500/20 text-green-400'
                         }`}
                     >
                       {pedido.status}
@@ -430,7 +472,7 @@ const Caixa: React.FC = () => {
               ) : (
                 <button
                   className="bg-green-600 hover:bg-green-700 text-white font-bold px-6 py-3 rounded-xl"
-                  onClick={() => atualizarStatus(pedidoSelecionado.id, 'FINALIZADO')}
+                  onClick={() => pedidoSelecionado && finalizarPedido(pedidoSelecionado)}
                 >
                   ENTREGAR PEDIDO
                 </button>
