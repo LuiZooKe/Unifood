@@ -66,7 +66,7 @@ function Cadastro() {
 
       if (data.success) {
         localStorage.setItem('dadosUsuario', JSON.stringify({ nome, email }));
-        navigate('/');
+        navigate('/login');
       } else {
         setErros([data.message || 'Erro ao cadastrar.']);
       }
