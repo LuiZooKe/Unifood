@@ -273,6 +273,7 @@ function Home() {
                 preco: `R$ ${parseFloat(produto.preco).toFixed(2)}`,
                 imagem: imagemURL,
                 descricao: produto.descricao || '',
+                quantidade: produto.quantidade,
               });
 
               if (produto.imagem && produto.nome) {

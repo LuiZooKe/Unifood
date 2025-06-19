@@ -7,6 +7,7 @@ interface Produto {
   preco: string;
   imagem: string;
   descricao: string;
+  quantidade: number;
 }
 
 interface ModalCategoriaProps {
@@ -86,12 +87,19 @@ const ModalCategoria: React.FC<ModalCategoriaProps> = ({
                 {produto.preco}
               </p>
 
+              <p
+                className={`text-xl font-semibold text-center mb-3 ${produto.quantidade > 0 ? 'text-green-600' : 'text-red-600'
+                  }`}
+              >
+                {produto.quantidade > 0 ? 'DISPONÍVEL' : 'EM FALTA'}
+              </p>
+
               <div className="flex justify-center gap-4">
                 <button
                   onClick={() =>
                     setDescricaoVisivel(descricaoVisivel === index ? null : index)
                   }
-                  className="text-gray-600 hover:text-blue-600 p-2 rounded-full"
+                  className="text-gray-600 hover:text-blue-600 p-2 roundDed-full"
                   title="Ver descrição"
                 >
                   <Info className="w-12 h-12" />
@@ -99,16 +107,24 @@ const ModalCategoria: React.FC<ModalCategoriaProps> = ({
 
                 <button
                   onClick={() => {
-                    if (estaLogado) {
+                    if (estaLogado && produto.quantidade > 0) {
                       handleAddToCart(produto, index);
-                    } else {
+                    } else if (!estaLogado) {
                       notify.error('Faça login para adicionar itens ao carrinho!');
                     }
                   }}
-                  className={`relative text-white ${estaLogado ? 'bg-red-600 hover:bg-red-700' : 'bg-gray-400 cursor-not-allowed'
+                  className={`relative text-white ${estaLogado && produto.quantidade > 0
+                      ? 'bg-red-600 hover:bg-red-700 cursor-pointer'
+                      : 'bg-gray-400 cursor-not-allowed'
                     } p-2 rounded-full`}
-                  title={estaLogado ? "Adicionar ao carrinho" : "Faça login para adicionar"}
-                  disabled={!estaLogado} // 🔒 Segurança visual e física
+                  title={
+                    !estaLogado
+                      ? 'Faça login para adicionar'
+                      : produto.quantidade <= 0
+                        ? 'Produto indisponível'
+                        : 'Adicionar ao carrinho'
+                  }
+                  disabled={!estaLogado || produto.quantidade <= 0} // desabilita quando não logado ou sem estoque
                 >
                   <ShoppingCart className="w-12 h-10" />
 
