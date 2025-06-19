@@ -45,9 +45,7 @@ function CadastroProduto() {
       try {
         const res = await fetch('http://localhost/UNIFOOD/database/fornecedores.php?action=listar');
         const data = await res.json();
-        if (data.success) {
-          setFornecedores(data.fornecedores);
-        }
+        if (data.success) setFornecedores(data.fornecedores);
       } catch {
         console.error('Erro ao buscar fornecedores');
       }
@@ -57,9 +55,7 @@ function CadastroProduto() {
       try {
         const res = await fetch('http://localhost/UNIFOOD/database/categorias.php?action=listar');
         const data = await res.json();
-        if (data.success) {
-          setCategorias(data.categorias);
-        }
+        if (data.success) setCategorias(data.categorias);
       } catch {
         console.error('Erro ao buscar categorias');
       }
@@ -138,9 +134,7 @@ function CadastroProduto() {
 
   const ordenarCategorias = (lista) => {
     const estoque = lista.find(c => c.nome.toUpperCase() === 'ESTOQUE');
-    const restantes = lista
-      .filter(c => c.nome.toUpperCase() !== 'ESTOQUE')
-      .sort((a, b) => a.nome.localeCompare(b.nome));
+    const restantes = lista.filter(c => c.nome.toUpperCase() !== 'ESTOQUE').sort((a, b) => a.nome.localeCompare(b.nome));
     return estoque ? [...restantes, estoque] : restantes;
   };
 
@@ -149,9 +143,9 @@ function CadastroProduto() {
       <div className="flex items-center justify-center w-full relative">
         <form
           onSubmit={handleSubmit}
-          className="bg-[#520000] w-full max-w-5xl rounded-xl shadow-lg p-10 grid grid-cols-1 md:grid-cols-2 gap-6 text-white"
+          className="bg-[#520000] w-full max-w-5xl rounded-xl shadow-lg px-4 py-8 md:px-10 grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 text-white"
         >
-          <h1 className="text-4xl font-bold col-span-1 md:col-span-2 text-center mb-4 tracking-wide">
+          <h1 className="text-3xl sm:text-4xl font-bold col-span-full text-center mb-4 break-words tracking-wide">
             Cadastro Produto
           </h1>
 
@@ -161,8 +155,8 @@ function CadastroProduto() {
           <Input label="Custo (R$)" name="custo" value={produto.custo} onChange={handleChange} type="number" step="0.01" />
           <Input label="Quantidade" name="quantidade" value={produto.quantidade} onChange={handleChange} type="number" />
 
-          <div>
-            <label className="block mb-1">Unidade de Medida</label>
+          <div className="space-y-1">
+            <label className="block text-sm font-medium">Unidade de Medida</label>
             <select
               name="unidade_medida"
               value={produto.unidade_medida}
@@ -177,8 +171,8 @@ function CadastroProduto() {
             </select>
           </div>
 
-          <div>
-            <label className="block mb-1">Fornecedor</label>
+          <div className="space-y-1">
+            <label className="block text-sm font-medium">Fornecedor</label>
             <select
               name="id_fornecedor"
               value={produto.id_fornecedor}
@@ -201,8 +195,8 @@ function CadastroProduto() {
             </select>
           </div>
 
-          <div>
-            <label className="block mb-1">Categoria</label>
+          <div className="space-y-1">
+            <label className="block text-sm font-medium">Categoria</label>
             <select
               name="categoria"
               value={produto.categoria}
@@ -212,16 +206,14 @@ function CadastroProduto() {
             >
               <option value="">Selecione uma categoria</option>
               {ordenarCategorias(categorias).map((cat) => (
-                <option key={cat.id} value={cat.nome}>
-                  {cat.nome}
-                </option>
+                <option key={cat.id} value={cat.nome}>{cat.nome}</option>
               ))}
               <option value="nova">➕ Nova Categoria</option>
             </select>
           </div>
 
-          <div>
-            <label className="block mb-1">Imagem</label>
+          <div className="space-y-1">
+            <label className="block text-sm font-medium">Imagem</label>
             <input
               type="file"
               name="imagem"
@@ -231,8 +223,8 @@ function CadastroProduto() {
             />
           </div>
 
-          <div>
-            <label className="block mb-1">Lucro (R$ e %)</label>
+          <div className="space-y-1">
+            <label className="block text-sm font-medium">Lucro (R$ e %)</label>
             <input
               value={`R$ ${produto.lucroRS || '0.00'} (${produto.lucroPorcentagem || '0.00'}%)`}
               disabled
@@ -241,27 +233,24 @@ function CadastroProduto() {
           </div>
 
           {mensagem && (
-            <p className="col-span-2 text-green-400 text-center font-bold">{mensagem}</p>
+            <p className="col-span-full text-green-400 text-center font-bold">{mensagem}</p>
           )}
           {erro && (
-            <p className="col-span-2 text-red-400 text-center font-bold">{erro}</p>
+            <p className="col-span-full text-red-400 text-center font-bold">{erro}</p>
           )}
 
           <button
             type="submit"
-            className="col-span-2 bg-green-600 hover:bg-green-700 py-3 px-6 rounded text-white font-semibold"
+            className="col-span-full bg-green-600 hover:bg-green-700 py-3 px-6 rounded text-white font-semibold"
           >
             Cadastrar Produto
           </button>
         </form>
 
-        {/* Modal Nova Categoria */}
         {showModalCategoria && (
           <div className="absolute top-0 left-0 w-full h-full bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-[#520000] text-white p-8 rounded-xl shadow-lg w-full max-w-md">
-              <h2 className="text-3xl font-bold mb-6 text-center tracking-wide">
-                Nova Categoria
-              </h2>
+              <h2 className="text-3xl font-bold mb-6 text-center tracking-wide">Nova Categoria</h2>
               <input
                 type="text"
                 value={novaCategoria}
@@ -292,8 +281,8 @@ function CadastroProduto() {
 }
 
 const Input = ({ label, name, value, onChange, type = 'text', ...rest }) => (
-  <div>
-    <label htmlFor={name} className="block mb-1">{label}</label>
+  <div className="space-y-1">
+    <label htmlFor={name} className="block text-sm font-medium">{label}</label>
     <input
       id={name}
       name={name}

@@ -123,9 +123,15 @@ const ModalPerfil: React.FC<ModalPerfilProps> = ({
           notify.error('Dados atualizados, mas erro ao atualizar senha: ' + senhaResult.message);
         } else {
           notify.success('Dados e senha atualizados com sucesso!');
+          setTimeout(() => {
+            location.reload();
+          }, 1500);
         }
       } else {
         notify.success('Dados atualizados com sucesso!');
+        setTimeout(() => {
+          location.reload();
+        }, 1500);
       }
 
       const dadosAtualizados = {
@@ -163,6 +169,9 @@ const ModalPerfil: React.FC<ModalPerfilProps> = ({
       if (data.success) {
         setCartao(null);
         notify.success('Cartão removido com sucesso!');
+        setTimeout(() => {
+          location.reload();
+        }, 1500);
       } else {
         notify.error('Erro ao remover cartão: ' + data.message);
       }
@@ -271,6 +280,9 @@ const ModalPerfil: React.FC<ModalPerfilProps> = ({
                   setCartao(dadosCartao);
                   notify.success('Cartão cadastrado com sucesso!');
                   setCartaoAberto(false);
+                  setTimeout(() => {
+                    location.reload();
+                  }, 1500);
                 }}
                 usuario={dados}
               />
