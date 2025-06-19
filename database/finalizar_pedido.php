@@ -32,18 +32,38 @@ $tipo_pagamento = $data['tipo_pagamento'] ?? '';
 $status = 'PENDENTE';
 $observacoes = $data['observacoes'] ?? '';
 
-// 🔍 Buscar o telefone do cliente na tabela 'clientes'
-$telefone = '';
-$buscaTelefone = $conn->prepare("SELECT telefone FROM clientes WHERE email = ?");
-$buscaTelefone->bind_param("s", $email);
-$buscaTelefone->execute();
-$resTelefone = $buscaTelefone->get_result();
+// 🔍 Buscar os dados do cliente
+$cliente = null;
+$buscaCliente = $conn->prepare("SELECT nome, telefone, saldo FROM clientes WHERE email = ?");
+$buscaCliente->bind_param("s", $email);
+$buscaCliente->execute();
+$resCliente = $buscaCliente->get_result();
 
-if ($resTelefone && $resTelefone->num_rows > 0) {
-    $row = $resTelefone->fetch_assoc();
-    $telefone = $row['telefone'] ?? '';
+if ($resCliente && $resCliente->num_rows > 0) {
+    $cliente = $resCliente->fetch_assoc();
+} else {
+    echo json_encode(['success' => false, 'message' => 'Cliente não encontrado.']);
+    exit;
 }
-$buscaTelefone->close();
+$buscaCliente->close();
+
+// Verifica e atualiza o saldo se necessário
+if ($tipo_pagamento === 'saldo') {
+    $saldoAtual = floatval($cliente['saldo'] ?? 0);
+    if ($saldoAtual < $valor_total) {
+        echo json_encode(['success' => false, 'message' => 'Saldo insuficiente.']);
+        exit;
+    }
+
+    $novoSaldo = $saldoAtual - $valor_total;
+    $atualizaSaldo = $conn->prepare("UPDATE clientes SET saldo = ? WHERE email = ?");
+    $atualizaSaldo->bind_param("ds", $novoSaldo, $email);
+    if (!$atualizaSaldo->execute()) {
+        echo json_encode(['success' => false, 'message' => 'Erro ao atualizar saldo.']);
+        exit;
+    }
+    $atualizaSaldo->close();
+}
 
 // 🔥 Inserir o pedido
 $stmt = $conn->prepare("INSERT INTO pedidos (
@@ -51,6 +71,7 @@ $stmt = $conn->prepare("INSERT INTO pedidos (
 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())");
 
 $jsonItens = json_encode($itens);
+$telefone = $cliente['telefone'] ?? '';
 
 $stmt->bind_param(
     "ssssdsss",
@@ -65,7 +86,11 @@ $stmt->bind_param(
 );
 
 if ($stmt->execute()) {
-    echo json_encode(['success' => true, 'message' => 'Pedido finalizado com sucesso']);
+    echo json_encode([
+        'success' => true,
+        'message' => 'Pedido finalizado com sucesso.',
+        'novo_saldo' => $tipo_pagamento === 'saldo' ? $novoSaldo : null
+    ]);
 } else {
     echo json_encode(['success' => false, 'message' => 'Erro ao finalizar pedido']);
 }
