@@ -13,6 +13,7 @@ import pratodecomida from './img/prato de comida.png';
 import ModalCategoria from './ts/ModalCategoria.tsx';
 import ModalCarrinho from './ts/ModalCarrinho.tsx';
 import Pagamento from './ts/Pagamento.tsx';
+import Pix from './ts/Pix.tsx';
 import PagamentoConfirm from './ts/PagamentoConfirm.tsx';
 import ModalPerfil from './ts/ModalPerfil.tsx';
 
@@ -57,6 +58,7 @@ function Home() {
   const [modalCarrinhoAberto, setModalCarrinhoAberto] = useState(false);
   const [itensCarrinho, setItensCarrinho] = useState([]);
   const [pagamentoAberto, setPagamentoAberto] = useState(false);
+  const [pagamentoPixAberto, setPagamentoPixAberto] = useState(false);
   const [confirmacaoAberta, setConfirmacaoAberta] = useState(false);
   const TIPO_VENDA = "SITE";
 
@@ -706,23 +708,42 @@ function Home() {
         visivel={pagamentoAberto}
         onFechar={() => setPagamentoAberto(false)}
         onPagar={(metodo) => {
-          finalizarPagamento(metodo);
-          setPagamentoAberto(false);
+          if (metodo === 'pix') {
+            setPagamentoAberto(false);
+            setPagamentoPixAberto(true); // 🔥 Abre o QR do Pix
+          } else {
+            finalizarPagamento(metodo);
+            setPagamentoAberto(false);
+            setConfirmacaoAberta(true);
+          }
         }}
         itens={itensCarrinho}
         total={calcularTotalCarrinho()}
         usuario={usuario}
       />
 
+      <Pix
+        visivel={pagamentoPixAberto}
+        onFechar={() => setPagamentoPixAberto(false)}
+        onConfirmarPagamento={() => {
+          finalizarPagamento('pix');
+          setPagamentoPixAberto(false);
+          setConfirmacaoAberta(true);
+          window.scrollTo({ top: 0, behavior: 'smooth' }); pagamento
+        }}
+        pedidoId={1} // Você pode substituir pelo ID real do pedido, se tiver
+        total={calcularTotalCarrinho()}
+      />
+
       <PagamentoConfirm
         visivel={confirmacaoAberta}
         onFechar={() => {
           setConfirmacaoAberta(false);
-          window.scrollTo({ top: 0, behavior: 'smooth' });
+          window.scrollTo({ top: 0, behavior: 'smooth' }); 
         }}
         onConfirmar={() => {
           setConfirmacaoAberta(false);
-          window.scrollTo({ top: 0, behavior: 'smooth' });
+          window.scrollTo({ top: 0, behavior: 'smooth' }); 
         }}
       />
 
