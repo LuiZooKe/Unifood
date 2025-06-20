@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { Toaster } from 'react-hot-toast'; // 🔥 Importa o Toaster
+import { Toaster } from 'react-hot-toast'; //  Importa o Toaster
 import './App.css';
 
 import Home from './Routes/Home/Home';
@@ -25,7 +25,7 @@ import AdminRoute from './components/AdminRoute';
 function App() {
   return (
     <>
-      {/* 🔥 Ativa os Toasts */}
+      {/*  Ativa os Toasts */}
       <Toaster 
         position="bottom-center"
         reverseOrder={false}

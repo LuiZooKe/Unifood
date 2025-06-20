@@ -78,7 +78,7 @@ function Cadastro() {
 
   return (
     <div className="flex min-h-screen">
-      {/* 🔥 Lado esquerdo */}
+      {/*  Lado esquerdo */}
       <div
         className="w-1/2 hidden lg:flex items-center justify-center bg-cover bg-center rounded-r-3xl"
         style={{ backgroundImage: `url(${fundoLogin})` }}
@@ -99,7 +99,7 @@ function Cadastro() {
         </div>
       </div>
 
-      {/* 🔥 Formulário */}
+      {/*  Formulário */}
       <form onSubmit={handleSubmit} className="w-full lg:w-1/2 flex items-center justify-center bg-white p-10 rounded-r-1x3">
         <div className="max-w-md w-full">
           <h1 className="text-gray-800 text-3xl font-bold mb-6 text-center">CADASTRO</h1>
@@ -138,7 +138,7 @@ function Cadastro() {
             required
           />
 
-          {/* 🔐 Senha */}
+          {/*  Senha */}
           <label className="block text-gray-700 mb-2" htmlFor="senha">Senha</label>
           <div className="relative">
             <input
@@ -159,7 +159,7 @@ function Cadastro() {
             </button>
           </div>
 
-          {/* 🔐 Confirmar Senha */}
+          {/*  Confirmar Senha */}
           <label className="block text-gray-700 mb-2" htmlFor="confirmarSenha">Confirmar Senha</label>
           <div className="relative">
             <input

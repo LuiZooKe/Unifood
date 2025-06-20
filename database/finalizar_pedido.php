@@ -24,7 +24,7 @@ if (!$data) {
     exit;
 }
 
-// 🔥 Dados recebidos
+//  Dados recebidos
 $nome = $data['nome'] ?? $data['nome_cliente'] ?? 'PDV';
 $email = $data['email'] ?? $data['email_cliente'] ?? 'pdv@unifood.com';
 $telefone = $data['telefone'] ?? $data['telefone_cliente'] ?? '00000000000';
@@ -35,7 +35,7 @@ $tipo_venda = strtoupper($data['tipo_venda'] ?? 'PDV');
 $status = 'PENDENTE';
 $observacoes = $data['observacoes'] ?? '';
 
-// 🔥 Se for SITE → valida cliente
+//  Se for SITE → valida cliente
 if ($tipo_venda === 'SITE') {
     $buscaCliente = $conn->prepare("SELECT nome, telefone, saldo FROM clientes WHERE email = ?");
     $buscaCliente->bind_param("s", $email);
@@ -52,7 +52,7 @@ if ($tipo_venda === 'SITE') {
     }
     $buscaCliente->close();
 
-    // 🔥 Verifica saldo se for pagamento por saldo
+    //  Verifica saldo se for pagamento por saldo
     if ($tipo_pagamento === 'saldo') {
         $saldoAtual = floatval($cliente['saldo'] ?? 0);
         if ($saldoAtual < $valor_total) {
@@ -71,14 +71,14 @@ if ($tipo_venda === 'SITE') {
     }
 }
 
-// 🔥 Se for PDV, usa dados padrão se não vierem preenchidos
+//  Se for PDV, usa dados padrão se não vierem preenchidos
 if ($tipo_venda === 'PDV') {
     if (empty($nome)) $nome = 'PDV';
     if (empty($email)) $email = 'pdv@unifood.com';
     if (empty($telefone)) $telefone = '00000000000';
 }
 
-// 🔥 Inserir pedido
+//  Inserir pedido
 $stmt = $conn->prepare("INSERT INTO pedidos (
     nome_cliente, email_cliente, telefone_cliente, itens, valor_total, tipo_pagamento, tipo_venda, status, observacoes, data_pedido, hora_pedido
 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())");

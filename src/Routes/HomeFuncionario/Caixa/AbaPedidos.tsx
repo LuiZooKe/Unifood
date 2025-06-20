@@ -97,9 +97,7 @@ const AbaPedidos: React.FC = () => {
 
         const dataEstoque = await responseEstoque.json();
 
-        if (dataEstoque.success) {
-          alert('Pedido finalizado e estoque atualizado com sucesso!');
-        } else {
+        if (!dataEstoque.success) {
           alert('Status atualizado, mas houve problema ao atualizar o estoque:\n' + dataEstoque.messages.join('\n'));
         }
 

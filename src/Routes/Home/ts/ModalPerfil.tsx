@@ -194,7 +194,7 @@ const ModalPerfil: React.FC<ModalPerfilProps> = ({
         onClick={(e) => e.stopPropagation()}
       >
 
-        {/* 🔥 Cabeçalho */}
+        {/*  Cabeçalho */}
         <div className="flex justify-center items-center relative py-4 border-b border-gray-300">
           <h2 className="text-center font-extrabold text-gray-800 leading-tight">
             <span className="block text-[clamp(2.5rem,6vw,4rem)]">MEU PERFIL 👤</span>
@@ -207,7 +207,7 @@ const ModalPerfil: React.FC<ModalPerfilProps> = ({
           </button>
         </div>
 
-        {/* 🔥 Aba Carteira / Dados */}
+        {/*  Aba Carteira / Dados */}
         <div className="flex gap-2 px-6 pt-4 pb-2 border-b border-gray-300">
           <button
             onClick={() => setAbaAberta('carteira')}
@@ -229,7 +229,7 @@ const ModalPerfil: React.FC<ModalPerfilProps> = ({
           </button>
         </div>
 
-        {/* 🔥 Conteúdo rolável */}
+        {/*  Conteúdo rolável */}
         <div className="flex-1 overflow-y-auto px-6 py-4">
           {abaAberta === 'dados' && (
             <div className="bg-gray-100 rounded-xl p-4 mb-4 text-center">
@@ -340,7 +340,7 @@ const ModalPerfil: React.FC<ModalPerfilProps> = ({
           )}
         </div>
 
-        {/* 🔥 Rodapé Fixo */}
+        {/*  Rodapé Fixo */}
         {abaAberta === 'dados' && (
           <div className="flex flex-col gap-3 px-6 pb-6 pt-4 border-t border-gray-300">
             <button

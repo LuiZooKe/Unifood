@@ -53,7 +53,7 @@ foreach ($data['itens'] as $item) {
     }
 
     $row = $result->fetch_assoc();
-    $quantidadeAtual = intval($row['quantidade']); // 🔥 Corrigido aqui
+    $quantidadeAtual = intval($row['quantidade']); //  Corrigido aqui
     $novaQuantidade = $quantidadeAtual - $quantidade;
 
     if ($novaQuantidade < 0) {

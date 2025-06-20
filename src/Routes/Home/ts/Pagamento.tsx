@@ -35,7 +35,7 @@ const Pagamento: React.FC<PagamentoProps> = ({
   const [mostrarCliente, setMostrarCliente] = useState(false);
   const [mostrarItens, setMostrarItens] = useState(true);
 
-  // 🔥 Sempre que abrir o modal, zera o estado:
+  //  Sempre que abrir o modal, zera o estado:
   useEffect(() => {
     if (visivel) {
       setMostrarCliente(false); // Dados do cliente fechado
@@ -54,7 +54,7 @@ const Pagamento: React.FC<PagamentoProps> = ({
         className="bg-white rounded-3xl shadow-xl p-8 w-[92%] max-w-[500px] flex flex-col max-h-[90vh]"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* 🔥 Botão de Fechar */}
+        {/*  Botão de Fechar */}
         <button
           onClick={onFechar}
           className="absolute top-6 right-6 text-gray-500 hover:text-red-500"
@@ -62,12 +62,12 @@ const Pagamento: React.FC<PagamentoProps> = ({
           <X className="w-10 h-10" />
         </button>
 
-        {/* 🔥 Título */}
+        {/*  Título */}
         <h2 className="text-5xl font-extrabold mb-4 text-center text-gray-900">
           Revisar Pedido
         </h2>
 
-        {/* 🔥 Accordion Dados do Cliente */}
+        {/*  Accordion Dados do Cliente */}
         <div className="w-full mb-4">
           <button
             onClick={() => setMostrarCliente(!mostrarCliente)}
@@ -96,7 +96,7 @@ const Pagamento: React.FC<PagamentoProps> = ({
           )}
         </div>
 
-        {/* 🔥 Accordion Itens do Pedido */}
+        {/*  Accordion Itens do Pedido */}
         <div className="w-full flex-1 mb-4 overflow-y-auto">
           <button
             onClick={() => setMostrarItens(!mostrarItens)}
@@ -142,7 +142,7 @@ const Pagamento: React.FC<PagamentoProps> = ({
           )}
         </div>
 
-        {/* 🔥 Total e Botões */}
+        {/*  Total e Botões */}
         <div className="w-full border-t border-gray-200 pt-4">
           <p className="text-3xl font-extrabold text-center text-gray-900 mb-4">
             Total: <span className="text-green-600">R$ {total}</span>

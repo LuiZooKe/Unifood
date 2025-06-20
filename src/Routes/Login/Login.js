@@ -47,7 +47,7 @@ function Login() {
 
   return (
     <div className="flex min-h-screen">
-      {/* 🔥 Lado Esquerdo */}
+      {/*  Lado Esquerdo */}
       <div
         className="w-1/2 hidden lg:flex items-center justify-center bg-cover bg-center rounded-r-3xl"
         style={{ backgroundImage: `url(${fundoLogin})` }}
@@ -68,7 +68,7 @@ function Login() {
         </div>
       </div>
 
-      {/* 🔥 Lado Direito - Formulário */}
+      {/*  Lado Direito - Formulário */}
       <form
         onSubmit={handleLogin}
         className="w-full lg:w-1/2 flex items-center justify-center bg-white p-10"

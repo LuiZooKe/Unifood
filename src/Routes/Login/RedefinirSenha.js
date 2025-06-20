@@ -137,7 +137,7 @@ function RedefinirSenha() {
                 </button>
               </div>
 
-              {/* 🔥 Mensagens agrupadas abaixo dos campos */}
+              {/*  Mensagens agrupadas abaixo dos campos */}
               {(erro || mensagem) && (
                 <div className={`mb-4 text-center ${erro ? 'text-red-500' : 'text-green-500'}`}>
                   {erro && <p>{erro}</p>}
@@ -156,7 +156,7 @@ function RedefinirSenha() {
         </div>
       </form>
 
-      {/* 🔥 Lado direito com imagem de fundo */}
+      {/*  Lado direito com imagem de fundo */}
       <div
         className="w-1/2 hidden lg:flex items-center justify-center bg-cover bg-center rounded-l-3xl"
         style={{ backgroundImage: `url(${fundoLogin})` }}

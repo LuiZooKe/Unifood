@@ -303,7 +303,7 @@ function Home() {
 
   return (
     <div>
-      {/* ✅ Topo do menu mobile */}
+      {/*  Topo do menu mobile */}
       {!(menuMobileAberto || modalCarrinhoAberto || perfilAberto) && (
         <div className="fixed top-0 left-0 right-0 z-[9999] md:hidden bg-[rgb(82,0,0)] shadow-md h-[9rem] flex items-center">
           <div className="pl-4 flex items-center">
@@ -323,7 +323,7 @@ function Home() {
         </div>
       )}
 
-      {/* ✅ Menu mobile expandido */}
+      {/*  Menu mobile expandido */}
       {menuMobileAberto && (
         <div
           className="fixed inset-0 z-[9999] bg-black/70 backdrop-blur-xl flex items-center justify-center md:hidden"
@@ -409,7 +409,7 @@ function Home() {
       )}
 
 
-      {/* ✅ Menu lateral desktop */}
+      {/*  Menu lateral desktop */}
       <aside className="menu white-bg z-[999] hidden md:block">
         <div className="h-[14rem] main-content menu-content">
           <h1>
@@ -511,7 +511,7 @@ function Home() {
       </section>
 
       <section className="bg-white relative w-full py-8">
-        {/* 🔥 Fundo do cardápio */}
+        {/*  Fundo do cardápio */}
         <div
           className="absolute inset-0 bg-no-repeat bg-center bg-[length:100%] opacity-[5%] z-0"
           style={{ backgroundImage: `url(${fundocardapio})` }}
@@ -574,13 +574,13 @@ function Home() {
 
       {categoriaSelecionada && (
         <div className="relative w-full">
-          {/* 🔥 Fundo suave */}
+          {/*  Fundo suave */}
           <div
             className="absolute inset-0 bg-no-repeat bg-center bg-[length:100%] opacity-[5%] z-0"
             style={{ backgroundImage: `url(${fundocardapio})` }}
           />
 
-          {/* 🔥 Conteúdo da categoria */}
+          {/*  Conteúdo da categoria */}
           <div className="relative z-10">
             <ModalCategoria
               categoriaSelecionada={categoriaSelecionada}

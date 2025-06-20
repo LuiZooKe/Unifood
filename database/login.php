@@ -9,7 +9,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit();
 }
 
-// 🔥 Conecta ao banco
+//  Conecta ao banco
 $conn = new mysqli("localhost", "root", "", "unifood_db");
 
 if ($conn->connect_error) {
@@ -17,19 +17,19 @@ if ($conn->connect_error) {
     exit;
 }
 
-// 🔥 Recebe os dados
+//  Recebe os dados
 $data = json_decode(file_get_contents("php://input"), true);
 
 $email = trim($data['email'] ?? '');
 $senha = $data['senha'] ?? '';
 
-// 🔥 Validação básica
+//  Validação básica
 if (empty($email) || empty($senha)) {
     echo json_encode(['success' => false, 'message' => 'Email e senha são obrigatórios']);
     exit;
 }
 
-// 🔥 Consulta o usuário
+//  Consulta o usuário
 $stmt = $conn->prepare("SELECT senha, tipo_usuario FROM users WHERE email = ?");
 $stmt->bind_param("s", $email);
 $stmt->execute();
@@ -42,13 +42,13 @@ if ($result->num_rows === 0) {
 
 $user = $result->fetch_assoc();
 
-// 🔐 Verifica a senha
+//  Verifica a senha
 if (!password_verify($senha, $user['senha'])) {
     echo json_encode(['success' => false, 'message' => 'Senha incorreta']);
     exit;
 }
 
-// 🔥 Login bem-sucedido
+//  Login bem-sucedido
 echo json_encode([
     'success' => true,
     'message' => 'Login realizado com sucesso',
