@@ -14,7 +14,7 @@ import ListaFuncionario from './Routes/HomeFuncionario/ListaFuncionario';
 import ListaProdutos from './Routes/HomeFuncionario/ListaProdutos';
 import CadastroFornecedor from './Routes/HomeFuncionario/CadastroFornecedor';
 import ListaFornecedores from './Routes/HomeFuncionario/ListaFornecedores';
-import Caixa from './Routes/HomeFuncionario/Caixa.tsx';
+import Caixa from './Routes/HomeFuncionario/Caixa/Caixa.tsx';
 import RedefinirSenha from './Routes/Login/RedefinirSenha';
 import SaibaMais from './Routes/Home/SaibaMais';
 
