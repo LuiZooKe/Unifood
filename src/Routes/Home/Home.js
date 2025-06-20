@@ -58,6 +58,7 @@ function Home() {
   const [itensCarrinho, setItensCarrinho] = useState([]);
   const [pagamentoAberto, setPagamentoAberto] = useState(false);
   const [confirmacaoAberta, setConfirmacaoAberta] = useState(false);
+  const TIPO_VENDA = "SITE";
 
   const scrollTravado =
     modalCarrinhoAberto ||
@@ -175,6 +176,7 @@ function Home() {
           itens: itensCarrinho,
           valor_total: total,
           tipo_pagamento: metodo,
+          tipo_venda: TIPO_VENDA,
         }),
       });
 

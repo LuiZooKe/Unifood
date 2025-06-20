@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { notify } from '../../../utils/notify';
 
 interface Pedido {
   id: number;

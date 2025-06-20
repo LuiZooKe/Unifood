@@ -99,7 +99,7 @@ if ($filtro === 'dia') {
 $sql = "
     SELECT 
         p.*, 
-        COALESCE(u.nome, 'Sem nome') AS nome_cliente, 
+        COALESCE(NULLIF(p.nome_cliente, ''), u.nome, 'Sem nome') AS nome_cliente, 
         COALESCE(u.email, p.email_cliente) AS email_cliente, 
         COALESCE(c.telefone, 'Não informado') AS telefone_cliente
     FROM pedidos p
@@ -129,6 +129,7 @@ if ($result && $result->num_rows > 0) {
             'hora' => $pedido['hora'],
             'valor' => floatval($pedido['valor_total']),
             'tipo_pagamento' => $pedido['tipo_pagamento'],
+            'tipo_venda' => $pedido['tipo_venda'],
             'status' => $pedido['status'],
             'itens' => $pedido['itens'],
             'observacoes' => $pedido['observacoes'] ?? '',

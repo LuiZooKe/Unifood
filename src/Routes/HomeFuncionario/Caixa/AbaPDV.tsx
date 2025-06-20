@@ -1,264 +1,342 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { Plus, Minus, ShoppingCart, X } from 'lucide-react';
 
 interface Produto {
+  id: string;
   nome: string;
+  descricao: string;
   preco: string;
   imagem: string;
-  descricao: string;
   categoria: string;
 }
 
-interface AbaPDVProps {
-  produtos: Produto[];
+interface ItemCarrinho {
+  produto: Produto;
+  quantidade: number;
 }
 
 interface Pedido {
   id: number;
   itens: { nome: string; preco: string; quantidade: number }[];
-  valorTotal: string;
+  total: string;
   dataHora: string;
 }
 
-const AbaPDV: React.FC<AbaPDVProps> = ({ produtos }) => {
-  const categorias = Array.from(new Set(produtos.map(p => p.categoria)));
-
+const AbaPDV: React.FC = () => {
+  const [categorias, setCategorias] = useState<string[]>([]);
+  const [produtos, setProdutos] = useState<Produto[]>([]);
   const [categoriaSelecionada, setCategoriaSelecionada] = useState<string | null>(null);
-  const [itensCarrinho, setItensCarrinho] = useState<{ [nome: string]: { produto: Produto; quantidade: number } }>({});
+  const [carrinho, setCarrinho] = useState<{ [id: string]: ItemCarrinho }>({});
   const [pedidoGerado, setPedidoGerado] = useState<Pedido | null>(null);
-  const [contadorPedidos, setContadorPedidos] = useState(1);
-  const [descricaoVisivel, setDescricaoVisivel] = useState<string | null>(null);
+  const [tipoPagamento, setTipoPagamento] = useState<string>('DINHEIRO');
+  const [nomeCliente, setNomeCliente] = useState<string>('');
 
-  const handleAddToCart = (produto: Produto) => {
-    setItensCarrinho(prev => {
-      const itemAtual = prev[produto.nome];
+  // 🔥 Carregar Categorias
+  useEffect(() => {
+    fetch('http://localhost/Unifood/database/categorias.php?action=listar')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          const categoriasValidas = data.categorias
+            .map((cat: any) => cat.nome)
+            .filter((nome: string) => {
+              const produtosDaCategoria = produtos.filter(p => p.categoria === nome);
+              return produtosDaCategoria.length > 0 && nome.toLowerCase() !== 'estoque';
+            });
+          setCategorias(categoriasValidas);
+        }
+      });
+  }, [produtos]);
+
+  // 🔥 Carregar Produtos
+  useEffect(() => {
+    fetch('http://localhost/Unifood/database/produtos.php?action=listar')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          setProdutos(data.produtos);
+        }
+      });
+  }, []);
+
+  const adicionarAoCarrinho = (produto: Produto) => {
+    setCarrinho(prev => {
+      const existente = prev[produto.id];
       return {
         ...prev,
-        [produto.nome]: {
+        [produto.id]: {
           produto,
-          quantidade: itemAtual ? itemAtual.quantidade + 1 : 1,
+          quantidade: existente ? existente.quantidade + 1 : 1,
         },
       };
     });
   };
 
-  const handleAlterarQuantidade = (nome: string, quantidade: number) => {
-    setItensCarrinho(prev => {
+  const alterarQuantidade = (id: string, quantidade: number) => {
+    setCarrinho(prev => {
       if (quantidade <= 0) {
         const novo = { ...prev };
-        delete novo[nome];
+        delete novo[id];
         return novo;
       }
       return {
         ...prev,
-        [nome]: {
-          ...prev[nome],
+        [id]: {
+          ...prev[id],
           quantidade,
         },
       };
     });
   };
 
-  const calcularTotal = () => {
-    return Object.values(itensCarrinho)
-      .reduce((total, item) => {
-        const preco = parseFloat(item.produto.preco.replace('R$', '').replace(',', '.'));
-        return total + preco * item.quantidade;
-      }, 0)
-      .toFixed(2)
-      .replace('.', ',');
+  const calcularTotalNumerico = () => {
+    return Object.values(carrinho).reduce((acc, item) => {
+      return acc + parseFloat(item.produto.preco) * item.quantidade;
+    }, 0);
   };
 
-  const limparCarrinho = () => {
-    setItensCarrinho({});
+  const calcularTotalFormatado = () => {
+    return calcularTotalNumerico().toFixed(2).replace('.', ',');
   };
 
-  const finalizarPedido = () => {
-    if (Object.keys(itensCarrinho).length === 0) return;
+  const finalizarPedido = async () => {
+    const data = new Date();
+    const data_pedido = data.toLocaleDateString('pt-BR');
+    const hora_pedido = data.toLocaleTimeString('pt-BR');
 
-    const itens = Object.values(itensCarrinho).map(item => ({
-      nome: item.produto.nome,
-      preco: item.produto.preco,
-      quantidade: item.quantidade,
-    }));
-
-    const dataHora = new Date().toLocaleString();
-
-    const novoPedido: Pedido = {
-      id: contadorPedidos,
-      itens,
-      valorTotal: calcularTotal(),
-      dataHora,
+    const pedido = {
+      nome_cliente: nomeCliente || 'PDV',
+      email_cliente: 'pdv@unifood.com',
+      telefone_cliente: '00000000000',
+      itens: Object.values(carrinho).map(item => ({
+        nome: item.produto.nome,
+        preco: `R$ ${item.produto.preco}`,
+        imagem: `http://localhost/Unifood/database/imgProdutos/${item.produto.imagem}`,
+        descricao: item.produto.descricao,
+        quantidade: item.quantidade,
+      })),
+      valor_total: calcularTotalNumerico(),
+      tipo_pagamento: tipoPagamento,
+      tipo_venda: 'PDV',
+      status: 'PENDENTE',
+      observacoes: '',
+      data_pedido,
+      hora_pedido,
     };
 
-    setPedidoGerado(novoPedido);
-    setContadorPedidos(prev => prev + 1);
-    limparCarrinho();
+    try {
+      const res = await fetch('http://localhost/Unifood/database/finalizar_pedido.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(pedido),
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        setPedidoGerado({
+          id: data.pedido_id,
+          itens: pedido.itens,
+          total: calcularTotalFormatado(),
+          dataHora: `${data_pedido} ${hora_pedido}`,
+        });
+        setCarrinho({});
+      } else {
+        alert(`Erro ao salvar pedido: ${data.message}`);
+      }
+    } catch (error) {
+      alert('Erro de conexão com servidor');
+      console.error(error);
+    }
   };
 
   return (
-    <div className="flex flex-col lg:flex-row gap-6 p-8">
-      {/* Categorias */}
-      <div className="w-full lg:w-1/4">
-        <h2 className="text-4xl font-bold mb-4">Categorias</h2>
-        <div className="space-y-3">
-          {categorias.map(categoria => (
+    <div className="flex gap-4 p-6 flex-col lg:flex-row">
+      {/* 🔥 CATEGORIAS */}
+      <div className="lg:w-1/5 w-full">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-[clamp(2.5rem,5vw,3.5rem)] font-extrabold text-white whitespace-nowrap">
+            CATEGORIAS
+          </h2>
+          {categoriaSelecionada && (
+            <button onClick={() => setCategoriaSelecionada(null)} className="text-red-300">
+              <X size={32} />
+            </button>
+          )}
+        </div>
+
+        <div className="flex flex-wrap lg:flex-col gap-2">
+          {categorias.map(cat => (
             <button
-              key={categoria}
-              onClick={() => setCategoriaSelecionada(categoria)}
-              className={`w-full text-2xl font-semibold py-4 px-6 rounded-xl transition ${
-                categoriaSelecionada === categoria ? 'bg-red-600 text-white' : 'bg-gray-100 hover:bg-gray-200'
-              }`}
+              key={cat}
+              onClick={() => setCategoriaSelecionada(cat)}
+              className={`w-full px-4 py-3 rounded-xl font-bold text-xl ${categoriaSelecionada === cat
+                  ? 'bg-white text-black'
+                  : 'bg-[#8b0000] text-white hover:bg-[#6e0000]'
+                }`}
             >
-              {categoria}
+              {cat}
             </button>
           ))}
         </div>
       </div>
 
-      {/* Produtos */}
-      <div className="w-full lg:w-2/4">
+      {/* 🔥 PRODUTOS */}
+      <div className="lg:w-3/5 w-full">
         {categoriaSelecionada ? (
-          <div>
-            <div className="flex justify-between mb-4">
-              <h3 className="text-4xl font-bold">{categoriaSelecionada}</h3>
-              <button
-                onClick={() => setCategoriaSelecionada(null)}
-                className="text-red-600 font-semibold hover:underline"
-              >
-                Fechar
-              </button>
-            </div>
-
-            <div className="flex gap-8 overflow-x-auto pb-3">
-              {produtos
-                .filter(p => p.categoria === categoriaSelecionada)
-                .map((produto, index) => (
-                  <div
-                    key={index}
-                    className="min-w-[270px] max-w-[270px] bg-white border rounded-2xl shadow-md hover:shadow-xl transition flex-shrink-0 relative"
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+            {produtos
+              .filter(p => p.categoria === categoriaSelecionada)
+              .map(p => (
+                <div
+                  key={p.id}
+                  className="bg-[#8b0000]/70 rounded-2xl p-4 flex flex-col shadow-lg h-full"
+                >
+                  <img
+                    src={`http://localhost/Unifood/database/imgProdutos/${p.imagem}`}
+                    alt={p.nome}
+                    className="h-32 object-cover rounded-xl mb-2"
+                  />
+                  <h3 className="font-extrabold text-2xl text-white mb-1">{p.nome}</h3>
+                  <p className="text-gray-200 text-sm mb-2 flex-1">{p.descricao}</p>
+                  <p className="text-red-200 font-bold text-lg mb-4">
+                    R$ {p.preco}
+                  </p>
+                  <button
+                    onClick={() => adicionarAoCarrinho(p)}
+                    className="bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl py-3 flex justify-center items-center gap-2 mt-auto"
                   >
-                    {/* Descrição flutuante */}
-                    {descricaoVisivel === produto.nome && (
-                      <div className="absolute inset-0 bg-white z-20 flex flex-col justify-center items-center p-6 border rounded-2xl">
-                        <button
-                          onClick={() => setDescricaoVisivel(null)}
-                          className="absolute top-2 right-2 text-gray-500 hover:text-red-600"
-                        >
-                          ✕
-                        </button>
-                        <p className="text-gray-800 text-base leading-relaxed text-center">
-                          {produto.descricao || 'Sem descrição.'}
-                        </p>
-                      </div>
-                    )}
-
-                    <img
-                      src={produto.imagem}
-                      alt={produto.nome}
-                      className="w-full h-44 object-cover rounded-t-2xl"
-                    />
-
-                    <div className="p-4 flex flex-col justify-between">
-                      <h4 className="text-[2rem] font-bold mb-2 text-center">{produto.nome}</h4>
-
-                      <p className="text-red-600 text-[2rem] font-semibold text-xl mb-3 text-center">
-                        {produto.preco}
-                      </p>
-
-                      <div className="flex justify-center gap-4">
-                        <button
-                          onClick={() =>
-                            setDescricaoVisivel(descricaoVisivel === produto.nome ? null : produto.nome)
-                          }
-                          className="text-gray-600 hover:text-blue-600 p-2 rounded-full"
-                          title="Ver descrição"
-                        >
-                          ℹ
-                        </button>
-
-                        <button
-                          onClick={() => handleAddToCart(produto)}
-                          className="bg-red-600 hover:bg-red-700 text-white p-2 rounded-full"
-                          title="Adicionar ao carrinho"
-                        >
-                          🛒
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-            </div>
+                    <ShoppingCart size={20} /> Adicionar
+                  </button>
+                </div>
+              ))}
           </div>
         ) : (
-          <div className="flex justify-center items-center h-full">
-            <p className="text-3xl text-gray-500">Selecione uma categoria</p>
-          </div>
+          <p className="text-2xl text-gray-200 text-center mt-24">
+            Selecione uma categoria
+          </p>
         )}
       </div>
 
-      {/* Carrinho */}
-      <div className="w-full lg:w-1/4 flex flex-col">
-        <h2 className="text-4xl font-bold mb-4">Carrinho</h2>
-        <div className="flex-1 bg-white rounded-xl border p-4 shadow space-y-4 overflow-y-auto">
-          {Object.keys(itensCarrinho).length === 0 ? (
-            <p className="text-center text-lg text-gray-500">Nenhum item no carrinho</p>
-          ) : (
-            Object.values(itensCarrinho).map(item => (
-              <div key={item.produto.nome} className="flex gap-4 items-center border-b pb-2">
-                <img src={item.produto.imagem} alt={item.produto.nome} className="w-16 h-16 rounded-lg object-cover" />
-                <div className="flex-1">
-                  <p className="font-bold text-xl">{item.produto.nome}</p>
-                  <p className="text-sm text-gray-500">{item.quantidade}x {item.produto.preco}</p>
+      {/* 🔥 PEDIDO */}
+      <div className="lg:w-[26%] w-full flex flex-col">
+        <h2 className="text-5xl font-extrabold text-white mb-4">PEDIDO</h2>
+        <div className="bg-white/90 backdrop-blur-md rounded-3xl shadow-2xl p-6 flex flex-col flex-1">
+          {/* 🔥 Lista com Scroll */}
+          <div className="flex-1 overflow-y-auto space-y-4 mb-5">
+            {Object.keys(carrinho).length === 0 ? (
+              <p className="text-center text-gray-600 text-lg">Carrinho vazio.</p>
+            ) : (
+              Object.values(carrinho).map(item => (
+                <div
+                  key={item.produto.id}
+                  className="flex gap-3 items-center bg-white rounded-2xl p-3 shadow border border-gray-200"
+                >
+                  <img
+                    src={`http://localhost/Unifood/database/imgProdutos/${item.produto.imagem}`}
+                    alt={item.produto.nome}
+                    className="w-16 h-16 object-cover rounded-xl"
+                  />
+                  <div className="flex-1">
+                    <p className="font-bold text-xl text-gray-800">{item.produto.nome}</p>
+                    <p className="text-gray-500 text-lg">
+                      {item.quantidade}x R$ {item.produto.preco}
+                    </p>
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <button
+                      onClick={() => alterarQuantidade(item.produto.id, item.quantidade + 1)}
+                      className="bg-gray-100 hover:bg-gray-200 text-black rounded-full w-9 h-9 flex items-center justify-center"
+                    >
+                      <Plus size={20} />
+                    </button>
+                    <button
+                      onClick={() => alterarQuantidade(item.produto.id, item.quantidade - 1)}
+                      className="bg-gray-100 hover:bg-gray-200 text-black rounded-full w-9 h-9 flex items-center justify-center"
+                    >
+                      <Minus size={20} />
+                    </button>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => handleAlterarQuantidade(item.produto.nome, item.quantidade - 1)}
-                    className="px-3 py-1 bg-gray-300 rounded hover:bg-gray-400"
-                  >−</button>
-                  <span className="text-lg font-semibold">{item.quantidade}</span>
-                  <button
-                    onClick={() => handleAlterarQuantidade(item.produto.nome, item.quantidade + 1)}
-                    className="px-3 py-1 bg-gray-300 rounded hover:bg-gray-400"
-                  >+</button>
-                </div>
-              </div>
-            ))
-          )}
-        </div>
-
-        {/* Total e Botão */}
-        <div className="mt-4">
-          <p className="text-2xl font-bold mb-4">
-            Total: <span className="text-red-600">R$ {calcularTotal()}</span>
-          </p>
-          <button
-            onClick={finalizarPedido}
-            disabled={Object.keys(itensCarrinho).length === 0}
-            className="w-full bg-green-600 hover:bg-green-700 text-white font-bold text-2xl py-4 rounded-xl shadow-lg"
-          >
-            Finalizar Pedido
-          </button>
-        </div>
-
-        {/* QR Code */}
-        {pedidoGerado && (
-          <div className="mt-6 flex flex-col items-center">
-            <p className="font-bold text-xl mb-2">QR Code do Pedido #{pedidoGerado.id}</p>
-            <img
-              src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(
-                JSON.stringify(pedidoGerado)
-              )}`}
-              alt="QR Code"
-              className="border rounded-xl"
-            />
-            <p className="text-center text-gray-500 text-sm mt-2">
-              {pedidoGerado.dataHora}
-            </p>
+              ))
+            )}
           </div>
-        )}
+
+          {/* 🔥 Fixo na parte inferior */}
+          <div className="border-t border-gray-300 pt-5">
+            {/* 🔥 Nome */}
+            <div className="mb-4">
+              <label className="block text-lg font-bold text-gray-800 mb-2">
+                Nome do Cliente:
+              </label>
+              <input
+                value={nomeCliente}
+                onChange={(e) => setNomeCliente(e.target.value)}
+                className="w-full p-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-600"
+                placeholder="Digite o nome"
+              />
+            </div>
+
+            <div className="mb-4">
+              <label className="block text-lg font-bold text-gray-800 mb-2">
+                Tipo de Pagamento:
+              </label>
+              <select
+                value={tipoPagamento}
+                onChange={(e) => setTipoPagamento(e.target.value)}
+                className="w-full p-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-600"
+              >
+                <option value="DINHEIRO">Dinheiro</option>
+                <option value="PIX">Pix</option>
+                <option value="CARTAO">Cartão</option>
+                <option value="OUTRO">Outro</option>
+              </select>
+            </div>
+
+            <p className="text-2xl font-bold text-gray-800 mb-3">
+              TOTAL: <span className="text-green-600">R$ {calcularTotalFormatado()}</span>
+            </p>
+
+            {/* 🔥 Ocultar botão Finalizar se QR visível */}
+            {!pedidoGerado && (
+              <button
+                onClick={finalizarPedido}
+                disabled={Object.keys(carrinho).length === 0}
+                className="w-full bg-green-600 hover:bg-green-700 text-white font-bold text-2xl py-4 rounded-2xl shadow-lg"
+              >
+                Finalizar Pedido
+              </button>
+            )}
+
+            {/* 🔥 QR CODE */}
+            {pedidoGerado && (
+              <div className="mt-6 flex flex-col items-center">
+                <p className="font-bold mb-2 text-gray-800 text-xl">
+                  QR Code do Pedido #{pedidoGerado.id}
+                </p>
+                <img
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(
+                    JSON.stringify({ pedido_id: pedidoGerado.id })
+                  )}`}
+                  alt={`QR Code do Pedido ${pedidoGerado.id}`}
+                  className="border rounded-xl"
+                />
+                <p className="text-center text-sm text-gray-600 mt-2">
+                  {pedidoGerado.dataHora}
+                </p>
+                <button
+                  onClick={() => setPedidoGerado(null)}
+                  className="mt-4 w-full bg-red-600 hover:bg-red-700 text-white text-xl font-bold rounded-2xl py-4"
+                >
+                  Novo Pedido
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
 };
 
-export default AbaPDV;
+export default AbaPDV;

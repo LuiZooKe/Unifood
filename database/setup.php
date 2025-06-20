@@ -101,9 +101,9 @@ $sql7 = "CREATE TABLE IF NOT EXISTS pedidos (
     itens TEXT NOT NULL,
     valor_total DECIMAL(10,2) NOT NULL,
     tipo_pagamento VARCHAR(20) NOT NULL,
+    tipo_venda VARCHAR(100) NOT NULL,
     status VARCHAR(30) DEFAULT 'PENDENTE',
     observacoes TEXT NULL,
-    id_transacao VARCHAR(100) NULL,
     data_pedido DATETIME DEFAULT CURRENT_TIMESTAMP,
     hora_pedido TIME GENERATED ALWAYS AS (TIME(data_pedido)) STORED
 )";
