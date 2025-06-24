@@ -34,14 +34,33 @@ const Pagamento: React.FC<PagamentoProps> = ({
 }) => {
   const [mostrarCliente, setMostrarCliente] = useState(false);
   const [mostrarItens, setMostrarItens] = useState(true);
+  const [erroPagamento, setErroPagamento] = useState('');
 
-  //  Sempre que abrir o modal, zera o estado:
   useEffect(() => {
     if (visivel) {
-      setMostrarCliente(false); // Dados do cliente fechado
-      setMostrarItens(true);    // Itens do pedido aberto
+      setMostrarCliente(false);
+      setMostrarItens(true);
+      setErroPagamento('');
     }
   }, [visivel]);
+
+  const handlePagar = (metodo: 'pix' | 'cartao' | 'saldo') => {
+    setErroPagamento('');
+
+    const totalNumber = parseFloat(total.replace(',', '.'));
+
+    if (metodo === 'cartao' && !usuario.numero_cartao) {
+      setErroPagamento('❌ Nenhum cartão cadastrado.');
+      return;
+    }
+
+    if (metodo === 'saldo' && (usuario.saldo || 0) < totalNumber) {
+      setErroPagamento('❌ Saldo insuficiente.');
+      return;
+    }
+
+    onPagar(metodo);
+  };
 
   if (!visivel) return null;
 
@@ -54,7 +73,7 @@ const Pagamento: React.FC<PagamentoProps> = ({
         className="bg-white rounded-3xl shadow-xl p-8 w-[92%] max-w-[500px] flex flex-col max-h-[90vh]"
         onClick={(e) => e.stopPropagation()}
       >
-        {/*  Botão de Fechar */}
+        {/* 🔘 Botão de Fechar */}
         <button
           onClick={onFechar}
           className="absolute top-6 right-6 text-gray-500 hover:text-red-500"
@@ -62,20 +81,18 @@ const Pagamento: React.FC<PagamentoProps> = ({
           <X className="w-10 h-10" />
         </button>
 
-        {/*  Título */}
+        {/* 🏷️ Título */}
         <h2 className="text-5xl font-extrabold mb-4 text-center text-gray-900">
           Revisar Pedido
         </h2>
 
-        {/*  Accordion Dados do Cliente */}
+        {/* 👤 Dados do Cliente */}
         <div className="w-full mb-4">
           <button
             onClick={() => setMostrarCliente(!mostrarCliente)}
             className="w-full flex items-center justify-between px-4 py-3 bg-gray-100 hover:bg-gray-200 rounded-xl"
           >
-            <span className="text-2xl font-bold text-gray-700">
-              Dados do Cliente
-            </span>
+            <span className="text-2xl font-bold text-gray-700">Dados do Cliente</span>
             {mostrarCliente ? <ChevronUp /> : <ChevronDown />}
           </button>
 
@@ -96,15 +113,13 @@ const Pagamento: React.FC<PagamentoProps> = ({
           )}
         </div>
 
-        {/*  Accordion Itens do Pedido */}
+        {/* 🍽️ Itens do Pedido */}
         <div className="w-full flex-1 mb-4 overflow-y-auto">
           <button
             onClick={() => setMostrarItens(!mostrarItens)}
             className="w-full flex items-center justify-between px-4 py-3 bg-gray-100 hover:bg-gray-200 rounded-xl"
           >
-            <span className="text-2xl font-bold text-gray-700">
-              Itens do Pedido
-            </span>
+            <span className="text-2xl font-bold text-gray-700">Itens do Pedido</span>
             {mostrarItens ? <ChevronUp /> : <ChevronDown />}
           </button>
 
@@ -142,29 +157,35 @@ const Pagamento: React.FC<PagamentoProps> = ({
           )}
         </div>
 
-        {/*  Total e Botões */}
+        {/* 💰 Total, Erros e Botões */}
         <div className="w-full border-t border-gray-200 pt-4">
           <p className="text-3xl font-extrabold text-center text-gray-900 mb-4">
             Total: <span className="text-green-600">R$ {total}</span>
           </p>
 
+          {erroPagamento && (
+            <div className="bg-red-100 text-red-700 px-4 py-3 rounded-xl mb-4 text-center font-semibold">
+              {erroPagamento}
+            </div>
+          )}
+
           <div className="w-full flex flex-col gap-2">
             <button
-              onClick={() => onPagar('pix')}
+              onClick={() => handlePagar('pix')}
               className="w-full py-5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-3xl shadow-md hover:shadow-lg transition"
             >
               💸 Pagar com Pix
             </button>
 
             <button
-              onClick={() => onPagar('cartao')}
+              onClick={() => handlePagar('cartao')}
               className="w-full py-5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-3xl shadow-md hover:shadow-lg transition"
             >
               💳 Pagar com Cartão
             </button>
 
             <button
-              onClick={() => onPagar('saldo')}
+              onClick={() => handlePagar('saldo')}
               className="w-full py-5 rounded-xl bg-green-600 hover:bg-green-700 text-white font-bold text-3xl shadow-md hover:shadow-lg transition"
             >
               🏦 Pagar com Saldo

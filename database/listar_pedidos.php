@@ -80,8 +80,9 @@ if (isset($_GET['id'])) {
     exit();
 }
 
-// 🔍 Se não houver ID → Listagem por filtro (dia, semana, mês)
+// 🔍 Se não houver ID → Listagem geral ou por filtros
 $filtro = $_GET['filtro'] ?? 'dia';
+$email = $_GET['email'] ?? null;
 
 $data_inicio = '';
 $data_fim = date('Y-m-d');
@@ -96,6 +97,7 @@ if ($filtro === 'dia') {
     $data_inicio = date('Y-m-d');
 }
 
+// 🔗 Montar SQL com ou sem filtro por email
 $sql = "
     SELECT 
         p.*, 
@@ -106,8 +108,13 @@ $sql = "
     LEFT JOIN users u ON u.email = p.email_cliente
     LEFT JOIN clientes c ON c.email = p.email_cliente
     WHERE DATE(p.data_pedido) BETWEEN '$data_inicio' AND '$data_fim'
-    ORDER BY p.data_pedido DESC, p.hora_pedido DESC
 ";
+
+if ($email) {
+    $sql .= " AND p.email_cliente = '$email'";
+}
+
+$sql .= " ORDER BY p.data_pedido DESC, p.hora_pedido DESC";
 
 $result = $conn->query($sql);
 

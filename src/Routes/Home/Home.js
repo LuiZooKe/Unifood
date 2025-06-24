@@ -160,12 +160,12 @@ function Home() {
 
     if (metodo === 'cartao' && !usuario.numero_cartao) {
       notify.error('Nenhum cartão cadastrado.');
-      return;
+      return false;
     }
 
     if (metodo === 'saldo' && (usuario.saldo || 0) < total) {
       notify.error('Saldo insuficiente.');
-      return;
+      return false;
     }
 
     try {
@@ -190,14 +190,15 @@ function Home() {
         localStorage.setItem('dadosUsuario', JSON.stringify(usuarioAtualizado));
 
         limparCarrinho();
-        setPagamentoAberto(false);
-        setConfirmacaoAberta(true);
+        return true; // ✅ Retorna sucesso
       } else {
         notify.error('Erro ao finalizar pedido: ' + data.message);
+        return false;
       }
     } catch (error) {
       console.error('Erro na conexão:', error);
       notify.error('Erro na conexão com o servidor.');
+      return false;
     }
   };
 
@@ -707,14 +708,16 @@ function Home() {
       <Pagamento
         visivel={pagamentoAberto}
         onFechar={() => setPagamentoAberto(false)}
-        onPagar={(metodo) => {
+        onPagar={async (metodo) => {
           if (metodo === 'pix') {
             setPagamentoAberto(false);
-            setPagamentoPixAberto(true); // 🔥 Abre o QR do Pix
+            setPagamentoPixAberto(true);
           } else {
-            finalizarPagamento(metodo);
-            setPagamentoAberto(false);
-            setConfirmacaoAberta(true);
+            const sucesso = await finalizarPagamento(metodo);
+            if (sucesso) {
+              setPagamentoAberto(false);
+              setConfirmacaoAberta(true);
+            }
           }
         }}
         itens={itensCarrinho}
@@ -722,30 +725,36 @@ function Home() {
         usuario={usuario}
       />
 
+
       <Pix
         visivel={pagamentoPixAberto}
         onFechar={() => setPagamentoPixAberto(false)}
-        onConfirmarPagamento={() => {
-          finalizarPagamento('pix');
-          setPagamentoPixAberto(false);
-          setConfirmacaoAberta(true);
-          window.scrollTo({ top: 0, behavior: 'smooth' }); pagamento
+        onConfirmarPagamento={async () => {
+          const sucesso = await finalizarPagamento('pix');
+          if (sucesso) {
+            setPagamentoPixAberto(false); // 🔥 Fecha a janela do Pix
+            setConfirmacaoAberta(true);    // 🔥 Abre a janela de "Pagamento Confirmado"
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }
         }}
-        pedidoId={1} // Você pode substituir pelo ID real do pedido, se tiver
         total={calcularTotalCarrinho()}
+        usuario={usuario}
       />
+
+
 
       <PagamentoConfirm
         visivel={confirmacaoAberta}
         onFechar={() => {
           setConfirmacaoAberta(false);
-          window.scrollTo({ top: 0, behavior: 'smooth' }); 
+          window.scrollTo({ top: 0, behavior: 'smooth' });
         }}
         onConfirmar={() => {
           setConfirmacaoAberta(false);
-          window.scrollTo({ top: 0, behavior: 'smooth' }); 
+          window.scrollTo({ top: 0, behavior: 'smooth' });
         }}
       />
+
 
       <ModalPerfil
         aberto={perfilAberto}
@@ -757,7 +766,6 @@ function Home() {
           localStorage.setItem('dadosUsuario', JSON.stringify(dadosAtualizados));
         }}
       />
-
 
     </div>
   );
