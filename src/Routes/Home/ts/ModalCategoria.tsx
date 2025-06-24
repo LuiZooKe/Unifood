@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Info, ShoppingCart, X } from 'lucide-react';
+import React from 'react';
+import { ShoppingCart } from 'lucide-react';
 import { notify } from '../../../utils/notify';
 
 interface Produto {
@@ -15,7 +15,7 @@ interface ModalCategoriaProps {
   produtos: Produto[];
   onAddToCart: (produto: Produto) => void;
   onClose: () => void;
-  estaLogado: boolean; // 👈 adiciona isso
+  estaLogado: boolean;
 }
 
 const ModalCategoria: React.FC<ModalCategoriaProps> = ({
@@ -25,21 +25,10 @@ const ModalCategoria: React.FC<ModalCategoriaProps> = ({
   onClose,
   estaLogado,
 }) => {
-  const [descricaoVisivel, setDescricaoVisivel] = useState<number | null>(null);
-  const [animacaoCarrinho, setAnimacaoCarrinho] = useState<number | null>(null);
-
-  const handleAddToCart = (produto: Produto, index: number) => {
-    onAddToCart(produto);
-    setAnimacaoCarrinho(index);
-    setTimeout(() => setAnimacaoCarrinho(null), 1500);
-  };
-
   if (!categoriaSelecionada) return null;
 
   return (
-    <div
-      className="w-full max-w-[99%] md:max-w-[70%] mx-auto bg-white rounded-3xl shadow-xl border p-10 mb-10"
-    >
+    <div className="w-full max-w-[99%] md:max-w-[70%] mx-auto bg-white rounded-3xl shadow-xl border p-10 mb-10">
       <div className="flex justify-between items-center mb-8 relative">
         <h3 className="text-5xl font-bold uppercase text-center w-full text-gray-900">
           {categoriaSelecionada}
@@ -49,96 +38,67 @@ const ModalCategoria: React.FC<ModalCategoriaProps> = ({
           className="absolute right-0 text-gray-500 hover:text-red-600 transition"
           title="Fechar"
         >
-          <X className="w-12 h-12" />
+          ✕
         </button>
       </div>
 
       <div className="flex gap-8 overflow-x-auto pb-3">
-        {produtos.map((produto, index) => (
-          <div
-            key={index}
-            className="min-w-[270px] max-w-[270px] bg-white border rounded-2xl shadow-md hover:shadow-xl transition flex-shrink-0 relative"
-          >
-            {/* Descrição flutuante */}
-            {descricaoVisivel === index && (
-              <div className="absolute inset-0 bg-white z-20 flex flex-col justify-center items-center p-6 border rounded-2xl">
-                <button
-                  onClick={() => setDescricaoVisivel(null)}
-                  className="absolute top-2 right-2 text-gray-500 hover:text-red-600"
-                >
-                  ✕
-                </button>
-                <p className="text-gray-800 text-base leading-relaxed text-center">
+        {produtos.map((produto, index) => {
+          const disponivel = produto.quantidade > 0;
+
+          return (
+            <div
+              key={index}
+              className="min-w-[270px] max-w-[270px] bg-white border rounded-2xl shadow-md hover:shadow-xl flex flex-col max-h-[480px]"
+            >
+              <img
+                src={produto.imagem}
+                alt={produto.nome}
+                className="w-full h-44 object-cover rounded-t-2xl"
+              />
+
+              <div className="p-4 flex flex-col flex-1">
+                <h4 className="text-[2rem] text-gray-900 font-extrabold leading-tight mb-1 text-center">
+                  {produto.nome}
+                </h4>
+
+                <p className="text-gray-700 text-[1.2rem] text-center mb-1 break-words max-h-[60px] overflow-y-auto">
                   {produto.descricao || 'Sem descrição.'}
                 </p>
-              </div>
-            )}
 
-            <img
-              src={produto.imagem}
-              alt={produto.nome}
-              className="w-full h-44 object-cover rounded-t-2xl"
-            />
-
-            <div className="p-4 flex flex-col justify-between">
-              <h4 className="text-[2rem] font-bold mb-2 text-center">{produto.nome}</h4>
-
-              <p className="text-red-600 text-[2rem] font-semibold text-xl mb-3 text-center">
-                {produto.preco}
-              </p>
-
-              <p
-                className={`text-xl font-semibold text-center mb-3 ${produto.quantidade > 0 ? 'text-green-600' : 'text-red-600'
+                <p
+                  className={`text-[1.2rem] font-semibold text-center mb-1 ${
+                    disponivel ? 'text-green-600' : 'text-red-500'
                   }`}
-              >
-                {produto.quantidade > 0 ? 'DISPONÍVEL' : 'EM FALTA'}
-              </p>
-
-              <div className="flex justify-center gap-4">
-                <button
-                  onClick={() =>
-                    setDescricaoVisivel(descricaoVisivel === index ? null : index)
-                  }
-                  className="text-gray-600 hover:text-blue-600 p-2 roundDed-full"
-                  title="Ver descrição"
                 >
-                  <Info className="w-12 h-12" />
-                </button>
+                  {disponivel ? 'DISPONÍVEL' : 'EM FALTA'}
+                </p>
+
+                <p className="text-red-600 font-extrabold text-[1.5rem] text-center mb-3">
+                  {produto.preco}
+                </p>
 
                 <button
                   onClick={() => {
-                    if (estaLogado && produto.quantidade > 0) {
-                      handleAddToCart(produto, index);
+                    if (estaLogado && disponivel) {
+                      onAddToCart(produto);
                     } else if (!estaLogado) {
                       notify.error('Faça login para adicionar itens ao carrinho!');
                     }
                   }}
-                  className={`relative text-white ${estaLogado && produto.quantidade > 0
+                  className={`w-full ${
+                    disponivel
                       ? 'bg-red-600 hover:bg-red-700 cursor-pointer'
                       : 'bg-gray-400 cursor-not-allowed'
-                    } p-2 rounded-full`}
-                  title={
-                    !estaLogado
-                      ? 'Faça login para adicionar'
-                      : produto.quantidade <= 0
-                        ? 'Produto indisponível'
-                        : 'Adicionar ao carrinho'
-                  }
-                  disabled={!estaLogado || produto.quantidade <= 0} // desabilita quando não logado ou sem estoque
+                  } text-white font-bold rounded-xl py-3 flex justify-center items-center gap-2 mt-auto`}
+                  disabled={!disponivel}
                 >
-                  <ShoppingCart className="w-12 h-10" />
-
-                  {animacaoCarrinho === index && (
-                    <span className="absolute -top-2 -right-2 bg-green-500 text-white rounded-full text-xs px-3 py-2 animate-bounce shadow-md">
-                      +1
-                    </span>
-                  )}
+                  <ShoppingCart size={20} /> Adicionar
                 </button>
-
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
