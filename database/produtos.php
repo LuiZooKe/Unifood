@@ -24,11 +24,9 @@ $action = $_GET['action'] ?? '';
 if ($action === 'listar') {
     $result = $conn->query("SELECT * FROM produtos");
     $produtos = [];
-
     while ($row = $result->fetch_assoc()) {
         $produtos[] = $row;
     }
-
     echo json_encode(['success' => true, 'produtos' => $produtos]);
     exit;
 }
@@ -42,7 +40,6 @@ if ($action === 'deletar' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
-    // Buscar a imagem atual do produto
     $stmt = $conn->prepare("SELECT imagem FROM produtos WHERE id = ?");
     $stmt->bind_param("i", $id);
     $stmt->execute();
@@ -50,7 +47,6 @@ if ($action === 'deletar' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt->fetch();
     $stmt->close();
 
-    // Deletar o arquivo da imagem, se existir
     if ($imagem) {
         $caminhoImagem = __DIR__ . '/imgProdutos/' . $imagem;
         if (file_exists($caminhoImagem)) {
@@ -58,21 +54,16 @@ if ($action === 'deletar' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    // Deletar o produto do banco
     $stmt = $conn->prepare("DELETE FROM produtos WHERE id = ?");
     $stmt->bind_param("i", $id);
-
     if ($stmt->execute()) {
         echo json_encode(['success' => true, 'message' => 'Produto deletado com sucesso.']);
     } else {
         echo json_encode(['success' => false, 'message' => 'Erro ao deletar produto.']);
     }
-
     $stmt->close();
-    $conn->close();
     exit;
 }
-
 
 if ($action === 'atualizar' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $id = $_POST['id'] ?? null;
@@ -122,10 +113,35 @@ if ($action === 'atualizar' && $_SERVER['REQUEST_METHOD'] === 'POST') {
             $id_fornecedor, $nome_fornecedor, $categoria, $unidade_medida, $lucro, $id);
     }
 
-    $stmt->execute();
-    echo json_encode(['success' => true, 'message' => 'Produto atualizado com sucesso']);
+    if ($stmt->execute()) {
+        echo json_encode(['success' => true, 'message' => 'Produto atualizado com sucesso']);
+    } else {
+        echo json_encode(['success' => false, 'message' => 'Erro ao atualizar produto']);
+    }
+    $stmt->close();
     exit;
 }
 
+if ($action === 'atualizar_estoque_rapido' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $id = $_POST['id'] ?? null;
+    $quantidade = $_POST['quantidade'] ?? null;
+
+    if (!$id || $quantidade === null) {
+        echo json_encode(['success' => false, 'message' => 'ID ou quantidade inválidos.']);
+        exit;
+    }
+
+    $stmt = $conn->prepare("UPDATE produtos SET quantidade = ? WHERE id = ?");
+    $stmt->bind_param("ii", $quantidade, $id);
+
+    if ($stmt->execute()) {
+        echo json_encode(['success' => true, 'message' => 'Estoque atualizado com sucesso']);
+    } else {
+        echo json_encode(['success' => false, 'message' => 'Erro ao atualizar estoque.']);
+    }
+    $stmt->close();
+    exit;
+}
 
 echo json_encode(['success' => false, 'message' => 'Ação inválida']);
+?>

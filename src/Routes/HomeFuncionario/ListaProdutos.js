@@ -61,9 +61,9 @@ function ListaProdutos() {
       });
       const data = await res.json();
       if (data.success) fetchProdutos();
-      else notify.error(data.message);
+      else alert(data.message);
     } catch {
-      notify.error('Erro ao deletar produto.');
+      alert('Erro ao deletar produto.');
     }
   };
 
@@ -94,10 +94,10 @@ function ListaProdutos() {
         setModalEditar(false);
         fetchProdutos();
       } else {
-        notify.error(data.message);
+        alert(data.message);
       }
     } catch {
-      notify.error('Erro ao atualizar produto.');
+      alert('Erro ao atualizar produto.');
     }
   };
 
@@ -116,7 +116,7 @@ function ListaProdutos() {
     }
   }, [editedProduto?.preco, editedProduto?.custo]);
 
-  const produtosFiltrados = produtos.filter(p => {
+  const produtosFiltrados = produtos.filter((p) => {
     return filtro === 'ESTOQUE' ? p.categoria === 'ESTOQUE' : p.categoria !== 'ESTOQUE';
   });
 
@@ -125,15 +125,19 @@ function ListaProdutos() {
       <div className="p-6 text-white overflow-x-hidden w-full">
         <h1 className="text-3xl font-bold mb-4 text-center">Lista de Produtos</h1>
 
-        <div className="flex justify-center gap-4 mb-6">
+        <div className="flex flex-wrap justify-center gap-4 mb-6">
           <button
-            className={`px-6 py-2 rounded font-semibold ${filtro === 'PRODUTOS' ? 'bg-blue-600' : 'bg-gray-600 hover:bg-gray-700'}`}
+            className={`px-6 py-2 rounded font-semibold ${
+              filtro === 'PRODUTOS' ? 'bg-blue-600' : 'bg-gray-600 hover:bg-gray-700'
+            }`}
             onClick={() => setFiltro('PRODUTOS')}
           >
             PRODUTOS
           </button>
           <button
-            className={`px-6 py-2 rounded font-semibold ${filtro === 'ESTOQUE' ? 'bg-blue-600' : 'bg-gray-600 hover:bg-gray-700'}`}
+            className={`px-6 py-2 rounded font-semibold ${
+              filtro === 'ESTOQUE' ? 'bg-blue-600' : 'bg-gray-600 hover:bg-gray-700'
+            }`}
             onClick={() => setFiltro('ESTOQUE')}
           >
             ESTOQUE
@@ -148,25 +152,27 @@ function ListaProdutos() {
               key={produto.id}
               className="bg-[#1f2f3f] p-4 rounded shadow flex justify-between items-center flex-wrap md:flex-nowrap gap-4"
             >
-              {produto.imagem ? (
-                <img
-                  src={`http://localhost/UNIFOOD/database/imgProdutos/${produto.imagem}`}
-                  alt={produto.nome}
-                  className="w-24 h-24 object-cover rounded-md border border-gray-600"
-                />
-              ) : (
-                <div className="w-24 h-24 rounded-md border border-gray-600 bg-white" />
-              )}
+              <div className="flex gap-4 items-center w-full md:w-auto">
+                {produto.imagem ? (
+                  <img
+                    src={`http://localhost/UNIFOOD/database/imgProdutos/${produto.imagem}`}
+                    alt={produto.nome}
+                    className="w-24 h-24 object-cover rounded-md border border-gray-600"
+                  />
+                ) : (
+                  <div className="w-24 h-24 rounded-md border border-gray-600 bg-white" />
+                )}
 
-              <div className="flex-1">
-                <p className="text-3xl font-semibold">{produto.nome}</p>
-                <p className="text-2xl text-gray-400">
-                  R$ {parseFloat(produto.preco).toFixed(2)}
-                </p>
-                <p className="text-lg text-gray-400">Quantidade: {produto.quantidade}</p>
+                <div className="flex-1 min-w-[150px]">
+                  <p className="text-2xl font-semibold mb-2">{produto.nome}</p>
+                  <p className="text-xl text-gray-400">
+                    R$ {parseFloat(produto.preco).toFixed(2)}
+                  </p>
+                  <p className="text-md text-gray-400">Quantidade: {produto.quantidade}</p>
+                </div>
               </div>
 
-              <div className="flex gap-2 mt-4 md:mt-0">
+              <div className="flex flex-wrap gap-2 justify-center">
                 <button
                   onClick={() => setModalDescricao(produto)}
                   className="bg-blue-500 px-3 py-1 rounded"
@@ -193,9 +199,10 @@ function ListaProdutos() {
           ))}
         </div>
 
+        {/* Modal de descrição */}
         {modalDescricao && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 overflow-auto">
-            <div className="bg-white text-black break-words p-6 rounded shadow md:max-w-[40vw] mx-4 md:ml-[20%]">
+          <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50">
+            <div className="bg-white text-black p-6 rounded shadow w-full max-w-[600px] mx-4 max-h-[90vh] overflow-auto">
               <h3 className="text-3xl font-bold mb-4">{modalDescricao.nome}</h3>
               {modalDescricao.imagem && (
                 <img
@@ -224,9 +231,10 @@ function ListaProdutos() {
           </div>
         )}
 
+        {/* Modal de edição */}
         {modalEditar && editedProduto && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 overflow-auto">
-            <div className="bg-white text-black p-6 rounded shadow w-full max-w-[700px] mx-4">
+          <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50">
+            <div className="bg-white text-black p-6 rounded shadow w-full max-w-[700px] mx-4 max-h-[90vh] overflow-auto">
               <h3 className="text-3xl font-bold mb-6">Editar Produto</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {[
@@ -241,7 +249,9 @@ function ListaProdutos() {
                     <input
                       type="text"
                       value={editedProduto[key] || ''}
-                      onChange={(e) => setEditedProduto({ ...editedProduto, [key]: e.target.value })}
+                      onChange={(e) =>
+                        setEditedProduto({ ...editedProduto, [key]: e.target.value })
+                      }
                       className="w-full border px-3 py-2"
                     />
                   </div>
@@ -251,12 +261,16 @@ function ListaProdutos() {
                   <label className="block text-sm font-medium mb-1">Unidade de Medida</label>
                   <select
                     value={editedProduto.unidade_medida}
-                    onChange={(e) => setEditedProduto({ ...editedProduto, unidade_medida: e.target.value })}
+                    onChange={(e) =>
+                      setEditedProduto({ ...editedProduto, unidade_medida: e.target.value })
+                    }
                     className="w-full border px-3 py-2"
                   >
                     <option value="">Selecione a unidade</option>
                     {unidades.map((u) => (
-                      <option key={u} value={u}>{u}</option>
+                      <option key={u} value={u}>
+                        {u}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -267,19 +281,23 @@ function ListaProdutos() {
                     value={editedProduto.id_fornecedor || ''}
                     onChange={(e) => {
                       const selectedId = e.target.value;
-                      const fornecedorSelecionado = fornecedores.find(f => f.id.toString() === selectedId);
-                      setEditedProduto(prev => ({
+                      const fornecedorSelecionado = fornecedores.find(
+                        (f) => f.id.toString() === selectedId
+                      );
+                      setEditedProduto((prev) => ({
                         ...prev,
                         id_fornecedor: selectedId,
-                        nome_fornecedor: fornecedorSelecionado?.nome || ''
+                        nome_fornecedor: fornecedorSelecionado?.nome || '',
                       }));
                     }}
                     className="w-full border px-3 py-2"
                     required
                   >
                     <option value="">Selecione o fornecedor</option>
-                    {fornecedores.map(f => (
-                      <option key={f.id} value={f.id}>{f.nome}</option>
+                    {fornecedores.map((f) => (
+                      <option key={f.id} value={f.id}>
+                        {f.nome}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -288,12 +306,16 @@ function ListaProdutos() {
                   <label className="block text-sm font-medium mb-1">Categoria</label>
                   <select
                     value={editedProduto.categoria}
-                    onChange={(e) => setEditedProduto({ ...editedProduto, categoria: e.target.value })}
+                    onChange={(e) =>
+                      setEditedProduto({ ...editedProduto, categoria: e.target.value })
+                    }
                     className="w-full border px-3 py-2"
                   >
                     <option value="">Selecione a categoria</option>
                     {categorias.map((cat) => (
-                      <option key={cat.id} value={cat.nome}>{cat.nome}</option>
+                      <option key={cat.id} value={cat.nome}>
+                        {cat.nome}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -309,19 +331,33 @@ function ListaProdutos() {
                 </div>
 
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-medium mb-1">Nova Imagem (opcional)</label>
+                  <label className="block text-sm font-medium mb-1">
+                    Nova Imagem (opcional)
+                  </label>
                   <input
                     type="file"
                     accept="image/*"
-                    onChange={(e) => setEditedProduto({ ...editedProduto, novaImagem: e.target.files[0] })}
+                    onChange={(e) =>
+                      setEditedProduto({ ...editedProduto, novaImagem: e.target.files[0] })
+                    }
                     className="w-full border px-3 py-2"
                   />
                 </div>
               </div>
 
               <div className="flex justify-end gap-2 mt-6">
-                <button onClick={() => setModalEditar(false)} className="bg-gray-400 px-4 py-2 rounded">Cancelar</button>
-                <button onClick={salvarEdicao} className="bg-green-600 px-4 py-2 rounded text-white">Salvar</button>
+                <button
+                  onClick={() => setModalEditar(false)}
+                  className="bg-gray-400 px-4 py-2 rounded"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={salvarEdicao}
+                  className="bg-green-600 px-4 py-2 rounded text-white"
+                >
+                  Salvar
+                </button>
               </div>
             </div>
           </div>

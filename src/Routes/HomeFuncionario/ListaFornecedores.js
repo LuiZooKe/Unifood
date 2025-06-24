@@ -30,16 +30,16 @@ function ListaFornecedores() {
       });
       const data = await res.json();
       if (data.success) fetchFornecedores();
-      else notify.error(data.message);
+      else alert(data.message);
     } catch {
-      notify.error('Erro ao deletar fornecedor.');
+      alert('Erro ao deletar fornecedor.');
     }
   };
 
   const salvarEdicao = async () => {
     try {
       const dadosLimpos = {
-        id: editedFornecedor.id, // 👈 garante que o ID seja enviado!
+        id: editedFornecedor.id,
         nome: editedFornecedor.nome?.trim() || '',
         email: editedFornecedor.email?.trim() || '',
         cpf: editedFornecedor.cpf ? editedFornecedor.cpf.replace(/\D/g, '') : '',
@@ -48,7 +48,7 @@ function ListaFornecedores() {
         numero: editedFornecedor.numero?.trim() || '',
         bairro: editedFornecedor.bairro?.trim() || '',
         cidade: editedFornecedor.cidade?.trim() || '',
-        telefone: editedFornecedor.telefone ? editedFornecedor.telefone.replace(/\D/g, '') : ''
+        telefone: editedFornecedor.telefone ? editedFornecedor.telefone.replace(/\D/g, '') : '',
       };
 
       const res = await fetch('http://localhost/UNIFOOD/database/fornecedores.php?action=atualizar', {
@@ -62,16 +62,19 @@ function ListaFornecedores() {
         setModalEditar(false);
         fetchFornecedores();
       } else {
-        notify.error(data.message);
+        alert(data.message);
       }
     } catch {
-      notify.error('Erro ao atualizar fornecedor.');
+      alert('Erro ao atualizar fornecedor.');
     }
   };
 
   useEffect(() => {
     fetchFornecedores();
   }, []);
+
+  const mostrarCPF = (f) => f.cpf && f.cpf.trim() !== '';
+  const mostrarCNPJ = (f) => f.cnpj && f.cnpj.trim() !== '';
 
   return (
     <Dashboard>
@@ -99,31 +102,37 @@ function ListaFornecedores() {
           ))}
         </div>
 
+        {/* Modal Detalhes */}
         {modalDetalhes && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 overflow-auto">
-            <div className="bg-white text-black p-6 rounded shadow w-full max-w-[700px] md:max-w-[40vw] mx-4 md:ml-[20%]">
+          <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50">
+            <div className="bg-white text-black p-6 rounded shadow w-full max-w-[600px] mx-4 max-h-[90vh] overflow-auto">
               <h3 className="text-3xl font-bold mb-4">{modalDetalhes.nome}</h3>
               <p><strong>Email:</strong> {modalDetalhes.email}</p>
-              <p><strong>CPF:</strong> {modalDetalhes.cpf}</p>
-              <p><strong>CNPJ:</strong> {modalDetalhes.cnpj}</p>
+              {mostrarCPF(modalDetalhes) && <p><strong>CPF:</strong> {modalDetalhes.cpf}</p>}
+              {mostrarCNPJ(modalDetalhes) && <p><strong>CNPJ:</strong> {modalDetalhes.cnpj}</p>}
               <p><strong>Endereço:</strong> {modalDetalhes.logradouro}, {modalDetalhes.numero}, {modalDetalhes.bairro}, {modalDetalhes.cidade}</p>
               <p><strong>Telefone:</strong> {modalDetalhes.telefone}</p>
-              <button onClick={() => setModalDetalhes(null)} className="mt-4 bg-blue-500 text-white px-4 py-2 rounded">Fechar</button>
+              <button onClick={() => setModalDetalhes(null)} className="mt-4 bg-blue-500 text-white px-4 py-2 rounded w-full">Fechar</button>
             </div>
           </div>
         )}
 
+        {/* Modal Edição */}
         {modalEditar && editedFornecedor && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 overflow-auto">
-            <div className="bg-white text-black p-6 rounded shadow w-full max-w-[700px] mx-4 ml-[20%]">
+          <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50">
+            <div className="bg-white text-black p-6 rounded shadow w-full max-w-[700px] mx-4 max-h-[90vh] overflow-auto">
               <h3 className="text-3xl font-bold mb-4">Editar Fornecedor</h3>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {[
                   ['Nome', 'nome'],
                   ['Email', 'email'],
-                  ['CPF', 'cpf', '000.000.000-00', 'bloqueado'],
-                  ['CNPJ', 'cnpj', '00.000.000/0000-00', 'bloqueado'],
+                  ...( (!editedFornecedor.cnpj || editedFornecedor.cnpj === '') 
+                    ? [['CPF', 'cpf', '000.000.000-00', 'bloqueado']] : [] 
+                  ),
+                  ...( (!editedFornecedor.cpf || editedFornecedor.cpf === '') 
+                    ? [['CNPJ', 'cnpj', '00.000.000/0000-00', 'bloqueado']] : [] 
+                  ),
                   ['Logradouro', 'logradouro'],
                   ['Número', 'numero'],
                   ['Bairro', 'bairro'],
@@ -154,17 +163,12 @@ function ListaFornecedores() {
               </div>
 
               <div className="flex justify-end gap-2 mt-6">
-                <button onClick={() => setModalEditar(false)} className="bg-gray-400 px-4 py-2 rounded">
-                  Cancelar
-                </button>
-                <button onClick={salvarEdicao} className="bg-green-600 px-4 py-2 rounded text-white">
-                  Salvar
-                </button>
+                <button onClick={() => setModalEditar(false)} className="bg-gray-400 px-4 py-2 rounded">Cancelar</button>
+                <button onClick={salvarEdicao} className="bg-green-600 px-4 py-2 rounded text-white">Salvar</button>
               </div>
             </div>
           </div>
         )}
-
       </div>
     </Dashboard>
   );

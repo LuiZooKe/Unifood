@@ -30,9 +30,9 @@ function ListaFuncionarios() {
       });
       const data = await res.json();
       if (data.success) fetchFuncionarios();
-      else notify.error(data.message);
+      else alert(data.message);
     } catch {
-      notify.error('Erro ao deletar funcionário.');
+      alert('Erro ao deletar funcionário.');
     }
   };
 
@@ -45,7 +45,7 @@ function ListaFuncionarios() {
       };
 
       if (editedFuncionario.cpf && !validarCPF(editedFuncionario.cpf)) {
-        notify.error("CPF inválido.");
+        alert("CPF inválido.");
         return;
       }
 
@@ -60,10 +60,10 @@ function ListaFuncionarios() {
         setModalEditar(false);
         fetchFuncionarios();
       } else {
-        notify.error(data.message);
+        alert(data.message);
       }
     } catch {
-      notify.error('Erro ao atualizar funcionário.');
+      alert('Erro ao atualizar funcionário.');
     }
   };
 
@@ -86,7 +86,7 @@ function ListaFuncionarios() {
 
   function validarCPF(cpf) {
     cpf = cpf.replace(/\D/g, '');
-    if (cpf.length !== 11 || /^(\\d)\1+$/.test(cpf)) return false;
+    if (cpf.length !== 11 || /^(\d)\1+$/.test(cpf)) return false;
 
     const calcularDigito = (base, fator) => {
       let soma = 0;
@@ -133,9 +133,10 @@ function ListaFuncionarios() {
           ))}
         </div>
 
+        {/* Modal Detalhes */}
         {modalDetalhes && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 overflow-auto">
-            <div className="bg-white text-black p-6 rounded shadow w-full max-w-[700px] md:max-w-[40vw] mx-4 md:ml-[20%]">
+          <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50">
+            <div className="bg-white text-black p-6 rounded shadow w-full max-w-[600px] mx-4 max-h-[90vh] overflow-auto">
               <h3 className="text-3xl font-bold mb-4">{modalDetalhes.nome}</h3>
               <p><strong>Email:</strong> {modalDetalhes.email}</p>
               <p><strong>CPF:</strong> {formatarCPF(modalDetalhes.cpf)}</p>
@@ -145,28 +146,21 @@ function ListaFuncionarios() {
               <p><strong>Admissão:</strong> {modalDetalhes.data_admissao}</p>
               <p><strong>Cargo:</strong> {modalDetalhes.cargo}</p>
               <p><strong>Salário:</strong> R$ {modalDetalhes.salario}</p>
-              <button onClick={() => setModalDetalhes(null)} className="mt-4 bg-blue-500 text-white px-4 py-2 rounded">Fechar</button>
+              <button onClick={() => setModalDetalhes(null)} className="mt-4 bg-blue-500 text-white px-4 py-2 rounded w-full">Fechar</button>
             </div>
           </div>
         )}
 
+        {/* Modal Edição */}
         {modalEditar && editedFuncionario && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 overflow-auto">
-            <div className="bg-white text-black p-6 rounded shadow w-full max-w-[700px] mx-4 ml-[20%]">
+          <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50">
+            <div className="bg-white text-black p-6 rounded shadow w-full max-w-[700px] mx-4 max-h-[90vh] overflow-auto">
               <h3 className="text-3xl font-bold mb-4">Editar Funcionário</h3>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {[
-                  ['Nome', 'nome'],
-                  ['Email', 'email'],
-                  ['CPF', 'cpf', '000.000.000-00'],
-                  ['Data de Nascimento', 'data_nascimento'],
-                  ['Logradouro', 'logradouro'],
-                  ['Número', 'numero'],
-                  ['Bairro', 'bairro'],
-                  ['Cidade', 'cidade'],
-                  ['Telefone', 'telefone', '(00) 00000-0000'],
-                  ['Data de Admissão', 'data_admissao']
+                {[['Nome', 'nome'], ['Email', 'email'], ['CPF', 'cpf', '000.000.000-00'], ['Data de Nascimento', 'data_nascimento'],
+                  ['Logradouro', 'logradouro'], ['Número', 'numero'], ['Bairro', 'bairro'], ['Cidade', 'cidade'],
+                  ['Telefone', 'telefone', '(00) 00000-0000'], ['Data de Admissão', 'data_admissao']
                 ].map(([label, key, mask]) => {
                   const isDate = key.includes('data');
                   return (
@@ -199,7 +193,7 @@ function ListaFuncionarios() {
                   );
                 })}
 
-                {/* Cargo antes do Salário */}
+                {/* Cargo */}
                 <div>
                   <label className="block text-sm font-medium mb-1">Cargo</label>
                   <select
@@ -214,6 +208,7 @@ function ListaFuncionarios() {
                   </select>
                 </div>
 
+                {/* Salário */}
                 <div>
                   <label className="block text-sm font-medium mb-1">Salário</label>
                   <input
