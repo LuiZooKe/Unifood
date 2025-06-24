@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ShoppingCart } from 'lucide-react';
 import { notify } from '../../../utils/notify';
 
@@ -25,6 +25,14 @@ const ModalCategoria: React.FC<ModalCategoriaProps> = ({
   onClose,
   estaLogado,
 }) => {
+  const [animacaoCarrinho, setAnimacaoCarrinho] = useState<string | null>(null);
+
+  const handleAddToCart = (produto: Produto) => {
+    onAddToCart(produto);
+    setAnimacaoCarrinho(produto.nome); // Você pode trocar para produto.id se tiver
+    setTimeout(() => setAnimacaoCarrinho(null), 3000);
+  };
+
   if (!categoriaSelecionada) return null;
 
   return (
@@ -43,13 +51,13 @@ const ModalCategoria: React.FC<ModalCategoriaProps> = ({
       </div>
 
       <div className="flex gap-8 overflow-x-auto pb-3">
-        {produtos.map((produto, index) => {
+        {produtos.map((produto) => {
           const disponivel = produto.quantidade > 0;
 
           return (
             <div
-              key={index}
-              className="min-w-[270px] max-w-[270px] bg-white border rounded-2xl shadow-md hover:shadow-xl flex flex-col max-h-[480px]"
+              key={produto.nome}
+              className="min-w-[270px] max-w-[270px] bg-white border rounded-2xl shadow-md hover:shadow-xl flex flex-col max-h-[480px] relative"
             >
               <img
                 src={produto.imagem}
@@ -81,12 +89,12 @@ const ModalCategoria: React.FC<ModalCategoriaProps> = ({
                 <button
                   onClick={() => {
                     if (estaLogado && disponivel) {
-                      onAddToCart(produto);
+                      handleAddToCart(produto);
                     } else if (!estaLogado) {
                       notify.error('Faça login para adicionar itens ao carrinho!');
                     }
                   }}
-                  className={`w-full ${
+                  className={`relative w-full ${
                     disponivel
                       ? 'bg-red-600 hover:bg-red-700 cursor-pointer'
                       : 'bg-gray-400 cursor-not-allowed'
@@ -94,6 +102,12 @@ const ModalCategoria: React.FC<ModalCategoriaProps> = ({
                   disabled={!disponivel}
                 >
                   <ShoppingCart size={20} /> Adicionar
+
+                  {animacaoCarrinho === produto.nome && (
+                    <span className="absolute -top-2 -right-2 bg-green-500 text-white rounded-full text-lg px-6 py-5 animate-bounce shadow-md">
+                      +1
+                    </span>
+                  )}
                 </button>
               </div>
             </div>

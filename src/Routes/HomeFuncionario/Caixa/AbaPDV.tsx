@@ -28,6 +28,7 @@ const AbaPDV: React.FC = () => {
   const [produtos, setProdutos] = useState<Produto[]>([]);
   const [categoriaSelecionada, setCategoriaSelecionada] = useState<string | null>(null);
   const [carrinho, setCarrinho] = useState<{ [id: string]: ItemCarrinho }>({});
+  const [animacaoCarrinho, setAnimacaoCarrinho] = useState<string | null>(null);
   const [pedidoGerado, setPedidoGerado] = useState<Pedido | null>(null);
   const [tipoPagamento, setTipoPagamento] = useState<string>('DINHEIRO');
   const [nomeCliente, setNomeCliente] = useState<string>('');
@@ -62,6 +63,7 @@ const AbaPDV: React.FC = () => {
 
   const adicionarAoCarrinho = (produto: Produto) => {
     if (produto.quantidade <= 0) return;
+
     setCarrinho(prev => {
       const existente = prev[produto.id];
       return {
@@ -72,6 +74,10 @@ const AbaPDV: React.FC = () => {
         },
       };
     });
+
+    // Ativa animação
+    setAnimacaoCarrinho(produto.id);
+    setTimeout(() => setAnimacaoCarrinho(null), 3000);
   };
 
   const alterarQuantidade = (id: string, quantidade: number) => {
@@ -172,11 +178,10 @@ const AbaPDV: React.FC = () => {
             <button
               key={cat}
               onClick={() => setCategoriaSelecionada(cat)}
-              className={`w-full px-4 py-3 rounded-xl font-bold text-xl ${
-                categoriaSelecionada === cat
-                  ? 'bg-white text-black'
-                  : 'bg-[#8b0000] text-white hover:bg-[#6e0000]'
-              }`}
+              className={`w-full px-4 py-3 rounded-xl font-bold text-xl ${categoriaSelecionada === cat
+                ? 'bg-white text-black'
+                : 'bg-[#8b0000] text-white hover:bg-[#6e0000]'
+                }`}
             >
               {cat}
             </button>
@@ -209,9 +214,8 @@ const AbaPDV: React.FC = () => {
                       {p.descricao}
                     </p>
                     <p
-                      className={`text-[1.2rem] font-bold text-center mb-1 ${
-                        disponivel ? 'text-green-400' : 'text-red-300'
-                      }`}
+                      className={`text-[1.2rem] font-bold text-center mb-1 ${disponivel ? 'text-green-400' : 'text-red-300'
+                        }`}
                     >
                       {disponivel ? 'DISPONÍVEL' : 'EM FALTA'}
                     </p>
@@ -221,13 +225,18 @@ const AbaPDV: React.FC = () => {
                     <button
                       onClick={() => adicionarAoCarrinho(p)}
                       disabled={!disponivel}
-                      className={`w-full ${
-                        disponivel
+                      className={`relative w-full ${disponivel
                           ? 'bg-red-600 hover:bg-red-700 cursor-pointer'
                           : 'bg-gray-400 cursor-not-allowed'
-                      } text-white font-bold rounded-xl py-3 flex justify-center items-center gap-2 mt-auto`}
+                        } text-white font-bold rounded-xl py-3 flex justify-center items-center gap-2 mt-auto`}
                     >
                       <ShoppingCart size={20} /> Adicionar
+
+                      {animacaoCarrinho === p.id && (
+                        <span className="absolute -top-2 -right-2 bg-green-500 text-white rounded-full text-lg px-3 py-2 animate-bounce shadow-md">
+                          +1
+                        </span>
+                      )}
                     </button>
                   </div>
                 );
@@ -308,10 +317,10 @@ const AbaPDV: React.FC = () => {
                   {tipoPagamento === 'DINHEIRO'
                     ? 'Dinheiro'
                     : tipoPagamento === 'PIX'
-                    ? 'Pix'
-                    : tipoPagamento === 'CARTAO'
-                    ? 'Cartão'
-                    : ''}
+                      ? 'Pix'
+                      : tipoPagamento === 'CARTAO'
+                        ? 'Cartão'
+                        : ''}
                 </p>
               ) : (
                 <select
