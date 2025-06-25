@@ -36,6 +36,7 @@ $imagem           = $_FILES['imagem'] ?? null;
 
 // Validação básica
 if (!$nome || !$descricao || !$preco || !$custo || !$categoria || !$unidade_medida) {
+    http_response_code(400);
     echo json_encode(['success' => false, 'message' => 'Preencha todos os campos obrigatórios.']);
     exit;
 }
