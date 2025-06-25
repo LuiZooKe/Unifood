@@ -59,8 +59,7 @@ foreach ($data['itens'] as $item) {
     if ($novaQuantidade < 0) {
         $mensagens[] = "Estoque insuficiente para o produto '$nome'.";
         $sucesso = false;
-        $stmtSelect->close();
-        continue;
+        $novaQuantidade = 0;
     }
 
     $stmtSelect->close();

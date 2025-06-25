@@ -16,6 +16,7 @@ interface ModalCategoriaProps {
   onAddToCart: (produto: Produto) => void;
   onClose: () => void;
   estaLogado: boolean;
+  carrinho: { [nome: string]: number }; // recebendo carrinho por prop
 }
 
 const ModalCategoria: React.FC<ModalCategoriaProps> = ({
@@ -24,13 +25,34 @@ const ModalCategoria: React.FC<ModalCategoriaProps> = ({
   onAddToCart,
   onClose,
   estaLogado,
+  carrinho,
 }) => {
-  const [animacaoCarrinho, setAnimacaoCarrinho] = useState<string | null>(null);
+  const [animacaoCarrinho, setAnimacaoCarrinho] = useState<{ [nome: string]: number }>({});
 
   const handleAddToCart = (produto: Produto) => {
+    const atual = carrinho[produto.nome] || 0;
+
+    if (atual >= produto.quantidade) {
+      notify.error(`Limite de estoque atingido (${produto.quantidade})`);
+      return;
+    }
+
     onAddToCart(produto);
-    setAnimacaoCarrinho(produto.nome); // Você pode trocar para produto.id se tiver
-    setTimeout(() => setAnimacaoCarrinho(null), 3000);
+
+    const novoValor = atual + 1;
+
+    setAnimacaoCarrinho((prev) => ({
+      ...prev,
+      [produto.nome]: novoValor,
+    }));
+
+    setTimeout(() => {
+      setAnimacaoCarrinho((prev) => {
+        const atualizado = { ...prev };
+        delete atualizado[produto.nome];
+        return atualizado;
+      });
+    }, 2000);
   };
 
   if (!categoriaSelecionada) return null;
@@ -53,6 +75,8 @@ const ModalCategoria: React.FC<ModalCategoriaProps> = ({
       <div className="flex gap-8 overflow-x-auto pb-3">
         {produtos.map((produto) => {
           const disponivel = produto.quantidade > 0;
+          const quantidadeCarrinho = carrinho[produto.nome] || 0;
+          const podeAdicionar = disponivel && quantidadeCarrinho < produto.quantidade;
 
           return (
             <div
@@ -88,24 +112,26 @@ const ModalCategoria: React.FC<ModalCategoriaProps> = ({
 
                 <button
                   onClick={() => {
-                    if (estaLogado && disponivel) {
-                      handleAddToCart(produto);
-                    } else if (!estaLogado) {
+                    if (!estaLogado) {
                       notify.error('Faça login para adicionar itens ao carrinho!');
+                    } else if (podeAdicionar) {
+                      handleAddToCart(produto);
+                    } else {
+                      notify.error(`Estoque máximo atingido (${produto.quantidade})`);
                     }
                   }}
                   className={`relative w-full ${
-                    disponivel
+                    podeAdicionar
                       ? 'bg-red-600 hover:bg-red-700 cursor-pointer'
                       : 'bg-gray-400 cursor-not-allowed'
                   } text-white font-bold rounded-xl py-3 flex justify-center items-center gap-2 mt-auto`}
-                  disabled={!disponivel}
+                  disabled={!podeAdicionar}
                 >
                   <ShoppingCart size={20} /> Adicionar
 
-                  {animacaoCarrinho === produto.nome && (
-                    <span className="absolute -top-2 -right-2 bg-green-500 text-white rounded-full text-lg px-6 py-5 animate-bounce shadow-md">
-                      +1
+                  {animacaoCarrinho[produto.nome] && (
+                    <span className="absolute -top-2 -right-2 bg-green-500 text-white rounded-full text-lg px-5 py-3 animate-bounce shadow-md">
+                      +{animacaoCarrinho[produto.nome]}
                     </span>
                   )}
                 </button>

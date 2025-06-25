@@ -591,6 +591,9 @@ function Home() {
               onAddToCart={adicionarAoCarrinho}
               onClose={fecharCategoria}
               estaLogado={estaLogado}
+              carrinho={Object.fromEntries(
+                itensCarrinho.map((item) => [item.nome, item.quantidade])
+              )}
             />
           </div>
         </div>

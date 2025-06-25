@@ -127,17 +127,15 @@ function ListaProdutos() {
 
         <div className="flex flex-wrap justify-center gap-4 mb-6">
           <button
-            className={`px-6 py-2 rounded font-semibold ${
-              filtro === 'PRODUTOS' ? 'bg-blue-600' : 'bg-gray-600 hover:bg-gray-700'
-            }`}
+            className={`px-6 py-2 rounded font-semibold ${filtro === 'PRODUTOS' ? 'bg-blue-600' : 'bg-gray-600 hover:bg-gray-700'
+              }`}
             onClick={() => setFiltro('PRODUTOS')}
           >
             PRODUTOS
           </button>
           <button
-            className={`px-6 py-2 rounded font-semibold ${
-              filtro === 'ESTOQUE' ? 'bg-blue-600' : 'bg-gray-600 hover:bg-gray-700'
-            }`}
+            className={`px-6 py-2 rounded font-semibold ${filtro === 'ESTOQUE' ? 'bg-blue-600' : 'bg-gray-600 hover:bg-gray-700'
+              }`}
             onClick={() => setFiltro('ESTOQUE')}
           >
             ESTOQUE
@@ -178,6 +176,35 @@ function ListaProdutos() {
                   className="bg-blue-500 px-3 py-1 rounded"
                 >
                   Descrição
+                </button>
+
+                <button
+                  onClick={() => {
+                    const quantidadeAtual = parseInt(produto.quantidade) || 0;
+                    const novaQuantidade = window.prompt("Adicionar ao estoque (quantidade):", "1");
+                    const quantidadeAdicional = parseInt(novaQuantidade);
+                    if (!isNaN(quantidadeAdicional) && quantidadeAdicional > 0) {
+                      const formData = new FormData();
+                      formData.append('id', produto.id);
+                      formData.append('quantidade', quantidadeAtual + quantidadeAdicional);
+                      fetch('http://localhost/UNIFOOD/database/produtos.php?action=atualizar_estoque_rapido', {
+                        method: 'POST',
+                        body: formData,
+                      })
+                        .then(res => res.json())
+                        .then(data => {
+                          if (data.success) {
+                            fetchProdutos();
+                          } else {
+                            alert(data.message);
+                          }
+                        })
+                        .catch(() => alert("Erro ao adicionar estoque."));
+                    }
+                  }}
+                  className="bg-green-500 px-3 py-1 rounded"
+                >
+                  + Estoque
                 </button>
                 <button
                   onClick={() => {

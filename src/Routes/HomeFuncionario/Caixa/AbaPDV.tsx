@@ -28,7 +28,7 @@ const AbaPDV: React.FC = () => {
   const [produtos, setProdutos] = useState<Produto[]>([]);
   const [categoriaSelecionada, setCategoriaSelecionada] = useState<string | null>(null);
   const [carrinho, setCarrinho] = useState<{ [id: string]: ItemCarrinho }>({});
-  const [animacaoCarrinho, setAnimacaoCarrinho] = useState<string | null>(null);
+  const [animacaoCarrinho, setAnimacaoCarrinho] = useState<{ [id: string]: number }>({});
   const [pedidoGerado, setPedidoGerado] = useState<Pedido | null>(null);
   const [tipoPagamento, setTipoPagamento] = useState<string>('DINHEIRO');
   const [nomeCliente, setNomeCliente] = useState<string>('');
@@ -66,27 +66,46 @@ const AbaPDV: React.FC = () => {
 
     setCarrinho(prev => {
       const existente = prev[produto.id];
+      const novaQtd = existente ? existente.quantidade + 1 : 1;
+
+      if (novaQtd > produto.quantidade) return prev; // trava se já atingiu o estoque
+
       return {
         ...prev,
         [produto.id]: {
           produto,
-          quantidade: existente ? existente.quantidade + 1 : 1,
+          quantidade: novaQtd,
         },
       };
     });
 
-    // Ativa animação
-    setAnimacaoCarrinho(produto.id);
-    setTimeout(() => setAnimacaoCarrinho(null), 3000);
+    setAnimacaoCarrinho(prev => ({
+      ...prev,
+      [produto.id]: (prev[produto.id] || 0) + 1,
+    }));
+
+    setTimeout(() => {
+      setAnimacaoCarrinho(prev => {
+        const novo = { ...prev };
+        delete novo[produto.id];
+        return novo;
+      });
+    }, 2000);
   };
 
   const alterarQuantidade = (id: string, quantidade: number) => {
+    const produto = produtos.find(p => p.id === id);
+    const estoque = produto?.quantidade ?? Infinity;
+
+    if (quantidade > estoque) return; // trava acima do estoque
+
     setCarrinho(prev => {
       if (quantidade <= 0) {
         const novo = { ...prev };
         delete novo[id];
         return novo;
       }
+
       return {
         ...prev,
         [id]: {
@@ -197,6 +216,9 @@ const AbaPDV: React.FC = () => {
               .filter(p => p.categoria === categoriaSelecionada)
               .map(p => {
                 const disponivel = p.quantidade > 0;
+                const quantidadeCarrinho = carrinho[p.id]?.quantidade || 0;
+                const estoqueDisponivel = p.quantidade;
+                const atingiuLimite = quantidadeCarrinho >= estoqueDisponivel;
                 return (
                   <div
                     key={p.id}
@@ -223,18 +245,20 @@ const AbaPDV: React.FC = () => {
                       R$ {p.preco}
                     </p>
                     <button
-                      onClick={() => adicionarAoCarrinho(p)}
-                      disabled={!disponivel}
-                      className={`relative w-full ${disponivel
-                          ? 'bg-red-600 hover:bg-red-700 cursor-pointer'
-                          : 'bg-gray-400 cursor-not-allowed'
+                      onClick={() => {
+                        if (!atingiuLimite) adicionarAoCarrinho(p);
+                      }}
+                      disabled={!disponivel || atingiuLimite}
+                      className={`relative w-full ${!disponivel || atingiuLimite
+                        ? 'bg-gray-400 cursor-not-allowed'
+                        : 'bg-red-600 hover:bg-red-700 cursor-pointer'
                         } text-white font-bold rounded-xl py-3 flex justify-center items-center gap-2 mt-auto`}
                     >
                       <ShoppingCart size={20} /> Adicionar
 
-                      {animacaoCarrinho === p.id && (
+                      {animacaoCarrinho[p.id] && (
                         <span className="absolute -top-2 -right-2 bg-green-500 text-white rounded-full text-lg px-3 py-2 animate-bounce shadow-md">
-                          +1
+                          +{animacaoCarrinho[p.id]}
                         </span>
                       )}
                     </button>
@@ -274,11 +298,18 @@ const AbaPDV: React.FC = () => {
                   </div>
                   <div className="flex flex-col gap-2">
                     <button
-                      onClick={() => alterarQuantidade(item.produto.id, item.quantidade + 1)}
-                      className="bg-gray-100 hover:bg-gray-200 text-black rounded-full w-9 h-9 flex items-center justify-center"
+                      onClick={() => {
+                        if (item.quantidade < item.produto.quantidade) {
+                          alterarQuantidade(item.produto.id, item.quantidade + 1);
+                        }
+                      }}
+                      disabled={item.quantidade >= item.produto.quantidade}
+                      className={`bg-gray-100 hover:bg-gray-200 text-black rounded-full w-9 h-9 flex items-center justify-center ${item.quantidade >= item.produto.quantidade ? 'opacity-50 cursor-not-allowed' : ''
+                        }`}
                     >
                       <Plus size={20} />
                     </button>
+
                     <button
                       onClick={() => alterarQuantidade(item.produto.id, item.quantidade - 1)}
                       className="bg-gray-100 hover:bg-gray-200 text-black rounded-full w-9 h-9 flex items-center justify-center"

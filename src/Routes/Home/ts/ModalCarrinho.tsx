@@ -56,6 +56,7 @@ const ModalCarrinho: React.FC<ModalCarrinhoProps> = ({
   const [abaAberta, setAbaAberta] = useState<'carrinho' | 'pedidos'>('carrinho');
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
   const [pedidoSelecionado, setPedidoSelecionado] = useState<Pedido | null>(null);
+  const [estoques, setEstoques] = useState<{ [nome: string]: number }>({});
 
   const buscarPedidos = async () => {
     try {
@@ -75,6 +76,33 @@ const ModalCarrinho: React.FC<ModalCarrinhoProps> = ({
       setPedidos([]);
     }
   };
+
+  useEffect(() => {
+    if (aberto) {
+      fetch("http://localhost/Unifood/database/produtos.php?action=listar")
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            const estoqueMap: { [nome: string]: number } = {};
+            data.produtos.forEach((produto: any) => {
+              estoqueMap[produto.nome] = parseInt(produto.quantidade);
+            });
+            setEstoques(estoqueMap);
+          }
+        })
+        .catch((err) => console.error("Erro ao buscar estoques:", err));
+    }
+  }, [aberto]);
+
+  useEffect(() => {
+    itens.forEach((item) => {
+      const max = estoques[item.nome] ?? Infinity;
+      if (item.quantidade > max) {
+        onAlterarQuantidade(item.nome, max);
+      }
+    });
+  }, [estoques]);
+
 
   useEffect(() => {
     if (abaAberta === 'pedidos') buscarPedidos();
@@ -150,7 +178,21 @@ const ModalCarrinho: React.FC<ModalCarrinhoProps> = ({
                           <div className="flex items-center gap-4">
                             <button onClick={() => onAlterarQuantidade(item.nome, item.quantidade - 1)} className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">−</button>
                             <span className="text-2xl font-semibold">{item.quantidade}</span>
-                            <button onClick={() => onAlterarQuantidade(item.nome, item.quantidade + 1)} className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">+</button>
+                            <button
+                              onClick={() => {
+                                const estoque = estoques[item.nome] ?? Infinity;
+                                if (item.quantidade < estoque) {
+                                  onAlterarQuantidade(item.nome, item.quantidade + 1);
+                                }
+                              }}
+                              disabled={item.quantidade >= (estoques[item.nome] ?? Infinity)}
+                              className={`px-4 py-2 rounded ${item.quantidade >= (estoques[item.nome] ?? Infinity)
+                                ? 'bg-gray-200 cursor-not-allowed'
+                                : 'bg-gray-300 hover:bg-gray-400'
+                                }`}
+                            >
+                              +
+                            </button>
                           </div>
                           <button onClick={() => onRemover(item.nome)} className="text-red-600 hover:text-red-800 text-lg font-medium">Remover</button>
                         </div>
