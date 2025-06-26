@@ -164,7 +164,7 @@ function CadastroProduto() {
               className="w-full border p-2 rounded text-black"
               required
             >
-              <option value="">Selecione a unidade</option>
+              <option value="" disabled hidden>Selecione uma unidade</option>
               {unidades.map((u) => (
                 <option key={u} value={u}>{u}</option>
               ))}
@@ -185,31 +185,61 @@ function CadastroProduto() {
                   nome_fornecedor: selectedFornecedor?.nome || ''
                 }));
               }}
-              className="w-full border p-2 rounded text-black"
+              className="w-full border p-2 rounded text-black bg-white"
               required
             >
-              <option value="">Selecione o fornecedor</option>
+              <option value="" disabled hidden>Selecione um fornecedor</option>
               {fornecedores.map(f => (
                 <option key={f.id} value={f.id}>{f.nome}</option>
               ))}
             </select>
           </div>
 
-          <div className="space-y-1">
+
+          <div className="space-y-1 relative">
             <label className="block text-sm font-medium">Categoria</label>
-            <select
-              name="categoria"
-              value={produto.categoria}
-              onChange={handleChange}
-              className="w-full border p-2 rounded text-black"
-              required
-            >
-              <option value="">Selecione uma categoria</option>
-              {ordenarCategorias(categorias).map((cat) => (
-                <option key={cat.id} value={cat.nome}>{cat.nome}</option>
-              ))}
-              <option value="nova">➕ Nova Categoria</option>
-            </select>
+
+            <div>
+              <button
+                type="button"
+                className="w-full border p-2 rounded text-left text-black bg-white"
+                onClick={() => setShowModalCategoria(prev => !prev)}
+              >
+                {produto.categoria || 'Selecione uma categoria'}
+              </button>
+            </div>
+
+            {showModalCategoria && (
+              <div className="absolute z-50 w-full max-h-72 overflow-y-auto  overflow-x-hidden bg-white border mt-1 rounded shadow text-black p-2 space-y-1">
+                {ordenarCategorias(categorias).map((cat) => (
+                  <div
+                    key={cat.id}
+                    className="cursor-pointer hover:bg-gray-100 p-1 rounded uppercase"
+                    onClick={() => {
+                      setProduto(prev => ({ ...prev, categoria: cat.nome }));
+                      setShowModalCategoria(false);
+                    }}
+                  >
+                    {cat.nome}
+                  </div>
+                ))}
+
+                <div className="flex items-center gap-2 mt-2">
+                  <input
+                    type="text"
+                    value={novaCategoria}
+                    onChange={(e) => setNovaCategoria(e.target.value.toUpperCase())}
+                    placeholder="Nova categoria"
+                    className="flex-1 border p-1 rounded uppercase"
+                    style={{ textTransform: 'uppercase' }}
+                  />
+                  <button
+                    className="text-green-600 font-bold"
+                    onClick={salvarNovaCategoria}
+                  >➕</button>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="space-y-1">
@@ -246,35 +276,6 @@ function CadastroProduto() {
             Cadastrar Produto
           </button>
         </form>
-
-        {showModalCategoria && (
-          <div className="absolute top-0 left-0 w-full h-full bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-[#520000] text-white p-8 rounded-xl shadow-lg w-full max-w-md">
-              <h2 className="text-3xl font-bold mb-6 text-center tracking-wide">Nova Categoria</h2>
-              <input
-                type="text"
-                value={novaCategoria}
-                onChange={(e) => setNovaCategoria(e.target.value)}
-                placeholder="Nome da categoria"
-                className="w-full border border-gray-400 p-2 rounded mb-6 text-black bg-white"
-              />
-              <div className="flex justify-end gap-4">
-                <button
-                  onClick={() => setShowModalCategoria(false)}
-                  className="bg-gray-500 px-4 py-2 rounded hover:bg-gray-600"
-                >
-                  Cancelar
-                </button>
-                <button
-                  onClick={salvarNovaCategoria}
-                  className="bg-green-600 px-4 py-2 rounded text-white hover:bg-green-700"
-                >
-                  Salvar
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </Dashboard>
   );

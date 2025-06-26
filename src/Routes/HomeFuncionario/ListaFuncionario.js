@@ -201,7 +201,6 @@ function ListaFuncionarios() {
                     onChange={(e) => setEditedFuncionario({ ...editedFuncionario, cargo: e.target.value })}
                     className="w-full border px-3 py-2"
                   >
-                    <option value="">Selecione o cargo</option>
                     <option value="Caixa">Caixa</option>
                     <option value="Atendente">Atendente</option>
                     <option value="Cozinheira">Cozinheira</option>

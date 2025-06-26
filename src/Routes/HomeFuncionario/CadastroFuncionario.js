@@ -181,7 +181,6 @@ function CadastroFuncionario() {
             className="w-full border p-2 rounded text-black"
             required
           >
-            <option value="">Selecione o cargo</option>
             <option value="Caixa">Caixa</option>
             <option value="Atendente">Atendente</option>
             <option value="Cozinheira">Cozinheira</option>

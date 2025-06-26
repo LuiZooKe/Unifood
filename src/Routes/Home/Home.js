@@ -514,7 +514,7 @@ function Home() {
       </section>
 
       <section className="bg-white relative w-full py-8">
-        {/*  Fundo do cardápio */}
+        {/* Fundo do cardápio sutil */}
         <div
           className="absolute inset-0 bg-no-repeat bg-center bg-[length:100%] opacity-[5%] z-0"
           style={{ backgroundImage: `url(${fundocardapio})` }}
@@ -528,21 +528,28 @@ function Home() {
             CATEGORIAS
           </h3>
 
-          {/* ⮜ Setinha esquerda */}
+          {/* Botão ESQUERDO com mais presença */}
           <button
-            className="hidden md:flex absolute left-[-1.5rem] top-1/2 -translate-y-1/2 z-10 bg-white shadow-md rounded-full p-1 hover:scale-110 transition"
+            className="hidden md:flex absolute left-0 top-1/2 -translate-y-5 z-30 
+      bg-black/60 hover:bg-black/70 text-white rounded-lg w-14 h-20 
+      items-center justify-center text-4xl font-bold shadow-md"
             onClick={() => {
               const container = document.getElementById('container-categorias');
-              container.scrollBy({ left: -400, behavior: 'smooth' });
+              container.scrollBy({ left: -500, behavior: 'smooth' });
             }}
           >
-            <span className="text-xl">‹</span>
+            ❮
           </button>
 
+          {/* Lista de categorias */}
           <div
             id="container-categorias"
-            className="flex gap-6 overflow-x-auto scrollbar-hide px-2"
-            style={{ scrollBehavior: 'smooth' }}
+            className="flex gap-6 overflow-x-auto px-2"
+            style={{
+              scrollBehavior: 'smooth',
+              scrollbarWidth: 'none',
+              msOverflowStyle: 'none',
+            }}
           >
             {Object.keys(produtosPorCategoria).map((categoria, i) => (
               <div
@@ -553,7 +560,7 @@ function Home() {
                 <img
                   src={produtosPorCategoria[categoria][0]?.imagem || pratodecomida}
                   alt={categoria}
-                  className="w-full h-56 object-cover transform group-hover:scale-105 transition duration-300"
+                  className="w-full h-56 object-cover"
                 />
                 <div className="absolute bottom-0 bg-black bg-opacity-50 w-full py-3 text-white text-xl font-bold text-center">
                   {categoria}
@@ -562,18 +569,28 @@ function Home() {
             ))}
           </div>
 
-          {/* ⮞ Setinha direita */}
+          {/* Botão DIREITO com mais presença */}
           <button
-            className="hidden md:flex absolute right-[-1.5rem] top-1/2 -translate-y-1/2 z-10 bg-white shadow-md rounded-full p-1 hover:scale-110 transition"
+            className="hidden md:flex absolute right-0 top-1/2 -translate-y-5 z-30 
+      bg-black/60 hover:bg-black/70 text-white rounded-lg w-14 h-20 
+      items-center justify-center text-4xl font-bold shadow-md"
             onClick={() => {
               const container = document.getElementById('container-categorias');
-              container.scrollBy({ left: 400, behavior: 'smooth' });
+              container.scrollBy({ left: 500, behavior: 'smooth' });
             }}
           >
-            <span className="text-xl">›</span>
+            ❯
           </button>
         </div>
+        <style>
+          {`
+      #container-categorias::-webkit-scrollbar {
+        display: none;
+      }
+    `}
+        </style>
       </section>
+
 
       {categoriaSelecionada && (
         <div className="relative w-full">

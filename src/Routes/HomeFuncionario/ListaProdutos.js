@@ -5,6 +5,7 @@ function ListaProdutos() {
   const [produtos, setProdutos] = useState([]);
   const [fornecedores, setFornecedores] = useState([]);
   const [categorias, setCategorias] = useState([]);
+  const [filtroCategoria, setFiltroCategoria] = useState('TODAS');
   const [erro, setErro] = useState('');
   const [modalDescricao, setModalDescricao] = useState(null);
   const [modalEditar, setModalEditar] = useState(false);
@@ -117,7 +118,13 @@ function ListaProdutos() {
   }, [editedProduto?.preco, editedProduto?.custo]);
 
   const produtosFiltrados = produtos.filter((p) => {
-    return filtro === 'ESTOQUE' ? p.categoria === 'ESTOQUE' : p.categoria !== 'ESTOQUE';
+    if (filtro === 'ESTOQUE') return p.categoria === 'ESTOQUE';
+    if (filtro === 'PRODUTOS') {
+      return p.categoria !== 'ESTOQUE' && (
+        filtroCategoria === 'TODAS' || p.categoria === filtroCategoria
+      );
+    }
+    return true;
   });
 
   return (
@@ -141,6 +148,28 @@ function ListaProdutos() {
             ESTOQUE
           </button>
         </div>
+
+        {filtro === 'PRODUTOS' && (
+          <div className="flex flex-wrap justify-center gap-2 mb-4">
+            <button
+              className={`px-4 py-1 rounded ${filtroCategoria === 'TODAS' ? 'bg-blue-700 text-white' : 'bg-gray-700 text-gray-300'}`}
+              onClick={() => setFiltroCategoria('TODAS')}
+            >
+              TODAS
+            </button>
+            {categorias
+              .filter(c => c.nome !== 'ESTOQUE')
+              .map(c => (
+                <button
+                  key={c.id}
+                  className={`px-4 py-1 rounded ${filtroCategoria === c.nome ? 'bg-blue-700 text-white' : 'bg-gray-700 text-gray-300'}`}
+                  onClick={() => setFiltroCategoria(c.nome)}
+                >
+                  {c.nome}
+                </button>
+              ))}
+          </div>
+        )}
 
         {erro && <p className="text-red-400 mb-4 text-center">{erro}</p>}
 
@@ -293,7 +322,6 @@ function ListaProdutos() {
                     }
                     className="w-full border px-3 py-2"
                   >
-                    <option value="">Selecione a unidade</option>
                     {unidades.map((u) => (
                       <option key={u} value={u}>
                         {u}
@@ -320,7 +348,6 @@ function ListaProdutos() {
                     className="w-full border px-3 py-2"
                     required
                   >
-                    <option value="">Selecione o fornecedor</option>
                     {fornecedores.map((f) => (
                       <option key={f.id} value={f.id}>
                         {f.nome}
@@ -329,22 +356,185 @@ function ListaProdutos() {
                   </select>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium mb-1">Categoria</label>
-                  <select
-                    value={editedProduto.categoria}
-                    onChange={(e) =>
-                      setEditedProduto({ ...editedProduto, categoria: e.target.value })
+                <div className="relative space-y-1 z-50">
+                  <label className="block text-sm font-medium">Categoria</label>
+                  <button
+                    type="button"
+                    className="w-full border p-2 rounded text-left bg-white"
+                    onClick={() =>
+                      setCategorias(prev =>
+                        prev.map(c => ({ ...c, editando: false, nomeEditado: c.nome }))
+                      ) || setEditedProduto(prev => ({ ...prev, expandirCategoria: !prev.expandirCategoria }))
                     }
-                    className="w-full border px-3 py-2"
                   >
-                    <option value="">Selecione a categoria</option>
-                    {categorias.map((cat) => (
-                      <option key={cat.id} value={cat.nome}>
-                        {cat.nome}
-                      </option>
-                    ))}
-                  </select>
+                    {editedProduto.categoria || 'Selecione a categoria'}
+                  </button>
+
+                  {editedProduto.expandirCategoria && (
+                    <>
+                      {/* Captura clique fora */}
+                      <div
+                        className="fixed inset-0 z-40"
+                        onClick={() =>
+                          setEditedProduto(prev => ({ ...prev, expandirCategoria: false }))
+                        }
+                      />
+
+                      {/* Dropdown visível e fixo abaixo do botão */}
+                      <div
+                        className="absolute left-0 right-0 bg-white border mt-1 rounded shadow text-black max-h-60 overflow-y-auto p-2 space-y-1 z-50"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        {categorias.map(cat => (
+                          <div key={cat.id} className="flex items-center gap-2 hover:bg-gray-100 p-1 rounded">
+                            {cat.editando ? (
+                              <input
+                                value={cat.nomeEditado}
+                                onChange={(e) => {
+                                  const novoNome = e.target.value.toUpperCase();
+                                  setCategorias(prev =>
+                                    prev.map(c =>
+                                      c.id === cat.id ? { ...c, nomeEditado: novoNome } : c
+                                    )
+                                  );
+                                }}
+                                className="flex-1 border p-1 rounded uppercase"
+                                style={{ textTransform: 'uppercase' }}
+                              />
+                            ) : (
+                              <span
+                                className="flex-1 cursor-pointer"
+                                onClick={() =>
+                                  setEditedProduto(prev => ({
+                                    ...prev,
+                                    categoria: cat.nome,
+                                    expandirCategoria: false
+                                  }))
+                                }
+                              >
+                                {cat.nome}
+                              </span>
+                            )}
+
+                            {cat.editando ? (
+                              <>
+                                <button
+                                  className="text-green-600 font-bold"
+                                  onClick={async () => {
+                                    try {
+                                      const res = await fetch('http://localhost/UNIFOOD/database/categorias.php?action=editar', {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({ id: cat.id, nome: cat.nomeEditado })
+                                      });
+                                      const data = await res.json();
+                                      if (data.success) {
+                                        setCategorias(prev =>
+                                          prev.map(c =>
+                                            c.id === cat.id ? { ...c, nome: cat.nomeEditado, editando: false } : c
+                                          )
+                                        );
+                                      }
+                                    } catch {
+                                      alert('Erro ao salvar');
+                                    }
+                                  }}
+                                >💾</button>
+                                <button
+                                  className="text-gray-600 font-bold"
+                                  onClick={() =>
+                                    setCategorias(prev =>
+                                      prev.map(c =>
+                                        c.id === cat.id ? { ...c, editando: false, nomeEditado: c.nome } : c
+                                      )
+                                    )
+                                  }
+                                >❌</button>
+                              </>
+                            ) : (
+                              <>
+                                <button
+                                  className="text-yellow-600 font-bold"
+                                  onClick={() =>
+                                    setCategorias(prev =>
+                                      prev.map(c =>
+                                        c.id === cat.id ? { ...c, editando: true, nomeEditado: c.nome } : c
+                                      )
+                                    )
+                                  }
+                                >✏️</button>
+                                <button
+                                  className="text-red-600 font-bold"
+                                  onClick={async () => {
+                                    if (window.confirm('Deseja excluir esta categoria?')) {
+                                      try {
+                                        const res = await fetch('http://localhost/UNIFOOD/database/categorias.php?action=deletar', {
+                                          method: 'POST',
+                                          headers: { 'Content-Type': 'application/json' },
+                                          body: JSON.stringify({ id: cat.id })
+                                        });
+                                        const data = await res.json();
+                                        if (data.success) {
+                                          setCategorias(prev => prev.filter(c => c.id !== cat.id));
+                                          if (editedProduto.categoria === cat.nome) {
+                                            setEditedProduto(prev => ({ ...prev, categoria: '' }));
+                                          }
+                                        }
+                                      } catch {
+                                        alert('Erro ao excluir');
+                                      }
+                                    }
+                                  }}
+                                >🗑️</button>
+                              </>
+                            )}
+                          </div>
+                        ))}
+
+                        {/* Adicionar nova categoria */}
+                        <div className="flex items-center gap-2 mt-2">
+                          <input
+                            type="text"
+                            placeholder='Nova Categoria'
+                            value={editedProduto.novaCategoria || ''}
+                            onChange={(e) =>
+                              setEditedProduto(prev => ({ ...prev, novaCategoria: e.target.value.toUpperCase() }))
+                            }
+                            className="flex-1 border p-1 rounded uppercase"
+                            style={{ textTransform: 'uppercase' }}
+                          />
+                          <button
+                            className="text-green-600 font-bold"
+                            onClick={async () => {
+                              const nome = editedProduto.novaCategoria?.trim();
+                              if (!nome) return;
+                              try {
+                                const res = await fetch('http://localhost/UNIFOOD/database/categorias.php?action=cadastrar', {
+                                  method: 'POST',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify({ nome })
+                                });
+                                const data = await res.json();
+                                if (data.success) {
+                                  setCategorias(prev => [...prev, { id: data.id, nome }]);
+                                  setEditedProduto(prev => ({
+                                    ...prev,
+                                    categoria: nome,
+                                    novaCategoria: '',
+                                    expandirCategoria: false
+                                  }));
+                                } else {
+                                  alert(data.message || 'Erro ao cadastrar');
+                                }
+                              } catch {
+                                alert('Erro na conexão');
+                              }
+                            }}
+                          >➕</button>
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </div>
 
                 <div>
