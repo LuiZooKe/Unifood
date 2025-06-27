@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import Dashboard from './Dashboard';
+import { notify } from '../../utils/notify.js';
+import PropTypes from 'prop-types';
+
 
 function CadastroProduto() {
   const [produto, setProduto] = useState({
@@ -295,5 +298,14 @@ const Input = ({ label, name, value, onChange, type = 'text', ...rest }) => (
     />
   </div>
 );
+
+Input.propTypes = {
+  label: PropTypes.string.isRequired,
+  name: PropTypes.string.isRequired,
+  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+  onChange: PropTypes.func.isRequired,
+  type: PropTypes.string,
+};
+
 
 export default CadastroProduto;

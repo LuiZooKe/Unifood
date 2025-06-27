@@ -11,6 +11,8 @@ function ListaProdutos() {
   const [modalEditar, setModalEditar] = useState(false);
   const [editedProduto, setEditedProduto] = useState(null);
   const [filtro, setFiltro] = useState('PRODUTOS');
+  const [pesquisaNome, setPesquisaNome] = useState('');
+
 
   const unidades = ['KG', 'LITRO', 'UNIDADE'];
 
@@ -120,12 +122,15 @@ function ListaProdutos() {
   const produtosFiltrados = produtos.filter((p) => {
     if (filtro === 'ESTOQUE') return p.categoria === 'ESTOQUE';
     if (filtro === 'PRODUTOS') {
-      return p.categoria !== 'ESTOQUE' && (
-        filtroCategoria === 'TODAS' || p.categoria === filtroCategoria
-      );
+      const categoriaOk = filtroCategoria === 'TODAS' || p.categoria === filtroCategoria;
+      const nomeOk = p.nome.toLowerCase().includes(pesquisaNome.toLowerCase());
+
+      return p.categoria !== 'ESTOQUE' && categoriaOk && nomeOk;
     }
+
     return true;
   });
+
 
   return (
     <Dashboard>
@@ -150,26 +155,40 @@ function ListaProdutos() {
         </div>
 
         {filtro === 'PRODUTOS' && (
-          <div className="flex flex-wrap justify-center gap-2 mb-4">
-            <button
-              className={`px-4 py-1 rounded ${filtroCategoria === 'TODAS' ? 'bg-blue-700 text-white' : 'bg-gray-700 text-gray-300'}`}
-              onClick={() => setFiltroCategoria('TODAS')}
-            >
-              TODAS
-            </button>
-            {categorias
-              .filter(c => c.nome !== 'ESTOQUE')
-              .map(c => (
-                <button
-                  key={c.id}
-                  className={`px-4 py-1 rounded ${filtroCategoria === c.nome ? 'bg-blue-700 text-white' : 'bg-gray-700 text-gray-300'}`}
-                  onClick={() => setFiltroCategoria(c.nome)}
-                >
-                  {c.nome}
-                </button>
-              ))}
-          </div>
+          <>
+            <div className="flex flex-wrap justify-center gap-2 mb-4">
+              <button
+                className={`px-4 py-1 rounded ${filtroCategoria === 'TODAS' ? 'bg-blue-700 text-white' : 'bg-gray-700 text-gray-300'}`}
+                onClick={() => setFiltroCategoria('TODAS')}
+              >
+                TODAS
+              </button>
+              {categorias
+                .filter(c => c.nome !== 'ESTOQUE')
+                .map(c => (
+                  <button
+                    key={c.id}
+                    className={`px-4 py-1 rounded ${filtroCategoria === c.nome ? 'bg-blue-700 text-white' : 'bg-gray-700 text-gray-300'}`}
+                    onClick={() => setFiltroCategoria(c.nome)}
+                  >
+                    {c.nome}
+                  </button>
+                ))}
+            </div>
+
+            {/* Barra de pesquisa */}
+            <div className="flex justify-center mb-6">
+              <input
+                type="text"
+                placeholder="Pesquisar por nome..."
+                className="px-4 py-2 rounded text-black"
+                value={pesquisaNome}
+                onChange={(e) => setPesquisaNome(e.target.value)}
+              />
+            </div>
+          </>
         )}
+
 
         {erro && <p className="text-red-400 mb-4 text-center">{erro}</p>}
 
