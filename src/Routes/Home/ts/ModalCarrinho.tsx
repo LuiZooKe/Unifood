@@ -142,7 +142,7 @@ const ModalCarrinho: React.FC<ModalCarrinhoProps> = ({
         body: JSON.stringify({
           id: pedidoEmEdicao.id,
           itens,
-          valor: valorAtual,
+          valor_total: valorAtual,
         }),
       })
         .then(res => res.json())
@@ -195,7 +195,7 @@ const ModalCarrinho: React.FC<ModalCarrinhoProps> = ({
             body: JSON.stringify({
               id: pedidoEmEdicao.id,
               itens,
-              valor: valorAtual,
+              valor_total: valorAtual,
             }),
           })
             .then(res => res.json())
