@@ -6,13 +6,15 @@ interface PixProps {
   onFechar: () => void;
   onConfirmarPagamento: () => void;
   total: string;
+  valorParcial?: number; // 🔹 novo
 }
 
 const Pix: React.FC<PixProps> = ({
   visivel,
   onFechar,
   onConfirmarPagamento,
-  total
+  total,
+  valorParcial
 }) => {
   const [copiado, setCopiado] = useState(false);
 
@@ -20,13 +22,14 @@ const Pix: React.FC<PixProps> = ({
 
   const chavePix = 'unifood@unifucamp.edu.br';
 
-  const valorFormatado = parseFloat(total.replace(',', '.')).toFixed(2);
+  const valorNumero = valorParcial ?? parseFloat(total.replace(',', '.'));
+  const valorFormatado = valorNumero.toFixed(2).replace('.', ',');
 
   const textoQr = `
-      Pagamento UniFood
-      Chave: ${chavePix}
-      Valor: R$ ${valorFormatado}
-      Descrição: Pedido no UniFood
+    Pagamento UniFood
+    Chave: ${chavePix}
+    Valor: R$ ${valorFormatado}
+    Descrição: Pedido no UniFood
   `.trim();
 
   const copiarChave = () => {
@@ -44,7 +47,6 @@ const Pix: React.FC<PixProps> = ({
         className="bg-white rounded-3xl shadow-xl p-8 w-[92%] max-w-[460px] flex flex-col items-center"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* 🔥 Cabeçalho */}
         <div className="flex justify-between items-center w-full mb-4">
           <h2 className="text-[clamp(2rem,6vw,3rem)] font-extrabold text-center w-full text-gray-800">
             PAGAMENTO VIA PIX
@@ -57,12 +59,10 @@ const Pix: React.FC<PixProps> = ({
           </button>
         </div>
 
-        {/* 💰 Valor */}
         <p className="text-2xl mb-2">
           Total: <strong className="text-green-700">R$ {valorFormatado}</strong>
         </p>
 
-        {/* 📸 QR Code */}
         <div className="flex justify-center mb-4">
           <img
             src={`https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(
@@ -73,7 +73,6 @@ const Pix: React.FC<PixProps> = ({
           />
         </div>
 
-        {/* Chave Pix */}
         <div className="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-3 mb-4">
           <p className="text-center text-lg text-gray-800 mb-2">
             Ou utilize nossa chave Pix:
@@ -98,13 +97,11 @@ const Pix: React.FC<PixProps> = ({
           )}
         </div>
 
-        {/* 🧾 Instruções */}
         <p className="text-lg text-center mb-4 text-gray-600">
           Escaneie o QR Code ou copie a chave Pix para realizar o pagamento.
           Após o pagamento, clique em <strong>"Confirmar Pagamento"</strong> para continuar.
         </p>
 
-        {/* ✅ Botão Confirmar */}
         <button
           onClick={onConfirmarPagamento}
           className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl text-3xl font-semibold transition"

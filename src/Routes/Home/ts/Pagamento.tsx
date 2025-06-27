@@ -18,11 +18,12 @@ interface Usuario {
 interface PagamentoProps {
   visivel: boolean;
   onFechar: () => void;
-  onPagar: (metodo: 'pix' | 'cartao' | 'saldo') => void;
   itens: Produto[];
   total: string;
   usuario: Usuario;
-  valorParcial?: number; // <- novo
+  valorParcial?: number;
+  pedidoIdEmEdicao: number | null;
+  onPagar: (metodo: 'pix' | 'cartao' | 'saldo', pedidoIdEmEdicao?: number | null) => void;
 }
 
 const Pagamento: React.FC<PagamentoProps> = ({
@@ -33,6 +34,7 @@ const Pagamento: React.FC<PagamentoProps> = ({
   total,
   usuario,
   valorParcial,
+  pedidoIdEmEdicao,
 }) => {
   const [mostrarCliente, setMostrarCliente] = useState(false);
   const [mostrarItens, setMostrarItens] = useState(true);
@@ -68,7 +70,7 @@ const Pagamento: React.FC<PagamentoProps> = ({
       return;
     }
 
-    onPagar(metodo);
+    onPagar(metodo, pedidoIdEmEdicao ?? null);
   };
 
   if (!visivel) return null;
@@ -118,15 +120,14 @@ const Pagamento: React.FC<PagamentoProps> = ({
           )}
         </div>
 
+        <button
+          onClick={() => setMostrarItens(!mostrarItens)}
+          className="w-full flex items-center justify-between px-4 py-3 bg-gray-100 hover:bg-gray-200 rounded-xl"
+        >
+          <span className="text-2xl font-bold text-gray-700">Itens do Pedido</span>
+          {mostrarItens ? <ChevronUp /> : <ChevronDown />}
+        </button>
         <div className="w-full flex-1 mb-4 overflow-y-auto">
-          <button
-            onClick={() => setMostrarItens(!mostrarItens)}
-            className="w-full flex items-center justify-between px-4 py-3 bg-gray-100 hover:bg-gray-200 rounded-xl"
-          >
-            <span className="text-2xl font-bold text-gray-700">Itens do Pedido</span>
-            {mostrarItens ? <ChevronUp /> : <ChevronDown />}
-          </button>
-
           {mostrarItens && (
             <div className="mt-3 space-y-4 px-2">
               {itens.length === 0 ? (
@@ -144,12 +145,11 @@ const Pagamento: React.FC<PagamentoProps> = ({
                     <div className="flex-1">
                       <p className="font-semibold text-2xl text-gray-800">{item.nome}</p>
                       <p className="text-lg text-gray-500">
-                        {item.quantidade}x {item.preco}
+                        {item.quantidade}x R$ {parsePreco(item.preco).toFixed(2).replace('.', ',')}
                       </p>
                     </div>
                     <p className="font-bold text-xl">
-                      R${' '}
-                      {(parsePreco(item.preco) * item.quantidade).toFixed(2)}
+                      R$ {(parsePreco(item.preco) * item.quantidade).toFixed(2).replace('.', ',')}
                     </p>
                   </div>
                 ))

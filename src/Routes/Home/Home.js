@@ -57,6 +57,8 @@ function Home() {
   const [menuMobileAberto, setMenuMobileAberto] = useState(false);
   const [modalCarrinhoAberto, setModalCarrinhoAberto] = useState(false);
   const [itensCarrinho, setItensCarrinho] = useState([]);
+  const [pedidoEmEdicao, setPedidoEmEdicao] = useState(null);
+  const [idPedidoEditando, setIdPedidoEditando] = useState(null);
   const [pagamentoAberto, setPagamentoAberto] = useState(false);
   const [pagamentoPixAberto, setPagamentoPixAberto] = useState(false);
   const [confirmacaoAberta, setConfirmacaoAberta] = useState(false);
@@ -145,6 +147,13 @@ function Home() {
     );
   };
 
+  const parsePreco = (preco) => {
+    if (typeof preco === 'string') {
+      return parseFloat(preco.replace('R$', '').replace(',', '.'));
+    }
+    return preco;
+  };
+
   const calcularTotalCarrinho = () => {
     return itensCarrinho
       .reduce((total, item) => {
@@ -158,24 +167,23 @@ function Home() {
       .toFixed(2);
   };
 
-  const finalizarPagamento = async (metodo, valorParcial) => {
+  const finalizarPagamento = async (metodo, valorParcial, idEmEdicao = idPedidoEditando ?? null) => {
+    console.log('ID a enviar:', idEmEdicao);
     const total = valorParcial ?? parseFloat(calcularTotalCarrinho().replace(',', '.'));
 
-    if (metodo === 'cartao' && !usuario.numero_cartao) {
-      notify.error('Nenhum cartão cadastrado.');
-      return false;
-    }
+    const url = idEmEdicao
+      ? 'http://localhost/UNIFOOD/database/editar_pedido.php'
+      : 'http://localhost/UNIFOOD/database/finalizar_pedido.php';
 
-    if (metodo === 'saldo' && (usuario.saldo || 0) < total) {
-      notify.error('Saldo insuficiente.');
-      return false;
-    }
+    console.log('Endpoint:', url);
+
 
     try {
-      const res = await fetch('http://localhost/UNIFOOD/database/finalizar_pedido.php', {
+      const res = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          ...(idEmEdicao ? { id: idEmEdicao } : {}),
           nome: usuario.nome,
           email: usuario.email,
           itens: itensCarrinho,
@@ -712,7 +720,8 @@ function Home() {
         aberto={modalCarrinhoAberto}
         onFechar={fecharTudo}
         onAbrirPagamento={(valorParcial) => {
-          setPagamentoParcial(valorParcial); // 👈 salva a diferença (caso exista)
+          setPagamentoParcial(valorParcial);
+          setIdPedidoEditando(pedidoEmEdicao?.id ?? null); // ← Salva ID antes de limpar
           setModalCarrinhoAberto(false);
           setPagamentoAberto(true);
         }}
@@ -727,22 +736,27 @@ function Home() {
           setUsuario(usuarioAtualizado);
           localStorage.setItem('dadosUsuario', JSON.stringify(usuarioAtualizado));
         }}
+        pedidoEmEdicao={pedidoEmEdicao}
+        setPedidoEmEdicao={setPedidoEmEdicao}
       />
 
       <Pagamento
         visivel={pagamentoAberto}
         onFechar={() => setPagamentoAberto(false)}
         valorParcial={pagamentoParcial}
-        onPagar={async (metodo) => {
+        pedidoIdEmEdicao={pedidoEmEdicao?.id ?? null}
+        onPagar={async (metodo, pedidoIdEmEdicao) => {
           if (metodo === 'pix') {
             setPagamentoAberto(false);
             setPagamentoPixAberto(true);
           } else {
-            const sucesso = await finalizarPagamento(metodo, pagamentoParcial);
+            const sucesso = await finalizarPagamento(metodo, pagamentoParcial, pedidoIdEmEdicao);
             if (sucesso) {
               setPagamentoAberto(false);
               setConfirmacaoAberta(true);
-              setPagamentoParcial(undefined); // ✅ limpa após pagamento
+              setPagamentoParcial(undefined);
+              setIdPedidoEditando(null);
+              setPedidoEmEdicao(null);
             }
           }
         }}
@@ -755,19 +769,19 @@ function Home() {
         visivel={pagamentoPixAberto}
         onFechar={() => setPagamentoPixAberto(false)}
         onConfirmarPagamento={async () => {
-          const sucesso = await finalizarPagamento('pix');
+          const sucesso = await finalizarPagamento("pix", pagamentoParcial, idPedidoEditando);
           if (sucesso) {
-            setPagamentoPixAberto(false); // 🔥 Fecha a janela do Pix
-            setConfirmacaoAberta(true);    // 🔥 Abre a janela de "Pagamento Confirmado"
+            setPagamentoPixAberto(false);
+            setConfirmacaoAberta(true);
             setPagamentoParcial(undefined);
+            setIdPedidoEditando(null);
+            setPedidoEmEdicao(null);
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }
         }}
-        total={calcularTotalCarrinho()}
+        total={String(pagamentoParcial?.toFixed(2) ?? calcularTotalCarrinho())} 
         usuario={usuario}
       />
-
-
 
       <PagamentoConfirm
         visivel={confirmacaoAberta}

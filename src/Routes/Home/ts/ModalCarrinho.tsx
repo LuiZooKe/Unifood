@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { notify } from '../../../utils/notify';
 import ReactDOM from 'react-dom';
 import { X } from 'lucide-react';
 
@@ -32,7 +33,7 @@ interface Usuario {
 interface ModalCarrinhoProps {
   aberto: boolean;
   onFechar: () => void;
-  onAbrirPagamento: (valorParcial?: number) => void;
+  onAbrirPagamento: (valorParcial?: number, idPedidoEmEdicao?: number | null) => void;
   itens: Produto[];
   setItens: (novosItens: Produto[]) => void;
   calcularTotal: () => string;
@@ -41,6 +42,8 @@ interface ModalCarrinhoProps {
   limparCarrinho: () => void;
   usuario: Usuario;
   atualizarUsuario: (usuarioAtualizado: Usuario) => void;
+  pedidoEmEdicao: { id: number; valorOriginal: number } | null;
+  setPedidoEmEdicao: (pedido: { id: number; valorOriginal: number } | null) => void;
 }
 
 const ModalCarrinho: React.FC<ModalCarrinhoProps> = ({
@@ -54,11 +57,13 @@ const ModalCarrinho: React.FC<ModalCarrinhoProps> = ({
   onRemover,
   limparCarrinho,
   usuario,
+  atualizarUsuario,
+  pedidoEmEdicao,
+  setPedidoEmEdicao
 }) => {
   const [abaAberta, setAbaAberta] = useState<'carrinho' | 'pedidos'>('carrinho');
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
   const [pedidoSelecionado, setPedidoSelecionado] = useState<Pedido | null>(null);
-  const [pedidoEmEdicao, setPedidoEmEdicao] = useState<{ id: number; valorOriginal: number } | null>(null);
   const [estoques, setEstoques] = useState<{ [nome: string]: number }>({});
 
   const parsePreco = (preco: string | number) => {
@@ -123,16 +128,14 @@ const ModalCarrinho: React.FC<ModalCarrinhoProps> = ({
     const valorAtual = parseFloat(calcularTotal());
 
     if (!pedidoEmEdicao) {
-      // Pedido novo
-      onAbrirPagamento(); // ← valor total padrão
+      onAbrirPagamento(); // novo pedido, sem edição
       return;
     }
 
     const diferenca = +(valorAtual - pedidoEmEdicao.valorOriginal).toFixed(2);
 
+    // 🔸 Caso 1: valor igual — só atualiza
     if (diferenca === 0) {
-      alert("✅ Pedido atualizado com sucesso.");
-
       fetch("http://localhost/Unifood/database/editar_pedido.php", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -145,25 +148,74 @@ const ModalCarrinho: React.FC<ModalCarrinhoProps> = ({
         .then(res => res.json())
         .then(data => {
           if (data.success) {
-            alert("✅ Pedido editado com sucesso!");
+            notify.success("✅ Pedido editado com sucesso!");
             setPedidoEmEdicao(null);
             limparCarrinho();
             setAbaAberta("pedidos");
           } else {
-            alert("Erro ao editar o pedido.");
+            notify.error("Erro ao editar o pedido.");
           }
         });
 
-    } else if (diferenca > 0) {
-      // Valor aumentou — pagar apenas a diferença
-      alert(`⚠️ O valor aumentou em R$ ${diferenca.toFixed(2).replace('.', ',')}. Será necessário pagar a diferença.`);
-      onAbrirPagamento(diferenca); // ← AQUI! passa só a diferença
-    } else {
-      const confirmar = confirm(`⚠️ O valor foi reduzido em R$ ${Math.abs(diferenca).toFixed(2).replace('.', ',')}.\nEssa diferença será convertida em saldo para você.\nDeseja continuar?`);
-      if (confirmar) {
-        onAbrirPagamento(); // pode ser valor total, ou adaptar
-      }
+      return;
     }
+
+    // 🔸 Caso 2: valor aumentou — cobra a diferença via Pix
+    if (diferenca > 0) {
+      notify.warning(
+        `⚠️ Valor aumentado em R$ ${diferenca.toFixed(2).replace(".", ",")}. Pagamento da diferença necessário.`
+      );
+      onAbrirPagamento(diferenca, pedidoEmEdicao.id);
+      return;
+    }
+
+    // 🔸 Caso 3: valor diminuiu — estorno para o saldo
+    const diferencaAbsoluta = Math.abs(diferenca);
+
+    fetch("http://localhost/Unifood/database/update_saldo.php", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: usuario.email,
+        saldo: diferencaAbsoluta,
+      }),
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          atualizarUsuario({
+            ...usuario,
+            saldo: data.saldo_atual,
+          });
+
+          // Atualiza o pedido
+          fetch("http://localhost/Unifood/database/editar_pedido.php", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              id: pedidoEmEdicao.id,
+              itens,
+              valor: valorAtual,
+            }),
+          })
+            .then(res => res.json())
+            .then(data => {
+              if (data.success) {
+                setPedidoEmEdicao(null);
+                limparCarrinho();
+                setAbaAberta("pedidos");
+
+                notify.success(
+                  `💰 R$ ${diferencaAbsoluta.toFixed(2).replace(".", ",")} foram creditados no seu saldo.`
+                );
+              } else {
+                notify.error("Erro ao atualizar o pedido.");
+              }
+            });
+        } else {
+          notify.error("Erro ao estornar saldo.");
+        }
+      });
   };
 
   return (
@@ -228,7 +280,9 @@ const ModalCarrinho: React.FC<ModalCarrinhoProps> = ({
                       <div className="flex flex-col justify-between w-full">
                         <div>
                           <h4 className="font-bold text-gray-800 text-[clamp(1.5rem,3vw,2.5rem)]">{item.nome}</h4>
-                          <p className="text-gray-600">Preço: <span className="font-semibold">{item.preco}</span></p>
+                          <p className="text-gray-600">
+                            Preço: <span className="font-semibold">R$ {parsePreco(item.preco).toFixed(2).replace('.', ',')}</span>
+                          </p>
                         </div>
                         <div className="flex flex-col items-end mt-4 gap-2">
                           <div className="flex items-center gap-4">
@@ -286,7 +340,7 @@ const ModalCarrinho: React.FC<ModalCarrinhoProps> = ({
           {abaAberta === 'carrinho' && itens.length > 0 && (
             <div className="mt-4 pt-4 border-t border-gray-300 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 px-6 pb-6">
               <p className="text-2xl font-bold text-gray-800">
-                TOTAL: <span className="text-green-600">R$ {calcularTotal()}</span>
+                TOTAL: <span className="text-green-600">R$ {parseFloat(calcularTotal()).toFixed(2).replace('.', ',')}</span>
               </p>
               <button
                 onClick={handleFinalizarCompra}
