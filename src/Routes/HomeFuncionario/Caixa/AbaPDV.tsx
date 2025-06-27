@@ -32,6 +32,7 @@ const AbaPDV: React.FC = () => {
   const [pedidoGerado, setPedidoGerado] = useState<Pedido | null>(null);
   const [tipoPagamento, setTipoPagamento] = useState<string>('DINHEIRO');
   const [nomeCliente, setNomeCliente] = useState<string>('');
+  const [buscaNome, setBuscaNome] = useState<string>('');
 
   // Carregar Categorias
   useEffect(() => {
@@ -68,7 +69,7 @@ const AbaPDV: React.FC = () => {
       const existente = prev[produto.id];
       const novaQtd = existente ? existente.quantidade + 1 : 1;
 
-      if (novaQtd > produto.quantidade) return prev; // trava se já atingiu o estoque
+      if (novaQtd > produto.quantidade) return prev;
 
       return {
         ...prev,
@@ -97,7 +98,7 @@ const AbaPDV: React.FC = () => {
     const produto = produtos.find(p => p.id === id);
     const estoque = produto?.quantidade ?? Infinity;
 
-    if (quantidade > estoque) return; // trava acima do estoque
+    if (quantidade > estoque) return;
 
     setCarrinho(prev => {
       if (quantidade <= 0) {
@@ -116,9 +117,11 @@ const AbaPDV: React.FC = () => {
     });
   };
 
+  const parsePreco = (preco: string) => parseFloat(preco.replace(',', '.')) || 0;
+
   const calcularTotalNumerico = () => {
     return Object.values(carrinho).reduce((acc, item) => {
-      return acc + parseFloat(item.produto.preco) * item.quantidade;
+      return acc + parsePreco(item.produto.preco) * item.quantidade;
     }, 0);
   };
 
@@ -181,10 +184,20 @@ const AbaPDV: React.FC = () => {
     <div className="flex gap-4 p-6 flex-col lg:flex-row">
       {/* Categorias */}
       <div className="lg:w-1/5 w-full">
-        <div className="flex justify-between items-center mb-4">
+        <div className="flex justify-between items-center mb-4 gap-4 flex-wrap">
           <h2 className="text-[clamp(2.5rem,5vw,3.5rem)] font-extrabold text-white whitespace-nowrap">
             PRODUTOS
           </h2>
+
+          {/* Input de pesquisa */}
+          <input
+            type="text"
+            placeholder="Pesquisar por nome..."
+            value={buscaNome}
+            onChange={e => setBuscaNome(e.target.value)}
+            className="px-3 py-2 rounded-xl text-black text-lg w-full"
+          />
+
           {categoriaSelecionada && (
             <button onClick={() => setCategoriaSelecionada(null)} className="text-red-300">
               <X size={32} />
@@ -197,10 +210,11 @@ const AbaPDV: React.FC = () => {
             <button
               key={cat}
               onClick={() => setCategoriaSelecionada(cat)}
-              className={`w-full px-4 py-3 rounded-xl font-bold text-xl ${categoriaSelecionada === cat
-                ? 'bg-white text-black'
-                : 'bg-[#8b0000] text-white hover:bg-[#6e0000]'
-                }`}
+              className={`w-full px-4 py-3 rounded-xl font-bold text-xl ${
+                categoriaSelecionada === cat
+                  ? 'bg-white text-black'
+                  : 'bg-[#8b0000] text-white hover:bg-[#6e0000]'
+              }`}
             >
               {cat}
             </button>
@@ -210,65 +224,66 @@ const AbaPDV: React.FC = () => {
 
       {/* Produtos */}
       <div className="lg:w-3/5 w-full lg:mt-[6.5rem]">
-        {categoriaSelecionada ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-            {produtos
-              .filter(p => p.categoria === categoriaSelecionada)
-              .map(p => {
-                const disponivel = p.quantidade > 0;
-                const quantidadeCarrinho = carrinho[p.id]?.quantidade || 0;
-                const estoqueDisponivel = p.quantidade;
-                const atingiuLimite = quantidadeCarrinho >= estoqueDisponivel;
-                return (
-                  <div
-                    key={p.id}
-                    className="bg-[#8b0000]/70 rounded-2xl p-4 flex flex-col shadow-lg max-h-[400px] h-full"
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+          {produtos
+            .filter(p =>
+              (categoriaSelecionada ? p.categoria === categoriaSelecionada : true) &&
+              p.nome.toLowerCase().includes(buscaNome.toLowerCase())
+            )
+            .map(p => {
+              const disponivel = p.quantidade > 0;
+              const quantidadeCarrinho = carrinho[p.id]?.quantidade || 0;
+              const estoqueDisponivel = p.quantidade;
+              const atingiuLimite = quantidadeCarrinho >= estoqueDisponivel;
+              return (
+                <div
+                  key={p.id}
+                  className="bg-[#8b0000]/70 rounded-2xl p-4 flex flex-col shadow-lg max-h-[400px] h-full"
+                >
+                  <img
+                    src={`http://localhost/Unifood/database/imgProdutos/${p.imagem}`}
+                    alt={p.nome}
+                    className="h-32 object-cover rounded-xl mb-2"
+                  />
+                  <h3 className="font-extrabold text-4xl text-white leading-tight mb-1 text-center">
+                    {p.nome}
+                  </h3>
+                  <p className="text-white text-[2rem] mb-1 text-center break-words">
+                    {p.descricao}
+                  </p>
+                  <p
+                    className={`text-[1.2rem] font-bold text-center mb-1 ${
+                      disponivel ? 'text-green-400' : 'text-red-300'
+                    }`}
                   >
-                    <img
-                      src={`http://localhost/Unifood/database/imgProdutos/${p.imagem}`}
-                      alt={p.nome}
-                      className="h-32 object-cover rounded-xl mb-2"
-                    />
-                    <h3 className="font-extrabold text-4xl text-white leading-tight mb-1 text-center">
-                      {p.nome}
-                    </h3>
-                    <p className="text-white text-[2rem] mb-1 text-center break-words">
-                      {p.descricao}
-                    </p>
-                    <p
-                      className={`text-[1.2rem] font-bold text-center mb-1 ${disponivel ? 'text-green-400' : 'text-red-300'
-                        }`}
-                    >
-                      {disponivel ? 'DISPONÍVEL' : 'EM FALTA'}
-                    </p>
-                    <p className="text-red-100 font-extrabold text-2xl mb-3 text-center">
-                      R$ {p.preco}
-                    </p>
-                    <button
-                      onClick={() => {
-                        if (!atingiuLimite) adicionarAoCarrinho(p);
-                      }}
-                      disabled={!disponivel || atingiuLimite}
-                      className={`relative w-full ${!disponivel || atingiuLimite
+                    {disponivel ? 'DISPONÍVEL' : 'EM FALTA'}
+                  </p>
+                  <p className="text-red-100 font-extrabold text-2xl mb-3 text-center">
+                    R$ {p.preco}
+                  </p>
+                  <button
+                    onClick={() => {
+                      if (!atingiuLimite) adicionarAoCarrinho(p);
+                    }}
+                    disabled={!disponivel || atingiuLimite}
+                    className={`relative w-full ${
+                      !disponivel || atingiuLimite
                         ? 'bg-gray-400 cursor-not-allowed'
                         : 'bg-red-600 hover:bg-red-700 cursor-pointer'
-                        } text-white font-bold rounded-xl py-3 flex justify-center items-center gap-2 mt-auto`}
-                    >
-                      <ShoppingCart size={20} /> Adicionar
+                    } text-white font-bold rounded-xl py-3 flex justify-center items-center gap-2 mt-auto`}
+                  >
+                    <ShoppingCart size={20} /> Adicionar
 
-                      {animacaoCarrinho[p.id] && (
-                        <span className="absolute -top-2 -right-2 bg-green-500 text-white rounded-full text-lg px-3 py-2 animate-bounce shadow-md">
-                          +{animacaoCarrinho[p.id]}
-                        </span>
-                      )}
-                    </button>
-                  </div>
-                );
-              })}
-          </div>
-        ) : (
-          <p className="text-2xl text-gray-200 text-center mt-24">Selecione uma categoria</p>
-        )}
+                    {animacaoCarrinho[p.id] && (
+                      <span className="absolute -top-2 -right-2 bg-green-500 text-white rounded-full text-lg px-3 py-2 animate-bounce shadow-md">
+                        +{animacaoCarrinho[p.id]}
+                      </span>
+                    )}
+                  </button>
+                </div>
+              );
+            })}
+        </div>
       </div>
 
       {/* Pedido */}
@@ -304,8 +319,11 @@ const AbaPDV: React.FC = () => {
                         }
                       }}
                       disabled={item.quantidade >= item.produto.quantidade}
-                      className={`bg-gray-100 hover:bg-gray-200 text-black rounded-full w-9 h-9 flex items-center justify-center ${item.quantidade >= item.produto.quantidade ? 'opacity-50 cursor-not-allowed' : ''
-                        }`}
+                      className={`bg-gray-100 hover:bg-gray-200 text-black rounded-full w-9 h-9 flex items-center justify-center ${
+                        item.quantidade >= item.produto.quantidade
+                          ? 'opacity-50 cursor-not-allowed'
+                          : ''
+                      }`}
                     >
                       <Plus size={20} />
                     </button>
@@ -348,10 +366,10 @@ const AbaPDV: React.FC = () => {
                   {tipoPagamento === 'DINHEIRO'
                     ? 'Dinheiro'
                     : tipoPagamento === 'PIX'
-                      ? 'Pix'
-                      : tipoPagamento === 'CARTAO'
-                        ? 'Cartão'
-                        : ''}
+                    ? 'Pix'
+                    : tipoPagamento === 'CARTAO'
+                    ? 'Cartão'
+                    : ''}
                 </p>
               ) : (
                 <select
@@ -367,7 +385,8 @@ const AbaPDV: React.FC = () => {
             </div>
 
             <p className="text-2xl font-bold text-gray-800 mb-3">
-              TOTAL: <span className="text-green-600">
+              TOTAL:{' '}
+              <span className="text-green-600">
                 R$ {pedidoGerado ? pedidoGerado.total : calcularTotalFormatado()}
               </span>
             </p>
@@ -391,9 +410,7 @@ const AbaPDV: React.FC = () => {
                   alt={`QR Code do Pedido ${pedidoGerado.id}`}
                   className="border rounded-xl"
                 />
-                <p className="text-center text-md text-gray-600 mt-1">
-                  {pedidoGerado.dataHora}
-                </p>
+                <p className="text-center text-md text-gray-600 mt-1">{pedidoGerado.dataHora}</p>
                 <button
                   onClick={() => {
                     setPedidoGerado(null);
