@@ -60,6 +60,7 @@ function Home() {
   const [pagamentoAberto, setPagamentoAberto] = useState(false);
   const [pagamentoPixAberto, setPagamentoPixAberto] = useState(false);
   const [confirmacaoAberta, setConfirmacaoAberta] = useState(false);
+  const [pagamentoParcial, setPagamentoParcial] = useState(undefined);
   const TIPO_VENDA = "SITE";
 
   const scrollTravado =
@@ -146,17 +147,19 @@ function Home() {
 
   const calcularTotalCarrinho = () => {
     return itensCarrinho
-      .reduce(
-        (total, item) =>
-          total +
-          parseFloat(item.preco.replace('R$', '').replace(',', '.')) * item.quantidade,
-        0
-      )
+      .reduce((total, item) => {
+        const precoNumerico =
+          typeof item.preco === 'string'
+            ? parsePreco(item.preco)
+            : item.preco;
+
+        return total + precoNumerico * item.quantidade;
+      }, 0)
       .toFixed(2);
   };
 
-  const finalizarPagamento = async (metodo) => {
-    const total = parseFloat(calcularTotalCarrinho().replace(',', '.'));
+  const finalizarPagamento = async (metodo, valorParcial) => {
+    const total = valorParcial ?? parseFloat(calcularTotalCarrinho().replace(',', '.'));
 
     if (metodo === 'cartao' && !usuario.numero_cartao) {
       notify.error('Nenhum cartão cadastrado.');
@@ -190,7 +193,7 @@ function Home() {
         localStorage.setItem('dadosUsuario', JSON.stringify(usuarioAtualizado));
 
         limparCarrinho();
-        return true; // ✅ Retorna sucesso
+        return true;
       } else {
         notify.error('Erro ao finalizar pedido: ' + data.message);
         return false;
@@ -708,11 +711,13 @@ function Home() {
       <ModalCarrinho
         aberto={modalCarrinhoAberto}
         onFechar={fecharTudo}
-        onAbrirPagamento={() => {
+        onAbrirPagamento={(valorParcial) => {
+          setPagamentoParcial(valorParcial); // 👈 salva a diferença (caso exista)
           setModalCarrinhoAberto(false);
           setPagamentoAberto(true);
         }}
         itens={itensCarrinho}
+        setItens={setItensCarrinho}
         calcularTotal={calcularTotalCarrinho}
         onAlterarQuantidade={alterarQuantidadeProduto}
         onRemover={removerDoCarrinho}
@@ -724,19 +729,20 @@ function Home() {
         }}
       />
 
-
       <Pagamento
         visivel={pagamentoAberto}
         onFechar={() => setPagamentoAberto(false)}
+        valorParcial={pagamentoParcial}
         onPagar={async (metodo) => {
           if (metodo === 'pix') {
             setPagamentoAberto(false);
             setPagamentoPixAberto(true);
           } else {
-            const sucesso = await finalizarPagamento(metodo);
+            const sucesso = await finalizarPagamento(metodo, pagamentoParcial);
             if (sucesso) {
               setPagamentoAberto(false);
               setConfirmacaoAberta(true);
+              setPagamentoParcial(undefined); // ✅ limpa após pagamento
             }
           }
         }}
@@ -744,7 +750,6 @@ function Home() {
         total={calcularTotalCarrinho()}
         usuario={usuario}
       />
-
 
       <Pix
         visivel={pagamentoPixAberto}
@@ -754,6 +759,7 @@ function Home() {
           if (sucesso) {
             setPagamentoPixAberto(false); // 🔥 Fecha a janela do Pix
             setConfirmacaoAberta(true);    // 🔥 Abre a janela de "Pagamento Confirmado"
+            setPagamentoParcial(undefined);
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }
         }}
@@ -767,10 +773,12 @@ function Home() {
         visivel={confirmacaoAberta}
         onFechar={() => {
           setConfirmacaoAberta(false);
+          setPagamentoParcial(undefined);
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }}
         onConfirmar={() => {
           setConfirmacaoAberta(false);
+          setPagamentoParcial(undefined);
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }}
       />

@@ -22,6 +22,7 @@ interface PagamentoProps {
   itens: Produto[];
   total: string;
   usuario: Usuario;
+  valorParcial?: number; // <- novo
 }
 
 const Pagamento: React.FC<PagamentoProps> = ({
@@ -31,6 +32,7 @@ const Pagamento: React.FC<PagamentoProps> = ({
   itens,
   total,
   usuario,
+  valorParcial,
 }) => {
   const [mostrarCliente, setMostrarCliente] = useState(false);
   const [mostrarItens, setMostrarItens] = useState(true);
@@ -44,17 +46,24 @@ const Pagamento: React.FC<PagamentoProps> = ({
     }
   }, [visivel]);
 
+  const parsePreco = (preco: string | number): number => {
+    return typeof preco === 'string'
+      ? parseFloat(preco.replace('R$', '').replace(',', '.'))
+      : preco;
+  };
+
+  const valorTotal = parseFloat(total.replace(',', '.'));
+  const valorParaPagar = valorParcial ?? valorTotal;
+
   const handlePagar = (metodo: 'pix' | 'cartao' | 'saldo') => {
     setErroPagamento('');
-
-    const totalNumber = parseFloat(total.replace(',', '.'));
 
     if (metodo === 'cartao' && !usuario.numero_cartao) {
       setErroPagamento('❌ Nenhum cartão cadastrado.');
       return;
     }
 
-    if (metodo === 'saldo' && (usuario.saldo || 0) < totalNumber) {
+    if (metodo === 'saldo' && (usuario.saldo || 0) < valorParaPagar) {
       setErroPagamento('❌ Saldo insuficiente.');
       return;
     }
@@ -73,7 +82,6 @@ const Pagamento: React.FC<PagamentoProps> = ({
         className="bg-white rounded-3xl shadow-xl p-8 w-[92%] max-w-[500px] flex flex-col max-h-[90vh]"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* 🔘 Botão de Fechar */}
         <button
           onClick={onFechar}
           className="absolute top-6 right-6 text-gray-500 hover:text-red-500"
@@ -81,12 +89,10 @@ const Pagamento: React.FC<PagamentoProps> = ({
           <X className="w-10 h-10" />
         </button>
 
-        {/* 🏷️ Título */}
         <h2 className="text-5xl font-extrabold mb-4 text-center text-gray-900">
           Revisar Pedido
         </h2>
 
-        {/* 👤 Dados do Cliente */}
         <div className="w-full mb-4">
           <button
             onClick={() => setMostrarCliente(!mostrarCliente)}
@@ -103,8 +109,7 @@ const Pagamento: React.FC<PagamentoProps> = ({
               <p><strong>Saldo:</strong> R$ {(usuario.saldo ?? 0).toFixed(2)}</p>
               {usuario.numero_cartao ? (
                 <p>
-                  <strong>Cartão:</strong> **** **** ****{' '}
-                  {usuario.numero_cartao.slice(-4)}
+                  <strong>Cartão:</strong> **** **** **** {usuario.numero_cartao.slice(-4)}
                 </p>
               ) : (
                 <p className="text-red-600">Nenhum cartão cadastrado</p>
@@ -113,7 +118,6 @@ const Pagamento: React.FC<PagamentoProps> = ({
           )}
         </div>
 
-        {/* 🍽️ Itens do Pedido */}
         <div className="w-full flex-1 mb-4 overflow-y-auto">
           <button
             onClick={() => setMostrarItens(!mostrarItens)}
@@ -145,10 +149,7 @@ const Pagamento: React.FC<PagamentoProps> = ({
                     </div>
                     <p className="font-bold text-xl">
                       R${' '}
-                      {(
-                        parseFloat(item.preco.replace('R$', '').replace(',', '.')) *
-                        item.quantidade
-                      ).toFixed(2)}
+                      {(parsePreco(item.preco) * item.quantidade).toFixed(2)}
                     </p>
                   </div>
                 ))
@@ -157,10 +158,9 @@ const Pagamento: React.FC<PagamentoProps> = ({
           )}
         </div>
 
-        {/* 💰 Total, Erros e Botões */}
         <div className="w-full border-t border-gray-200 pt-4">
           <p className="text-3xl font-extrabold text-center text-gray-900 mb-4">
-            Total: <span className="text-green-600">R$ {total}</span>
+            Total: <span className="text-green-600">R$ {valorParaPagar.toFixed(2).replace('.', ',')}</span>
           </p>
 
           {erroPagamento && (

@@ -32,8 +32,9 @@ interface Usuario {
 interface ModalCarrinhoProps {
   aberto: boolean;
   onFechar: () => void;
-  onAbrirPagamento: () => void;
+  onAbrirPagamento: (valorParcial?: number) => void;
   itens: Produto[];
+  setItens: (novosItens: Produto[]) => void;
   calcularTotal: () => string;
   onAlterarQuantidade: (nome: string, novaQuantidade: number) => void;
   onRemover: (nome: string) => void;
@@ -47,6 +48,7 @@ const ModalCarrinho: React.FC<ModalCarrinhoProps> = ({
   onFechar,
   onAbrirPagamento,
   itens,
+  setItens,
   calcularTotal,
   onAlterarQuantidade,
   onRemover,
@@ -56,7 +58,14 @@ const ModalCarrinho: React.FC<ModalCarrinhoProps> = ({
   const [abaAberta, setAbaAberta] = useState<'carrinho' | 'pedidos'>('carrinho');
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
   const [pedidoSelecionado, setPedidoSelecionado] = useState<Pedido | null>(null);
+  const [pedidoEmEdicao, setPedidoEmEdicao] = useState<{ id: number; valorOriginal: number } | null>(null);
   const [estoques, setEstoques] = useState<{ [nome: string]: number }>({});
+
+  const parsePreco = (preco: string | number) => {
+    return typeof preco === 'string'
+      ? parseFloat(preco.replace('R$', '').replace(',', '.'))
+      : preco;
+  };
 
   const buscarPedidos = async () => {
     try {
@@ -109,6 +118,53 @@ const ModalCarrinho: React.FC<ModalCarrinhoProps> = ({
   }, [abaAberta]);
 
   if (!aberto) return null;
+
+  const handleFinalizarCompra = () => {
+    const valorAtual = parseFloat(calcularTotal());
+
+    if (!pedidoEmEdicao) {
+      // Pedido novo
+      onAbrirPagamento(); // ← valor total padrão
+      return;
+    }
+
+    const diferenca = +(valorAtual - pedidoEmEdicao.valorOriginal).toFixed(2);
+
+    if (diferenca === 0) {
+      alert("✅ Pedido atualizado com sucesso.");
+
+      fetch("http://localhost/Unifood/database/editar_pedido.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: pedidoEmEdicao.id,
+          itens,
+          valor: valorAtual,
+        }),
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            alert("✅ Pedido editado com sucesso!");
+            setPedidoEmEdicao(null);
+            limparCarrinho();
+            setAbaAberta("pedidos");
+          } else {
+            alert("Erro ao editar o pedido.");
+          }
+        });
+
+    } else if (diferenca > 0) {
+      // Valor aumentou — pagar apenas a diferença
+      alert(`⚠️ O valor aumentou em R$ ${diferenca.toFixed(2).replace('.', ',')}. Será necessário pagar a diferença.`);
+      onAbrirPagamento(diferenca); // ← AQUI! passa só a diferença
+    } else {
+      const confirmar = confirm(`⚠️ O valor foi reduzido em R$ ${Math.abs(diferenca).toFixed(2).replace('.', ',')}.\nEssa diferença será convertida em saldo para você.\nDeseja continuar?`);
+      if (confirmar) {
+        onAbrirPagamento(); // pode ser valor total, ou adaptar
+      }
+    }
+  };
 
   return (
     <>
@@ -233,7 +289,7 @@ const ModalCarrinho: React.FC<ModalCarrinhoProps> = ({
                 TOTAL: <span className="text-green-600">R$ {calcularTotal()}</span>
               </p>
               <button
-                onClick={onAbrirPagamento}
+                onClick={handleFinalizarCompra}
                 className="bg-green-600 hover:bg-green-700 text-white font-bold text-2xl py-3 px-8 rounded-xl shadow-md hover:shadow-xl transition-all"
               >
                 Finalizar Compra
@@ -273,18 +329,28 @@ const ModalCarrinho: React.FC<ModalCarrinhoProps> = ({
 
             <div className="w-full mb-4">
               <div className="bg-gray-100 rounded-xl px-4 py-3">
-                <p className="text-xl text-gray-700"><strong>Data:</strong> {pedidoSelecionado.data} - {pedidoSelecionado.hora}</p>
-                <p className="text-xl text-gray-700"><strong>Forma de Pagamento:</strong> {pedidoSelecionado.tipo_pagamento.toUpperCase()}</p>
                 <p className="text-xl text-gray-700">
-                  <strong>Valor Total:</strong> <span className="font-extrabold text-red-600">R$ {Number(pedidoSelecionado.valor).toFixed(2).replace('.', ',')}</span>
+                  <strong>Data:</strong> {pedidoSelecionado.data} - {pedidoSelecionado.hora}
+                </p>
+                <p className="text-xl text-gray-700">
+                  <strong>Forma de Pagamento:</strong> {pedidoSelecionado.tipo_pagamento.toUpperCase()}
+                </p>
+                <p className="text-xl text-gray-700">
+                  <strong>Valor Total:</strong>{' '}
+                  <span className="font-extrabold text-red-600">
+                    R$ {Number(pedidoSelecionado.valor).toFixed(2).replace('.', ',')}
+                  </span>
                 </p>
                 <p className="text-xl text-gray-700">
                   <strong>Status:</strong>{' '}
-                  <span className={`font-extrabold ${pedidoSelecionado.status === 'FINALIZADO'
-                    ? 'text-green-600'
-                    : pedidoSelecionado.status === 'PENDENTE'
-                      ? 'text-red-600'
-                      : 'text-gray-900'}`}>
+                  <span
+                    className={`font-extrabold ${pedidoSelecionado.status === 'FINALIZADO'
+                      ? 'text-green-600'
+                      : pedidoSelecionado.status === 'PENDENTE'
+                        ? 'text-red-600'
+                        : 'text-gray-900'
+                      }`}
+                  >
                     {pedidoSelecionado.status}
                   </span>
                 </p>
@@ -312,10 +378,28 @@ const ModalCarrinho: React.FC<ModalCarrinhoProps> = ({
               )}
             </div>
 
+            <div className="flex items-center justify-between bg-gray-100 rounded-xl px-4 py-3 mb-3">
+              <h3 className="text-2xl font-bold text-gray-700">Itens do Pedido</h3>
+
+              {/* Botão de edição visível apenas se status for PENDENTE */}
+              {pedidoSelecionado.status === 'PENDENTE' && (
+                <button
+                  onClick={() => {
+                    setItens(pedidoSelecionado.itens);
+                    setPedidoEmEdicao({
+                      id: pedidoSelecionado.id,
+                      valorOriginal: Number(pedidoSelecionado.valor),
+                    });
+                    setPedidoSelecionado(null);
+                    setAbaAberta('carrinho');
+                  }}
+                  className="text-[1.5rem] text-yellow-600 hover:text-yellow-700 font-semibold transition"
+                >
+                  ✏️ Editar
+                </button>
+              )}
+            </div>
             <div className="flex flex-col flex-1 overflow-y-auto">
-              <div className="bg-gray-100 rounded-xl px-4 py-3 mb-3">
-                <h3 className="text-2xl font-bold text-gray-700">Itens do Pedido</h3>
-              </div>
               <div className="space-y-4 px-2">
                 {pedidoSelecionado.itens.length === 0 ? (
                   <p className="text-center text-2xl text-gray-500">Nenhum item encontrado.</p>
@@ -323,7 +407,7 @@ const ModalCarrinho: React.FC<ModalCarrinhoProps> = ({
                   pedidoSelecionado.itens.map((item, idx) => {
                     const precoUnitario =
                       typeof item.preco === 'string'
-                        ? parseFloat(item.preco.replace('R$', '').replace(',', '.'))
+                        ? parsePreco(item.preco)
                         : item.preco;
 
                     return (
@@ -343,7 +427,7 @@ const ModalCarrinho: React.FC<ModalCarrinhoProps> = ({
                           </p>
                         </div>
                         <p className="font-bold text-xl">
-                          R$ {(precoUnitario * item.quantidade).toFixed(2).replace('.', ',')}
+                          R$ {(parsePreco(item.preco) * item.quantidade).toFixed(2).replace('.', ',')}
                         </p>
                       </div>
                     );
