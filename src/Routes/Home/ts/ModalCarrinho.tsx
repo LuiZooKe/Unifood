@@ -418,12 +418,15 @@ const ModalCarrinho: React.FC<ModalCarrinhoProps> = ({
                 )}`}
                 alt="QR Code do Pedido"
                 className={`rounded-xl border border-gray-300 transition 
-      ${pedidoSelecionado.status === 'FINALIZADO' ? 'blur-sm opacity-50' : ''}`}
+      ${['FINALIZADO', 'EXCLUÍDO'].includes(pedidoSelecionado.status) ? 'blur-sm opacity-50' : ''}`}
               />
-              {pedidoSelecionado.status === 'FINALIZADO' && (
+              {['FINALIZADO', 'EXCLUÍDO'].includes(pedidoSelecionado.status) && (
                 <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
-                  <p className="bg-white/90 text-green-700 font-bold text-xl px-4 py-2 rounded-xl shadow">
-                    Pedido Finalizado ✔️
+                  <p className={`bg-white/90 font-bold text-xl px-4 py-2 rounded-xl shadow ${pedidoSelecionado.status === 'FINALIZADO' ? 'text-green-700' : 'text-gray-700'
+                    }`}>
+                    {pedidoSelecionado.status === 'FINALIZADO'
+                      ? 'Pedido Finalizado ✔️'
+                      : 'Pedido Excluído 🗑️'}
                   </p>
                   <p className="bg-white/90 text-red-600 font-bold text-lg px-4 py-2 rounded-xl shadow flex items-center gap-2">
                     <span className="text-2xl">❌</span> QR-CODE INDISPONÍVEL
@@ -431,26 +434,51 @@ const ModalCarrinho: React.FC<ModalCarrinhoProps> = ({
                 </div>
               )}
             </div>
-
             <div className="flex items-center justify-between bg-gray-100 rounded-xl px-4 py-3 mb-3">
               <h3 className="text-2xl font-bold text-gray-700">Itens do Pedido</h3>
 
               {/* Botão de edição visível apenas se status for PENDENTE */}
               {pedidoSelecionado.status === 'PENDENTE' && (
-                <button
-                  onClick={() => {
-                    setItens(pedidoSelecionado.itens);
-                    setPedidoEmEdicao({
-                      id: pedidoSelecionado.id,
-                      valorOriginal: Number(pedidoSelecionado.valor),
-                    });
-                    setPedidoSelecionado(null);
-                    setAbaAberta('carrinho');
-                  }}
-                  className="text-[1.5rem] text-yellow-600 hover:text-yellow-700 font-semibold transition"
-                >
-                  ✏️ Editar
-                </button>
+                <div className="flex gap-4">
+                  <button
+                    onClick={() => {
+                      setItens(pedidoSelecionado.itens);
+                      setPedidoEmEdicao({
+                        id: pedidoSelecionado.id,
+                        valorOriginal: Number(pedidoSelecionado.valor),
+                      });
+                      setPedidoSelecionado(null);
+                      setAbaAberta('carrinho');
+                    }}
+                    className="text-[1.5rem] text-yellow-600 hover:text-yellow-700 font-semibold transition"
+                  >
+                    ✏️ Editar
+                  </button>
+                  <button
+                    onClick={async () => {
+                      const confirmacao = confirm("Tem certeza que deseja excluir este pedido?");
+                      if (!confirmacao) return;
+
+                      const res = await fetch("http://localhost/Unifood/database/excluir_pedido.php", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ id: pedidoSelecionado.id }),
+                      });
+                      const data = await res.json();
+
+                      if (data.success) {
+                        notify.success("🗑️ Pedido excluído com sucesso.");
+                        setPedidoSelecionado(null);
+                        buscarPedidos(); // Atualiza a lista
+                      } else {
+                        notify.error("Erro ao excluir pedido.");
+                      }
+                    }}
+                    className="text-[1.5rem] text-red-600 hover:text-red-700 font-semibold transition"
+                  >
+                    🗑️ Excluir
+                  </button>
+                </div>
               )}
             </div>
             <div className="flex flex-col flex-1 overflow-y-auto">
