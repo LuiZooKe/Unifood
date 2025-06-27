@@ -30,7 +30,16 @@ if (
 
 $id = intval($data['id']);
 $itens = $data['itens'];
-$valor_total = floatval(str_replace(',', '.', $data['valor_total']));
+
+// 🔢 Calcula o valor total com base nos itens
+$valor_total = 0;
+foreach ($itens as $item) {
+    if (isset($item['preco'], $item['quantidade'])) {
+        $preco = floatval($item['preco']);
+        $quantidade = intval($item['quantidade']);
+        $valor_total += $preco * $quantidade;
+    }
+}
 
 // 💥 Verifica se o pedido existe e está pendente
 $verifica = $conn->prepare("SELECT status FROM pedidos WHERE id = ?");
