@@ -263,9 +263,9 @@ const AbaPedidos: React.FC = () => {
               </p>
             </div>
 
-            {pedidoSelecionado.status === 'FINALIZADO' ? (
+            {['FINALIZADO', 'EXCLUÍDO'].includes(pedidoSelecionado.status) ? (
               <button className="bg-gray-500 cursor-not-allowed text-white font-bold px-6 py-3 rounded-xl" disabled>
-                ESTE PEDIDO JÁ FOI ENTREGUE
+                {pedidoSelecionado.status === 'EXCLUIDO' ? 'PEDIDO EXCLUÍDO' : 'ESTE PEDIDO JÁ FOI ENTREGUE'}
               </button>
             ) : (
               <button
