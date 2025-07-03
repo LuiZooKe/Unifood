@@ -128,7 +128,7 @@ function Dashboard({ children }) {
             Caixa
           </a>
 
-          <a href="#" className="hover:bg-gray-700 p-2 rounded">
+          <a href="/relatorios" className="hover:bg-gray-700 p-2 rounded">
             Relatórios
           </a>
 

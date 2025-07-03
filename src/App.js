@@ -14,6 +14,7 @@ import ListaFuncionario from './Routes/HomeFuncionario/ListaFuncionario';
 import ListaProdutos from './Routes/HomeFuncionario/ListaProdutos';
 import CadastroFornecedor from './Routes/HomeFuncionario/CadastroFornecedor';
 import ListaFornecedores from './Routes/HomeFuncionario/ListaFornecedores';
+import Relatorios from './Routes/HomeFuncionario/Relatorios';
 import Caixa from './Routes/HomeFuncionario/Caixa/Caixa.tsx';
 import RedefinirSenha from './Routes/Login/RedefinirSenha';
 import SaibaMais from './Routes/Home/SaibaMais';
@@ -26,7 +27,7 @@ function App() {
   return (
     <>
       {/*  Ativa os Toasts */}
-      <Toaster 
+      <Toaster
         position="bottom-center"
         reverseOrder={false}
         toastOptions={{
@@ -86,6 +87,11 @@ function App() {
           <Route path="/caixa" element={
             <FunRoute>
               <Caixa />
+            </FunRoute>
+          } />
+          <Route path="/relatorios" element={
+            <FunRoute>
+              <Relatorios />
             </FunRoute>
           } />
         </Routes>
