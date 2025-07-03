@@ -23,33 +23,29 @@ function Relatorios() {
   const [totalPedidos, setTotalPedidos] = useState(0);
   const [erro, setErro] = useState("");
   const [filtro, setFiltro] = useState("todos");
+  const [modoTV, setModoTV] = useState(false);
 
-  // Mapeamento de cores para pagamentos - garanta maiúsculas sem espaços
   const coresPagamento = {
     PIX: "#00C49F",
     DINHEIRO: "#FFBB28",
     CARTAO: "#FF8042",
+    SALDO: "#00c446"
   };
 
-  // Cores para tipo de venda
   const coresVenda = {
     PDV: "#4D96FF",
     SITE: "#FF4D6D",
   };
 
-  // Função para normalizar chaves de cor: maiúsculas + trim
   const normalizeKey = (key) => (key ? key.trim().toUpperCase() : "");
 
   const fetchRelatorios = async (filtroSelecionado) => {
     try {
-      const res = await fetch(
-        "http://localhost/UNIFOOD/database/relatorios.php",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ filtro: filtroSelecionado }),
-        }
-      );
+      const res = await fetch("http://localhost/UNIFOOD/database/relatorios.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ filtro: filtroSelecionado }),
+      });
       const data = await res.json();
       if (data.success) {
         setDadosPagamentos(
@@ -71,7 +67,7 @@ function Relatorios() {
         setDetalhesProdutos(data.detalhes_produtos);
         setErro("");
       } else {
-        setErro(data.message || "Erro ao carregar dados do relatório.");
+        setErro(data.message || "Erro ao carregar dados.");
         setDadosPagamentos([]);
         setDadosVendas([]);
         setDadosTicket([]);
@@ -83,13 +79,6 @@ function Relatorios() {
     } catch (e) {
       console.error(e);
       setErro("Erro ao conectar ao servidor.");
-      setDadosPagamentos([]);
-      setDadosVendas([]);
-      setDadosTicket([]);
-      setTopProdutos([]);
-      setDetalhesProdutos([]);
-      setFaturamento(0);
-      setTotalPedidos(0);
     }
   };
 
@@ -97,200 +86,247 @@ function Relatorios() {
     fetchRelatorios(filtro);
   }, [filtro]);
 
+  // 📺 MODO TV
+  if (modoTV) {
+    return (
+      <div className="fixed top-0 left-0 z-50 w-screen h-screen bg-black text-white overflow-auto p-6">
+        <h1 className="text-4xl font-bold text-center mb-10">Visão Geral - Modo TV</h1>
+        <div className="flex flex-wrap justify-center gap-10">
+          <PieChart width={400} height={400}>
+            <Pie data={dadosPagamentos} dataKey="quantidade" nameKey="tipo_pagamento" cx="50%" cy="50%" outerRadius={150} label>
+              {dadosPagamentos.map((entry, index) => (
+                <Cell key={index} fill={coresPagamento[normalizeKey(entry.tipo_pagamento)] || "#ccc"} />
+              ))}
+            </Pie>
+            <Tooltip />
+            <Legend />
+          </PieChart>
+
+          <PieChart width={400} height={400}>
+            <Pie data={dadosVendas} dataKey="quantidade" nameKey="tipo_venda" cx="50%" cy="50%" outerRadius={150} label>
+              {dadosVendas.map((entry, index) => (
+                <Cell key={index} fill={coresVenda[normalizeKey(entry.tipo_venda)] || "#ccc"} />
+              ))}
+            </Pie>
+            <Tooltip />
+            <Legend />
+          </PieChart>
+
+          <BarChart width={700} height={400} data={dadosTicket}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="tipo_venda" />
+            <YAxis />
+            <Tooltip formatter={(v) => `R$ ${v}`} />
+            <Legend />
+            <Bar dataKey="ticket_medio" fill="#f87171" />
+          </BarChart>
+        </div>
+
+        <div className="text-center mt-10">
+          <button
+            onClick={() => setModoTV(false)}
+            className="mt-4 bg-red-600 px-6 py-3 text-white rounded hover:bg-red-500"
+          >
+            Fechar Modo TV
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <Dashboard>
-      <div className="p-6 text-white overflow-x-hidden w-full">
-        <h1 className="text-3xl font-bold mb-[30px] text-center">
-          Relatórios de Pedidos Finalizados
-        </h1>
-
-        <div className="mb-4 flex justify-center gap-4 flex-wrap">
-          <select
-            value={filtro}
-            onChange={(e) => setFiltro(e.target.value)}
-            className="text-black p-2 rounded"
-          >
-            <option value="todos">Todos</option>
-            <option value="hoje">Hoje</option>
-            <option value="semana">Última Semana</option>
-            <option value="mes">Último Mês</option>
-          </select>
-        </div>
-
-        {/* Resumo topo */}
-        <div className="flex justify-center gap-4 flex-wrap mb-8">
-          <div className="bg-green-600 p-4 rounded shadow text-center min-w-[150px]">
-            <p className="text-xl font-bold">Faturamento</p>
-            <p className="text-2xl">R$ {faturamento.toFixed(2)}</p>
-          </div>
-          <div className="bg-blue-600 p-4 rounded shadow text-center min-w-[150px]">
-            <p className="text-xl font-bold">Total Pedidos</p>
-            <p className="text-2xl">{totalPedidos}</p>
-          </div>
-        </div>
-
-        {/* Gráficos */}
-        <div className="flex flex-col md:flex-row justify-center gap-10 flex-wrap items-center">
-          {/* Pagamento */}
-          <div className="relative min-h-[400px]">
-            <PieChart width={400} height={400}>
-              <Pie
-                data={
-                  dadosPagamentos.length > 0
-                    ? dadosPagamentos
-                    : [{ tipo_pagamento: "Sem Dados", quantidade: 1 }]
-                }
-                dataKey="quantidade"
-                nameKey="tipo_pagamento"
-                cx="50%"
-                cy="50%"
-                outerRadius={150}
-                label={dadosPagamentos.length > 0}
+      <div className="min-h-screen bg-[#520000] text-white p-6 w-full">
+        <div className="max-w-[1200px] mx-auto">
+          <div className="flex justify-between flex-wrap items-center mb-6">
+            <h1 className="text-2xl md:text-3xl font-semibold tracking-tight">
+              Relatórios de Pedidos Finalizados
+            </h1>
+            <div className="flex gap-2 items-center">
+              <select
+                value={filtro}
+                onChange={(e) => setFiltro(e.target.value)}
+                className="p-2 rounded text-black"
               >
-                {(dadosPagamentos.length > 0
-                  ? dadosPagamentos
-                  : [{ tipo_pagamento: "Sem Dados", quantidade: 1 }]
-                ).map((entry, index) => {
-                  const cor = dadosPagamentos.length > 0
-                    ? coresPagamento[normalizeKey(entry.tipo_pagamento)] || "#8884d8"
-                    : "#ffffff";
-                  return <Cell key={`cell-pag-${index}`} fill={cor} />;
-                })}
-              </Pie>
-              <Tooltip />
-              <Legend />
-            </PieChart>
-            {dadosPagamentos.length === 0 && (
-              <span className="absolute inset-0 flex justify-center items-center text-black text-xl">
-                Sem dados para este período.
-              </span>
-            )}
-          </div>
-
-          {/* Tipo de venda */}
-          <div className="relative min-h-[400px]">
-            <PieChart width={400} height={400}>
-              <Pie
-                data={
-                  dadosVendas.length > 0
-                    ? dadosVendas
-                    : [{ tipo_venda: "Sem Dados", quantidade: 1 }]
-                }
-                dataKey="quantidade"
-                nameKey="tipo_venda"
-                cx="50%"
-                cy="50%"
-                outerRadius={150}
-                label={dadosVendas.length > 0}
+                <option value="todos">Todos</option>
+                <option value="hoje">Hoje</option>
+                <option value="semana">Última Semana</option>
+                <option value="mes">Último Mês</option>
+              </select>
+              <button
+                onClick={() => setModoTV(true)}
+                className="bg-purple-600 hover:bg-purple-500 px-4 py-2 rounded text-white"
               >
-                {(dadosVendas.length > 0
-                  ? dadosVendas
-                  : [{ tipo_venda: "Sem Dados", quantidade: 1 }]
-                ).map((entry, index) => {
-                  const cor = dadosVendas.length > 0
-                    ? coresVenda[normalizeKey(entry.tipo_venda)] || "#8884d8"
-                    : "#ffffff";
-                  return <Cell key={`cell-venda-${index}`} fill={cor} />;
-                })}
-              </Pie>
-              <Tooltip />
-              <Legend />
-            </PieChart>
-            {dadosVendas.length === 0 && (
-              <span className="absolute inset-0 flex justify-center items-center text-black text-xl">
-                Sem dados para este período.
-              </span>
-            )}
+                Modo TV
+              </button>
+            </div>
           </div>
-        </div>
 
-        {/* Ticket médio */}
-        <div className="w-full max-w-[800px] bg-[#1f2f3f] rounded p-4 mt-8 mx-auto">
-          <h3 className="text-center text-xl font-bold mb-4">
-            Ticket Médio por Canal
-          </h3>
-          <div className="flex justify-center">
-            <BarChart width={700} height={400} data={dadosTicket}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="tipo_venda" />
-              <YAxis />
-              <Tooltip formatter={(value) => `R$ ${value.toFixed(2)}`} />
-              <Legend />
-              <Bar dataKey="ticket_medio" fill="#8884d8" name="Ticket Médio">
-                {dadosTicket.map((entry, index) => (
-                  <Cell
-                    key={`cell-bar-${index}`}
-                    fill={entry.tipo_venda === "PDV" ? "#4D96FF" : "#FF4D6D"}
-                  />
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 gap-6 mb-8">
+            <div className="bg-green-600 p-6 rounded shadow">
+              <p className="text-md opacity-75">FATURAMENTO</p>
+              <p className="text-5xl font-bold">R$ {faturamento.toFixed(2)}</p>
+            </div>
+            <div className="bg-[#6e0f0f] p-6 rounded shadow">
+              <p className="text-md opacity-75">TOTAL DE PEDIDOS</p>
+              <p className="text-5xl font-bold">{totalPedidos}</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-[#6e0f0f] p-4 rounded">
+              <h3 className="text-lg font-semibold my-4 text-center">Por Tipo de Pagamento</h3>
+              <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+                <PieChart width={300} height={300}>
+                  <Pie
+                    data={dadosPagamentos}
+                    dataKey="quantidade"
+                    nameKey="tipo_pagamento"
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={100}
+                  >
+                    {dadosPagamentos.map((entry, index) => (
+                      <Cell
+                        key={index}
+                        fill={
+                          coresPagamento[normalizeKey(entry.tipo_pagamento)] || "#ccc"
+                        }
+                      />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                  <Legend />
+                </PieChart>
+                <BarChart width={300} height={300} data={dadosPagamentos} barCategoryGap={40} barSize={30}>
+                  <XAxis dataKey="tipo_pagamento" />
+                  <YAxis />
+                  <Tooltip formatter={(v) => `${v} pedidos`} />
+                  <Legend />
+                  <Bar
+                    dataKey="quantidade"
+                    name="Pedidos"
+                  >
+                    {dadosPagamentos.map((entry, index) => (
+                      <Cell
+                        key={index}
+                        fill={
+                          coresPagamento[normalizeKey(entry.tipo_pagamento)] || "#f87171"
+                        }
+                      />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </div>
+            </div>
+
+            <div className="bg-[#6e0f0f] p-4 rounded">
+              <h3 className="text-lg font-semibold my-4 text-center">Por Tipo de Venda</h3>
+              <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+                <PieChart width={300} height={300}>
+                  <Pie
+                    data={dadosVendas}
+                    dataKey="quantidade"
+                    nameKey="tipo_venda"
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={100}
+                  >
+                    {dadosVendas.map((entry, index) => (
+                      <Cell
+                        key={index}
+                        fill={coresVenda[normalizeKey(entry.tipo_venda)] || "#ccc"}
+                      />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                  <Legend />
+                </PieChart>
+                <BarChart
+                  width={300}
+                  height={300}
+                  data={dadosTicket}
+                  barCategoryGap={40}
+                  barSize={30}
+                >
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="tipo_venda" />
+                  <YAxis />
+                  <Tooltip formatter={(v) => `R$ ${v}`} />
+                  <Legend />
+                  <Bar
+                    dataKey="ticket_medio"
+                    name="Ticket Médio"
+                  >
+                    {dadosTicket.map((entry, index) => (
+                      <Cell
+                        key={index}
+                        fill={
+                          coresVenda[normalizeKey(entry.tipo_venda)] || "#f87171"
+                        }
+                      />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-10 overflow-x-auto">
+            <h3 className="text-x1 font-semibold mb-2">
+              Top 10 PRODUTOS MAIS VENDIDOS
+            </h3>
+            <table className="min-w-full text-md bg-[#6e0f0f] rounded">
+              <thead>
+                <tr className="text-left bg-[#7f1d1d] text-black font-semibold">
+                  <th className="p-3">Produto</th>
+                  <th className="p-3">Quantidade Vendida</th>
+                </tr>
+              </thead>
+              <tbody>
+                {topProdutos.map((item, idx) => (
+                  <tr key={idx} className="border-t border-[#9b1c1c]">
+                    <td className="p-3 font-medium">{item.nome}</td>
+                    <td className="p-3">{item.quantidade_total}</td>
+                  </tr>
                 ))}
-              </Bar>
-            </BarChart>
+              </tbody>
+            </table>
           </div>
-          {dadosTicket.length === 0 && (
-            <p className="text-center text-white mt-4">
-              Sem dados para este período.
-            </p>
-          )}
-        </div>
 
-        {/* Top 10 produtos */}
-        <div className="w-full mt-10 overflow-x-auto">
-          <h3 className="text-center text-xl font-bold mb-4">
-            Top 10 Produtos Mais Vendidos
-          </h3>
-          <table className="w-full text-left border border-white">
-            <thead>
-              <tr>
-                <th className="border px-2 py-1">Produto</th>
-                <th className="border px-2 py-1">Quantidade Vendida</th>
-              </tr>
-            </thead>
-            <tbody>
-              {topProdutos.map((item, idx) => (
-                <tr key={idx}>
-                  <td className="border px-2 py-1">{item.nome}</td>
-                  <td className="border px-2 py-1">{item.quantidade_total}</td>
+          <div className="mt-10 overflow-x-auto">
+            <h3 className="text-X1 font-semibold mb-2">DETALHAMENTO DOS PRODUTOS</h3>
+            <table className="min-w-full text-md bg-[#6e0f0f] rounded">
+              <thead>
+                <tr className="text-left bg-[#7f1d1d] text-black font-semibold">
+                  <th className="p-3">Produto</th>
+                  <th className="p-3">Preço</th>
+                  <th className="p-3">Custo</th>
+                  <th className="p-3">Lucro Unitário</th>
+                  <th className="p-3">Quantidade</th>
+                  <th className="p-3">Lucro Total</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Tabela detalhada produtos */}
-        <div className="w-full mt-10 overflow-x-auto">
-          <h3 className="text-center text-xl font-bold mb-4">
-            Detalhamento de Produtos
-          </h3>
-          <table className="w-full text-left border border-white">
-            <thead>
-              <tr>
-                <th className="border px-2 py-1">Produto</th>
-                <th className="border px-2 py-1">Preço</th>
-                <th className="border px-2 py-1">Custo</th>
-                <th className="border px-2 py-1">Lucro Unitário</th>
-                <th className="border px-2 py-1">Quantidade Vendida</th>
-                <th className="border px-2 py-1">Lucro Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              {detalhesProdutos.map((item, idx) => (
-                <tr key={idx}>
-                  <td className="border px-2 py-1">{item.nome}</td>
-                  <td className="border px-2 py-1">R$ {item.preco.toFixed(2)}</td>
-                  <td className="border px-2 py-1">R$ {item.custo.toFixed(2)}</td>
-                  <td className="border px-2 py-1">
-                    R$ {item.lucro_unitario.toFixed(2)}
-                  </td>
-                  <td className="border px-2 py-1">{item.quantidade_total}</td>
-                  <td className="border px-2 py-1">R$ {item.lucro_total.toFixed(2)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {detalhesProdutos.map((item, idx) => (
+                  <tr key={idx} className="border-t border-[#9b1c1c]">
+                    <td className="p-3 font-medium">{item.nome}</td>
+                    <td className="p-3">R$ {item.preco.toFixed(2)}</td>
+                    <td className="p-3">R$ {item.custo.toFixed(2)}</td>
+                    <td className="p-3">R$ {item.lucro_unitario.toFixed(2)}</td>
+                    <td className="p-3">{item.quantidade_total}</td>
+                    <td className="p-3">R$ {item.lucro_total.toFixed(2)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </Dashboard>
   );
+
+
 }
 
 export default Relatorios;

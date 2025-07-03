@@ -101,7 +101,7 @@ if ($res3) {
     }
 }
 
-// FATURAMENTO e total pedidos
+// FATURAMENTO e TOTAL PEDIDOS
 $sql4 = "
     SELECT SUM(valor_total) as faturamento, COUNT(*) as total_pedidos
     FROM pedidos
@@ -113,18 +113,18 @@ if ($res4 && $row = $res4->fetch_assoc()) {
     $response['total_pedidos'] = intval($row['total_pedidos'] ?? 0);
 }
 
-// TOP 10 produtos
+// TOP 10 PRODUTOS — usando nome
 $sql5 = "
-    SELECT p.nome, SUM(JSON_EXTRACT(itens, CONCAT('$[', numbers.n, '].quantidade'))) AS quantidade_total
+    SELECT 
+        JSON_UNQUOTE(JSON_EXTRACT(itens, CONCAT('$[', numbers.n, '].nome'))) AS nome,
+        SUM(JSON_EXTRACT(itens, CONCAT('$[', numbers.n, '].quantidade'))) AS quantidade_total
     FROM pedidos
     JOIN (
         SELECT 0 n UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4
         UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9
     ) numbers
-    JOIN produtos p
-      ON JSON_EXTRACT(pedidos.itens, CONCAT('$[', numbers.n, '].id')) = p.id
     WHERE pedidos.status = 'FINALIZADO' $condicaoData
-    GROUP BY p.nome
+    GROUP BY nome
     ORDER BY quantidade_total DESC
     LIMIT 10
 ";
@@ -138,20 +138,24 @@ if ($res5) {
     }
 }
 
-// DETALHES produtos
+// DETALHES DE PRODUTOS — cruzando por nome
 $sql6 = "
-    SELECT p.nome, p.preco, p.custo, p.lucro as lucro_unitario,
-           SUM(JSON_EXTRACT(itens, CONCAT('$[', numbers.n, '].quantidade'))) AS quantidade_total,
-           SUM(JSON_EXTRACT(itens, CONCAT('$[', numbers.n, '].quantidade')) * p.lucro) AS lucro_total
+    SELECT 
+        JSON_UNQUOTE(JSON_EXTRACT(itens, CONCAT('$[', numbers.n, '].nome'))) AS nome,
+        p.preco,
+        p.custo,
+        p.lucro AS lucro_unitario,
+        SUM(JSON_EXTRACT(itens, CONCAT('$[', numbers.n, '].quantidade'))) AS quantidade_total,
+        SUM(JSON_EXTRACT(itens, CONCAT('$[', numbers.n, '].quantidade')) * p.lucro) AS lucro_total
     FROM pedidos
     JOIN (
         SELECT 0 n UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4
         UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9
     ) numbers
     JOIN produtos p
-      ON JSON_EXTRACT(pedidos.itens, CONCAT('$[', numbers.n, '].id')) = p.id
+      ON JSON_UNQUOTE(JSON_EXTRACT(pedidos.itens, CONCAT('$[', numbers.n, '].nome'))) = p.nome
     WHERE pedidos.status = 'FINALIZADO' $condicaoData
-    GROUP BY p.nome, p.preco, p.custo, p.lucro
+    GROUP BY nome, p.preco, p.custo, p.lucro
 ";
 $res6 = $conn->query($sql6);
 if ($res6) {
