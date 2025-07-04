@@ -47,9 +47,9 @@ $response = [
     'detalhes_produtos' => [],
 ];
 
-// PAGAMENTOS
+// PAGAMENTOS — com soma de valor_total
 $sql1 = "
-    SELECT tipo_pagamento, COUNT(*) as quantidade
+    SELECT tipo_pagamento, COUNT(*) as quantidade, SUM(valor_total) as total
     FROM pedidos
     WHERE status = 'FINALIZADO' $condicaoData
     GROUP BY tipo_pagamento
@@ -59,14 +59,15 @@ if ($res1) {
     while ($row = $res1->fetch_assoc()) {
         $response['pagamentos'][] = [
             'tipo_pagamento' => $row['tipo_pagamento'],
-            'quantidade' => intval($row['quantidade'])
+            'quantidade' => intval($row['quantidade']),
+            'total' => floatval($row['total'] ?? 0)
         ];
     }
 }
 
-// VENDAS
+// VENDAS — com soma de valor_total
 $sql2 = "
-    SELECT tipo_venda, COUNT(*) as quantidade
+    SELECT tipo_venda, COUNT(*) as quantidade, SUM(valor_total) as total
     FROM pedidos
     WHERE status = 'FINALIZADO' $condicaoData
     GROUP BY tipo_venda
@@ -76,12 +77,13 @@ if ($res2) {
     while ($row = $res2->fetch_assoc()) {
         $response['vendas'][] = [
             'tipo_venda' => $row['tipo_venda'],
-            'quantidade' => intval($row['quantidade'])
+            'quantidade' => intval($row['quantidade']),
+            'total' => floatval($row['total'] ?? 0)
         ];
     }
 }
 
-// TICKET MÉDIO
+// TICKET MÉDIO — também adicionando total para usar no gráfico
 $sql3 = "
     SELECT tipo_venda, SUM(valor_total) as soma_total, COUNT(*) as quantidade
     FROM pedidos
@@ -96,7 +98,8 @@ if ($res3) {
         $ticket_medio = $quantidade > 0 ? $soma_total / $quantidade : 0;
         $response['ticket'][] = [
             'tipo_venda' => $row['tipo_venda'],
-            'ticket_medio' => round($ticket_medio, 2)
+            'ticket_medio' => round($ticket_medio, 2),
+            'total' => round($soma_total, 2)
         ];
     }
 }
@@ -145,6 +148,7 @@ $sql6 = "
         p.preco,
         p.custo,
         p.lucro AS lucro_unitario,
+        p.imagem,
         SUM(JSON_EXTRACT(itens, CONCAT('$[', numbers.n, '].quantidade'))) AS quantidade_total,
         SUM(JSON_EXTRACT(itens, CONCAT('$[', numbers.n, '].quantidade')) * p.lucro) AS lucro_total
     FROM pedidos
@@ -167,6 +171,7 @@ if ($res6) {
             'lucro_unitario' => floatval($row['lucro_unitario']),
             'quantidade_total' => intval($row['quantidade_total']),
             'lucro_total' => floatval($row['lucro_total']),
+            'imagem' => $row['imagem'],
         ];
     }
 }
