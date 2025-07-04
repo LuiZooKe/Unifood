@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { useNavigate } from 'react-router-dom';
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
@@ -17,6 +18,7 @@ import {
 } from "recharts";
 
 function Relatorios() {
+  const navigate = useNavigate();
   const [dadosPagamentos, setDadosPagamentos] = useState([]);
   const [dadosVendas, setDadosVendas] = useState([]);
   const [dadosTicket, setDadosTicket] = useState([]);
@@ -28,7 +30,27 @@ function Relatorios() {
   const [filtro, setFiltro] = useState("todos");
   const [slideAtual, setSlideAtual] = useState(0);
   const [modoTV, setModoTV] = useState(false);
+  const relatorioRef = useRef(null);
   const caminhoBaseImagens = "http://localhost/UNIFOOD/database/imgProdutos/";
+
+  const ativarModoTV = () => {
+    const el = relatorioRef.current;
+    if (el && el.requestFullscreen) {
+      el.requestFullscreen();
+    } else if (el && el.webkitRequestFullscreen) {
+      el.webkitRequestFullscreen(); // Safari
+    } else if (el && el.msRequestFullscreen) {
+      el.msRequestFullscreen(); // IE11
+    }
+    setModoTV(true);
+  };
+
+  const sairModoTV = () => {
+    if (document.fullscreenElement) {
+      document.exitFullscreen();
+    }
+    setModoTV(false);
+  };
 
   const coresPagamento = {
     CARTAO: "#f97316",    // Laranja suave (orange-500)
@@ -93,31 +115,48 @@ function Relatorios() {
 
   return (
     <Dashboard>
-      <div className="min-h-screen bg-[#520000] text-white p-6 w-full">
+      <div
+        ref={relatorioRef}
+        className={`min-h-screen bg-[#520000] text-white p-6 w-full relative ${modoTV ? "z-[9999] overflow-auto" : ""
+          }`}
+      >
         <div className="max-w-[1200px] mx-auto">
-          <div className="flex justify-between flex-wrap items-center mb-6">
-            <h1 className="text-2xl md:text-3xl font-semibold tracking-tight">
-              Relatórios de Pedidos Finalizados
-            </h1>
-            <div className="flex gap-2 items-center">
-              <select
-                value={filtro}
-                onChange={(e) => setFiltro(e.target.value)}
-                className="p-2 rounded text-black"
-              >
-                <option value="todos">Todos</option>
-                <option value="hoje">Hoje</option>
-                <option value="semana">Última Semana</option>
-                <option value="mes">Último Mês</option>
-              </select>
-              {/* <button
-                onClick={() => setModoTV(true)}
-                className="bg-purple-600 hover:bg-purple-500 px-4 py-2 rounded text-white"
-              >
-                MODO TV 📺
-              </button> */}
+          <div className="relative h-[80px]">
+            <div className="absolute top-0 left-0 right-0 z-[9999] bg-[#520000] py-4 px-1 flex justify-between flex-wrap items-center shadow-lg rounded">
+
+              <h1 className="text-2xl md:text-3xl font-semibold tracking-tight">
+                Relatórios de Pedidos Finalizados
+              </h1>
+              <div className="flex gap-2 items-center">
+                <select
+                  value={filtro}
+                  onChange={(e) => setFiltro(e.target.value)}
+                  className="p-2 rounded text-black"
+                >
+                  <option value="todos">Todos</option>
+                  <option value="hoje">Hoje</option>
+                  <option value="semana">Última Semana</option>
+                  <option value="mes">Último Mês</option>
+                </select>
+                {modoTV ? (
+                  <button
+                    onClick={sairModoTV}
+                    className="bg-red-700 hover:bg-red-600 px-4 py-2 rounded text-white"
+                  >
+                    ❌ Sair
+                  </button>
+                ) : (
+                  <button
+                    onClick={ativarModoTV}
+                    className="bg-purple-600 hover:bg-purple-500 px-4 py-2 rounded text-white"
+                  >
+                    MODO TV 📺
+                  </button>
+                )}
+              </div>
             </div>
           </div>
+
 
           {/* Primeira linha com 2 blocos: Faturamento e Total de Pedidos */}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 gap-6 mb-8">
@@ -243,16 +282,16 @@ function Relatorios() {
               <p className="text-md opacity-75 mb-2">MENOS VENDIDO</p>
               {(() => {
                 const produto = [...detalhesProdutos]
-                  .filter(p => p.quantidade_total > 0)
-                  .sort((a, b) => a.quantidade_total - b.quantidade_total)[0];
+                  .filter(p => p.quantidade_vendida > 0)
+                  .sort((a, b) => a.quantidade_vendida - b.quantidade_vendida)[0];
                 return produto ? (
                   <div className="text-[1.5rem] space-y-1">
                     <div className="flex justify-between">
                       <p className="font-semibold">{produto.nome}</p>
-                      <p>Total: R$ {(produto.preco * produto.quantidade_total).toFixed(2)}</p>
+                      <p>Total: R$ {(produto.preco * produto.quantidade_vendida).toFixed(2)}</p>
                     </div>
                     <div className="flex justify-between">
-                      <p>Vendidos: {produto.quantidade_total}</p>
+                      <p>Vendidos: {produto.quantidade_vendida}</p>
                       <p>Margem: {(produto.lucro_unitario / produto.preco * 100).toFixed(1)}%</p>
                     </div>
                   </div>
@@ -390,7 +429,6 @@ function Relatorios() {
             </table>
           </div>
 
-          {/* TABELA DE LUCRO DOS PRODUTOS */}
           <div className="mt-10 overflow-x-auto">
             <h3 className="text-x1 font-semibold mb-2">DETALHAMENTO DOS PRODUTOS</h3>
             <table className="min-w-full text-md bg-[#6e0f0f] rounded">
@@ -400,24 +438,36 @@ function Relatorios() {
                   <th className="p-3">Preço</th>
                   <th className="p-3">Custo</th>
                   <th className="p-3">Lucro Unitário</th>
-                  <th className="p-3">Quantidade</th>
+                  <th className="p-3">Fornecedor</th>
+                  <th className="p-3">Qtd. em Estoque</th>
+                  <th className="p-3">Qtd. Vendida</th>
                   <th className="p-3">Lucro Total</th>
                 </tr>
               </thead>
               <tbody>
                 {detalhesProdutos.map((item, idx) => (
-                  <tr key={idx} className="border-t border-[#9b1c1c]">
+                  <tr
+                    key={idx}
+                    className="border-t border-[#9b1c1c] cursor-pointer hover:bg-[#8b1f1f] transition"
+                    onClick={() => {
+                      localStorage.setItem("produtoSelecionado", item.nome);
+                      navigate("/lista-produtos");
+                    }}
+                    title="Clique para ver/editar o produto na Lista"
+                  >
                     <td className="p-3 font-medium">{item.nome}</td>
                     <td className="p-3">R$ {item.preco.toFixed(2)}</td>
                     <td className="p-3">R$ {item.custo.toFixed(2)}</td>
                     <td className="p-3">R$ {item.lucro_unitario.toFixed(2)}</td>
-                    <td className="p-3">{item.quantidade_total}</td>
+                    <td className="p-3">{item.nome_fornecedor}</td>
+                    <td className="p-3">{item.quantidade_estoque}</td>
+                    <td className="p-3">{item.quantidade_vendida}</td>
                     <td className="p-3">R$ {item.lucro_total.toFixed(2)}</td>
                   </tr>
                 ))}
-                {/* Linha com lucro total geral */}
+
                 <tr className="bg-[#7f1d1d] text-white font-bold border-t border-white">
-                  <td colSpan={5} className="p-3 text-right">Lucro Líquido Total</td>
+                  <td colSpan={7} className="p-3 text-right">Lucro Líquido Total</td>
                   <td className="p-3">
                     R$ {detalhesProdutos.reduce((acc, item) => acc + item.lucro_total, 0).toFixed(2)}
                   </td>

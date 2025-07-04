@@ -149,7 +149,9 @@ $sql6 = "
         p.custo,
         p.lucro AS lucro_unitario,
         p.imagem,
-        SUM(JSON_EXTRACT(itens, CONCAT('$[', numbers.n, '].quantidade'))) AS quantidade_total,
+        p.nome_fornecedor AS nome_fornecedor,
+        p.quantidade AS quantidade_estoque,
+        SUM(JSON_EXTRACT(itens, CONCAT('$[', numbers.n, '].quantidade'))) AS quantidade_vendida,
         SUM(JSON_EXTRACT(itens, CONCAT('$[', numbers.n, '].quantidade')) * p.lucro) AS lucro_total
     FROM pedidos
     JOIN (
@@ -159,7 +161,7 @@ $sql6 = "
     JOIN produtos p
       ON JSON_UNQUOTE(JSON_EXTRACT(pedidos.itens, CONCAT('$[', numbers.n, '].nome'))) = p.nome
     WHERE pedidos.status = 'FINALIZADO' $condicaoData
-    GROUP BY nome, p.preco, p.custo, p.lucro
+    GROUP BY nome, p.preco, p.custo, p.lucro, p.nome_fornecedor, p.quantidade
 ";
 $res6 = $conn->query($sql6);
 if ($res6) {
@@ -169,9 +171,11 @@ if ($res6) {
             'preco' => floatval($row['preco']),
             'custo' => floatval($row['custo']),
             'lucro_unitario' => floatval($row['lucro_unitario']),
-            'quantidade_total' => intval($row['quantidade_total']),
-            'lucro_total' => floatval($row['lucro_total']),
             'imagem' => $row['imagem'],
+            'nome_fornecedor' => $row['nome_fornecedor'],
+            'quantidade_estoque' => intval($row['quantidade_estoque']),
+            'quantidade_vendida' => intval($row['quantidade_vendida']),
+            'lucro_total' => floatval($row['lucro_total'])
         ];
     }
 }

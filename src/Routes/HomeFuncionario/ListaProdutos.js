@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import Dashboard from './Dashboard';
 
 function ListaProdutos() {
@@ -12,7 +13,8 @@ function ListaProdutos() {
   const [editedProduto, setEditedProduto] = useState(null);
   const [filtro, setFiltro] = useState('PRODUTOS');
   const [pesquisaNome, setPesquisaNome] = useState('');
-
+  const location = useLocation();
+  const produtoSelecionado = location.state?.produtoSelecionado || null;
 
   const unidades = ['KG', 'LITRO', 'UNIDADE'];
 
@@ -29,6 +31,17 @@ function ListaProdutos() {
       setErro('Erro ao carregar produtos.');
     }
   };
+
+  useEffect(() => {
+    const nome = localStorage.getItem("produtoSelecionado");
+    if (nome && produtos.length > 0) {
+      const encontrado = produtos.find((p) => p.nome === nome);
+      if (encontrado) {
+        setModalDescricao(encontrado);
+      }
+      localStorage.removeItem("produtoSelecionado");
+    }
+  }, [produtos]);
 
   const fetchFornecedores = async () => {
     try {
@@ -277,7 +290,7 @@ function ListaProdutos() {
         {/* Modal de descrição */}
         {modalDescricao && (
           <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50">
-            <div className="bg-white text-black p-6 rounded shadow w-full max-w-[600px] mx-4 max-h-[90vh] overflow-auto">
+            <div className="bg-white text-black p-6 rounded shadow w-full max-w-[600px] mx-4 max-h-[90vh] overflow-auto relative">
               <h3 className="text-3xl font-bold mb-4">{modalDescricao.nome}</h3>
               {modalDescricao.imagem && (
                 <img
@@ -286,6 +299,18 @@ function ListaProdutos() {
                   className="w-full h-48 object-cover rounded mb-4"
                 />
               )}
+              <div className="flex justify-end  mb-4">
+                <button
+                  onClick={() => {
+                    setEditedProduto(modalDescricao);
+                    setModalDescricao(null);
+                    setModalEditar(true);
+                  }}
+                  className="bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-2 px-4 rounded shadow flex items-center gap-2"
+                >
+                  Editar Produto ✏️
+                </button>
+              </div>
               <div className="space-y-2">
                 <p><strong>Descrição:</strong> {modalDescricao.descricao}</p>
                 <p><strong>Preço:</strong> R$ {parseFloat(modalDescricao.preco).toFixed(2)}</p>
@@ -296,6 +321,7 @@ function ListaProdutos() {
                 <p><strong>Categoria:</strong> {modalDescricao.categoria}</p>
                 <p><strong>Fornecedor:</strong> {modalDescricao.nome_fornecedor}</p>
               </div>
+
               <button
                 onClick={() => setModalDescricao(null)}
                 className="bg-blue-500 text-white px-4 py-2 rounded mt-6 w-full"
