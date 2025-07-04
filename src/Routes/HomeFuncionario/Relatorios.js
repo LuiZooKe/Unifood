@@ -117,12 +117,12 @@ function Relatorios() {
     <Dashboard>
       <div
         ref={relatorioRef}
-        className={`min-h-screen bg-[#520000] text-white p-6 w-full relative ${modoTV ? "z-[9999] overflow-auto" : ""
+        className={`min-h-screen bg-white text-black p-6 w-full relative ${modoTV ? "z-[9999] overflow-auto" : ""
           }`}
       >
         <div className="max-w-[1200px] mx-auto">
           <div className="relative h-[80px]">
-            <div className="absolute top-0 left-0 right-0 z-[9999] bg-[#520000] py-4 px-1 flex justify-between flex-wrap items-center shadow-lg rounded">
+            <div className="absolute top-0 left-0 right-0 z-[9999] bg-[#f1f0f1] py-4 px-1 flex justify-between flex-wrap items-center shadow-lg rounded">
 
               <h1 className="text-2xl md:text-3xl font-semibold tracking-tight">
                 Relatórios de Pedidos Finalizados
@@ -159,7 +159,7 @@ function Relatorios() {
 
 
           {/* Primeira linha com 2 blocos: Faturamento e Total de Pedidos */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 gap-6 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 gap-6 mb-8 text-white">
             <div className="bg-green-600 p-6 rounded shadow">
               <p className="text-md opacity-75">FATURAMENTO</p>
               <p className="text-5xl font-bold">R$ {faturamento.toFixed(2)}</p>
@@ -172,7 +172,7 @@ function Relatorios() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mb-8">
             {/* Lucro Líquido */}
-            <div className="bg-green-700 p-6 rounded shadow relative overflow-hidden h-full flex flex-col justify-center">
+            <div className="bg-green-700 p-6 rounded shadow relative overflow-hidden h-full flex flex-col justify-center text-white">
               <p className="text-md opacity-75 mb-2">LUCRO LÍQUIDO</p>
               <div className="flex items-center h-full">
                 <p className="text-4xl font-bold">
@@ -183,7 +183,7 @@ function Relatorios() {
             </div>
 
             {/* Ticket Médio */}
-            <div className="bg-yellow-600 p-6 rounded shadow relative overflow-hidden h-full flex flex-col justify-center">
+            <div className="bg-yellow-600 p-6 rounded shadow relative overflow-hidden h-full flex flex-col justify-center text-white">
               <p className="text-md opacity-75 mb-2">TICKET MÉDIO</p>
               <div className="flex justify-around items-center space-x-4">
                 {dadosTicket.map((ticket, idx) => (
@@ -301,7 +301,7 @@ function Relatorios() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-[#6e0f0f] p-4 rounded">
+            <div className="bg-[#f1f0f1] p-4 rounded">
               <h3 className="text-x1 font-semibold mt-4 text-center">Por Tipo de Pagamento</h3>
               <div className="flex flex-col md:flex-row items-center justify-between gap-6">
                 <PieChart width={300} height={300}>
@@ -326,7 +326,6 @@ function Relatorios() {
                   <Legend />
                 </PieChart>
                 <BarChart width={300} height={300} data={dadosPagamentos} barCategoryGap={40} barSize={30}>
-                  <XAxis dataKey="tipo_pagamento" />
                   <YAxis />
                   <Tooltip formatter={(v) => `${v} pedidos`} />
                   <Legend
@@ -350,7 +349,7 @@ function Relatorios() {
               </div>
             </div>
 
-            <div className="bg-[#6e0f0f] p-4 rounded">
+            <div className="bg-[#f1f0f1] p-4 rounded-x1">
               <h3 className="text-x1 font-semibold mt-4 text-center">Por Tipo de Venda</h3>
               <div className="flex flex-col md:flex-row items-center justify-between gap-6">
                 <PieChart width={300} height={300}>
@@ -408,7 +407,7 @@ function Relatorios() {
           {/* Tabela TOP 10 PRODUTOS MAIS VENDIDOS */}
           <div className="mt-10 overflow-x-auto">
             <h3 className="text-x1 font-semibold mb-2">Top 10 PRODUTOS MAIS VENDIDOS</h3>
-            <table className="min-w-full text-md bg-[#6e0f0f] rounded">
+            <table className="min-w-full text-md rounded">
               <thead>
                 <tr className="text-left bg-[#7f1d1d] text-black font-semibold">
                   <th className="p-3">Produto</th>
@@ -431,7 +430,7 @@ function Relatorios() {
 
           <div className="mt-10 overflow-x-auto">
             <h3 className="text-x1 font-semibold mb-2">DETALHAMENTO DOS PRODUTOS</h3>
-            <table className="min-w-full text-md bg-[#6e0f0f] rounded">
+            <table className="min-w-full text-md bg-white rounded">
               <thead>
                 <tr className="text-left bg-[#7f1d1d] text-black font-semibold">
                   <th className="p-3">Produto</th>
@@ -448,7 +447,7 @@ function Relatorios() {
                 {detalhesProdutos.map((item, idx) => (
                   <tr
                     key={idx}
-                    className="border-t border-[#9b1c1c] cursor-pointer hover:bg-[#8b1f1f] transition"
+                    className="border-t border-[#9b1c1c] cursor-pointer hover:bg-[#9c9c9c] transition"
                     onClick={() => {
                       localStorage.setItem("produtoSelecionado", item.nome);
                       navigate("/lista-produtos");
@@ -466,7 +465,7 @@ function Relatorios() {
                   </tr>
                 ))}
 
-                <tr className="bg-[#7f1d1d] text-white font-bold border-t border-white">
+                <tr className="bg-[#f1f0f1] text-black font-bold border-t border-white">
                   <td colSpan={7} className="p-3 text-right">Lucro Líquido Total</td>
                   <td className="p-3">
                     R$ {detalhesProdutos.reduce((acc, item) => acc + item.lucro_total, 0).toFixed(2)}
